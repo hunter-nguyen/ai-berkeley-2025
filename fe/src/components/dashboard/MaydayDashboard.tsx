@@ -33,6 +33,7 @@ export default function MaydayDashboard() {
   const [isFlightDetailsOpen, setIsFlightDetailsOpen] = useState(false);
   const [isLiveCommsCollapsed, setIsLiveCommsCollapsed] = useState(false);
   const [isAlertsCollapsed, setIsAlertsCollapsed] = useState(false);
+  const [aircraftCount, setAircraftCount] = useState(0);
 
   const handleAircraftSelect = (aircraft: Aircraft) => {
     setSelectedAircraft(aircraft);
@@ -44,10 +45,14 @@ export default function MaydayDashboard() {
     setSelectedAircraft(null);
   };
 
+  const handleAircraftUpdate = (count: number) => {
+    setAircraftCount(count);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 overflow-hidden">
       {/* ATC Status Bar */}
-      <ATCStatusBar />
+      <ATCStatusBar aircraftCount={aircraftCount} />
       
       {/* Main Content Area */}
       <div className="h-[calc(100vh-60px)] flex">
@@ -56,6 +61,7 @@ export default function MaydayDashboard() {
           <DynamicRadarMap 
             onAircraftSelect={handleAircraftSelect}
             selectedAircraft={selectedAircraft}
+            onAircraftUpdate={handleAircraftUpdate}
           />
         </div>
 

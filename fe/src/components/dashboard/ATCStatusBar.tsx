@@ -2,13 +2,22 @@
 
 import { useState, useEffect } from 'react';
 
-export default function ATCStatusBar() {
-  const [currentTime, setCurrentTime] = useState(new Date());
+interface ATCStatusBarProps {
+  aircraftCount?: number;
+}
+
+export default function ATCStatusBar({ aircraftCount = 0 }: ATCStatusBarProps) {
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    setCurrentTime(new Date());
+    
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
+    
     return () => clearInterval(timer);
   }, []);
 
@@ -52,12 +61,18 @@ export default function ATCStatusBar() {
         {/* Center Section - Operational Data */}
         <div className="flex items-center space-x-8 text-sm font-mono">
           <div className="text-center">
+            <div className="text-xs text-gray-400">LIVE A/C</div>
+            <div className="text-sm font-bold text-cyan-400">{aircraftCount}</div>
+          </div>
+          <div className="text-center">
             <div className="text-xs text-gray-400">RWY</div>
             <div className="text-sm font-bold text-white">28L/R-10L/R</div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-400">TRAFFIC</div>
-            <div className="text-sm font-bold text-cyan-400">MODERATE</div>
+            <div className="text-sm font-bold text-cyan-400">
+              {aircraftCount === 0 ? 'LOADING' : aircraftCount < 5 ? 'LIGHT' : aircraftCount < 15 ? 'MODERATE' : 'HEAVY'}
+            </div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-400">VIS</div>
@@ -73,11 +88,15 @@ export default function ATCStatusBar() {
         <div className="flex items-center space-x-6 text-sm font-mono">
           <div className="text-right">
             <div className="text-xs text-gray-400">UTC</div>
-            <div className="text-sm font-bold text-green-400">{formatUTCTime(currentTime)}</div>
+            <div className="text-sm font-bold text-green-400">
+              {mounted && currentTime ? formatUTCTime(currentTime) : '--:--:--Z'}
+            </div>
           </div>
           <div className="text-right">
             <div className="text-xs text-gray-400">LOCAL</div>
-            <div className="text-sm font-bold text-white">{formatTime(currentTime)}</div>
+            <div className="text-sm font-bold text-white">
+              {mounted && currentTime ? formatTime(currentTime) : '--:--:--'}
+            </div>
           </div>
           <div className="text-right">
             <div className="text-xs text-gray-400">POS</div>
