@@ -5,14 +5,16 @@ Handles live ATC audio streaming, transcription, and language processing
 """
 import asyncio
 import os
+import json
 from dotenv import load_dotenv
 from uagents import Agent, Context
 from .audio_processor import AudioProcessor
 from ..agents.atc_language_agent import ATCTranscriptProcessor
 import logging
+from pathlib import Path
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from root .env file
+load_dotenv(Path(__file__).parent.parent.parent.parent.parent / '.env')
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

@@ -1,0 +1,40 @@
+{
+  "name": "ai-berkeley-2025-atc-agent",
+  "version": "1.0.0",
+  "description": "🎯 AI-powered ATC Audio Agent for real-time aviation communication analysis",
+  "private": true,
+  "workspaces": [
+    "fe"
+  ],
+  "scripts": {
+    "setup": "python setup.py",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd fe && npm run dev",
+    "dev:backend": "cd be && source venv/bin/activate && python scripts/run_atc_agent.py",
+    "build": "cd fe && npm run build",
+    "start": "cd fe && npm start",
+    "lint": "cd fe && npm run lint",
+    "clean": "rm -rf fe/.next fe/node_modules be/venv be/__pycache__ */__pycache__",
+    "install:all": "npm install && cd fe && npm install && cd ../be && pip install -r requirements.txt"
+  },
+  "keywords": [
+    "atc",
+    "aviation",
+    "audio",
+    "ai",
+    "transcription",
+    "groq",
+    "nextjs",
+    "python",
+    "websocket"
+  ],
+  "author": "AI Berkeley 2025 Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.8.0"
+  }
+}

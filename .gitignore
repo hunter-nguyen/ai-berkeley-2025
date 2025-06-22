@@ -1,42 +1,36 @@
-# Dependencies
+# ==============================================
+# 🎯 AI Berkeley 2025 - ATC Audio Agent
+# ==============================================
+# Unified .gitignore for the entire project
+
+# ==============================================
+# 🔒 ENVIRONMENT & SECRETS - NEVER COMMIT!
+# ==============================================
+.env
+.env.*
+!.env.example
+**/.env*
+!**/.env.example
+
+# ==============================================
+# 📦 DEPENDENCIES & BUILD OUTPUTS
+# ==============================================
+
+# Node.js / Frontend
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
 
-# Build outputs
+# Next.js
 .next/
+out/
 dist/
 build/
 
-# Environment variables - CRITICAL: Never commit these!
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-be/.env
-fe/.env.local
-**/.env*
-!.env.example
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Python
+# Python / Backend
 __pycache__/
 *.py[cod]
 *$py.class
@@ -47,34 +41,98 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Logs
+# ==============================================
+# 🛠 IDE & EDITOR FILES
+# ==============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# ==============================================
+# 📝 LOGS & RUNTIME DATA
+# ==============================================
 logs/
 *.log
-
-# Runtime data
 pids/
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
+# ==============================================
+# 🧪 TESTING & COVERAGE
+# ==============================================
 coverage/
-
-# nyc test coverage
 .nyc_output/
+.coverage
+htmlcov/
+.pytest_cache/
+.cache
 
-# Dependency directories
-jspm_packages/
+# ==============================================
+# 📊 TEMPORARY & CACHE FILES
+# ==============================================
+.tmp/
+.temp/
+.cache/
+.npm/
+.eslintcache
+.parcel-cache
+.turbo
 
-# Optional npm cache directory
-.npm
+# ==============================================
+# 🎵 AUDIO & MEDIA FILES (Large)
+# ==============================================
+*.wav
+*.mp3
+*.m4a
+*.aac
+*.flac
+*.ogg
 
-# Optional REPL history
-.node_repl_history
+# ==============================================
+# 📈 DATA & DATABASE FILES
+# ==============================================
+*.db
+*.sqlite
+*.sqlite3
+data/
+datasets/
+*.csv
+*.json.bak
 
-# Output of 'npm pack'
-*.tgz
+# ==============================================
+# 🚀 DEPLOYMENT & INFRASTRUCTURE
+# ==============================================
+.vercel
+.netlify
+Dockerfile.prod
+docker-compose.override.yml
 
-# Yarn Integrity file
-.yarn-integrity 
+# ==============================================
+# 📱 MOBILE & NATIVE
+# ==============================================
+*.apk
+*.ipa
+*.app
+
+# ==============================================
+# 🏗 BUILD TOOLS & ARTIFACTS
+# ==============================================
+.gradle/
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar 

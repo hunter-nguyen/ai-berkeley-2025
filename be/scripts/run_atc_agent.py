@@ -10,13 +10,20 @@ import logging
 from dotenv import load_dotenv
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pathlib import Path
+from typing import Dict, Any, List
+from datetime import datetime
+import signal
+
+# Setup paths and load environment from root
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.append(str(PROJECT_ROOT / "be" / "src"))
+
+# Load environment variables from root .env file
+load_dotenv(PROJECT_ROOT / '.env')
 
 from src.atc_audio_agent.core.audio_processor import AudioProcessor
 from src.atc_audio_agent.agents.atc_language_agent import ATCTranscriptProcessor
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Setup logging
 logging.basicConfig(
