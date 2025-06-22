@@ -1,0 +1,216 @@
+[
+  {
+    "id": "msg_001",
+    "timestamp": "2025-06-22T04:27:14.400411",
+    "callsign": "UAL1549",
+    "message": "Mayday mayday, United 1549, we have engine failure, requesting immediate return to SFO",
+    "isUrgent": true,
+    "type": "atc_analysis",
+    "rawTranscript": "Mayday mayday, United 1549, we have engine failure, requesting immediate return to SFO",
+    "instructions": [
+      "emergency",
+      "return"
+    ],
+    "runways": [
+      "28R"
+    ],
+    "chunk": 1,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL1549",
+          "airline": "United Airlines",
+          "flight_number": "1549",
+          "aircraft_type": "heavy"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "emergency",
+          "callsign": "UAL1549",
+          "instruction": "engine failure emergency",
+          "runway": "28R",
+          "details": "requesting immediate return"
+        }
+      ],
+      "runways": [
+        "28R"
+      ],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "engine failure",
+      "summary": "Emergency - engine failure requesting immediate return"
+    }
+  },
+  {
+    "id": "msg_002",
+    "timestamp": "2025-06-22T04:27:14.400450",
+    "callsign": "DAL456",
+    "message": "Delta 456 cleared to land runway 28R",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Delta 456 cleared to land runway 28R",
+    "instructions": [
+      "landing_clearance"
+    ],
+    "runways": [
+      "28R"
+    ],
+    "chunk": 2,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "DAL456",
+          "airline": "Delta Air Lines",
+          "flight_number": "456",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "landing_clearance",
+          "callsign": "DAL456",
+          "instruction": "cleared to land runway 28R",
+          "runway": "28R",
+          "details": null
+        }
+      ],
+      "runways": [
+        "28R"
+      ],
+      "frequencies": [
+        "tower"
+      ],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Landing clearance for runway 28R"
+    }
+  },
+  {
+    "id": "msg_003",
+    "timestamp": "2025-06-22T04:27:14.400464",
+    "callsign": "ASA567",
+    "message": "Alaska 567, we have medical emergency on board, requesting priority landing",
+    "isUrgent": true,
+    "type": "atc_analysis",
+    "rawTranscript": "Alaska 567, we have medical emergency on board, requesting priority landing",
+    "instructions": [
+      "medical_emergency",
+      "priority"
+    ],
+    "runways": [],
+    "chunk": 3,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "ASA567",
+          "airline": "Alaska Airlines",
+          "flight_number": "567",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "medical_emergency",
+          "callsign": "ASA567",
+          "instruction": "medical emergency priority landing",
+          "runway": null,
+          "details": "requesting priority landing"
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "medical emergency",
+      "summary": "Medical emergency requesting priority landing"
+    }
+  },
+  {
+    "id": "msg_004",
+    "timestamp": "2025-06-22T04:27:14.400470",
+    "callsign": "SWA123",
+    "message": "Southwest 123, unable comply, say again",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Southwest 123, unable comply, say again",
+    "instructions": [
+      "unable"
+    ],
+    "runways": [],
+    "chunk": 4,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "SWA123",
+          "airline": "Southwest Airlines",
+          "flight_number": "123",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "unable",
+          "callsign": "SWA123",
+          "instruction": "unable comply",
+          "runway": null,
+          "details": "say again"
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "tower"
+      ],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Unable to comply, requesting repeat"
+    }
+  },
+  {
+    "id": "msg_005",
+    "timestamp": "2025-06-22T04:27:14.400475",
+    "callsign": "AAL789",
+    "message": "American 789 line up and wait runway 28R",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "American 789 line up and wait runway 28R",
+    "instructions": [
+      "line_up_wait"
+    ],
+    "runways": [
+      "28R"
+    ],
+    "chunk": 5,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "AAL789",
+          "airline": "American Airlines",
+          "flight_number": "789",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "line_up_wait",
+          "callsign": "AAL789",
+          "instruction": "line up and wait runway 28R",
+          "runway": "28R",
+          "details": null
+        }
+      ],
+      "runways": [
+        "28R"
+      ],
+      "frequencies": [
+        "tower"
+      ],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Line up and wait on runway 28R"
+    }
+  }
+]

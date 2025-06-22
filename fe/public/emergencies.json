@@ -1,0 +1,102 @@
+[
+  {
+    "id": "emrg_1750592637_msg_001",
+    "timestamp": "2025-06-22T04:43:57.739975",
+    "source_message_id": "msg_001",
+    "source_timestamp": "2025-06-22T04:27:14.400411",
+    "callsign": "UAL1549",
+    "severity": "HIGH",
+    "category": "EMERGENCY",
+    "emergency_type": "other",
+    "description": "Other detected - MAYDAY call",
+    "original_message": "Mayday mayday, United 1549, we have engine failure, requesting immediate return to SFO",
+    "raw_transcript": "Mayday mayday, United 1549, we have engine failure, requesting immediate return to SFO",
+    "recommended_actions": [
+      "Monitor closely",
+      "Prepare emergency services",
+      "Coordinate with pilot"
+    ],
+    "confidence": 1.0,
+    "status": "ACTIVE",
+    "acknowledged": false,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL1549",
+          "airline": "United Airlines",
+          "flight_number": "1549",
+          "aircraft_type": "heavy"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "emergency",
+          "callsign": "UAL1549",
+          "instruction": "engine failure emergency",
+          "runway": "28R",
+          "details": "requesting immediate return"
+        }
+      ],
+      "runways": [
+        "28R"
+      ],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "engine failure",
+      "summary": "Emergency - engine failure requesting immediate return"
+    },
+    "created_by": "simple_emergency_agent"
+  },
+  {
+    "id": "emrg_1750592637_msg_003",
+    "timestamp": "2025-06-22T04:43:57.740120",
+    "source_message_id": "msg_003",
+    "source_timestamp": "2025-06-22T04:27:14.400464",
+    "callsign": "ASA567",
+    "severity": "HIGH",
+    "category": "EMERGENCY",
+    "emergency_type": "other",
+    "description": "Other detected - declared emergency",
+    "original_message": "Alaska 567, we have medical emergency on board, requesting priority landing",
+    "raw_transcript": "Alaska 567, we have medical emergency on board, requesting priority landing",
+    "recommended_actions": [
+      "Monitor closely",
+      "Prepare emergency services",
+      "Coordinate with pilot"
+    ],
+    "confidence": 1.0,
+    "status": "ACTIVE",
+    "acknowledged": false,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "ASA567",
+          "airline": "Alaska Airlines",
+          "flight_number": "567",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "medical_emergency",
+          "callsign": "ASA567",
+          "instruction": "medical emergency priority landing",
+          "runway": null,
+          "details": "requesting priority landing"
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "medical emergency",
+      "summary": "Medical emergency requesting priority landing"
+    },
+    "created_by": "simple_emergency_agent"
+  }
+]

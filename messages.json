@@ -1,5 +1,59 @@
 [
   {
+    "id": "d1cf07b9-4ea8-4c28-9951-011e7f040aed",
+    "timestamp": "2025-06-22T04:37:45.905035",
+    "callsign": "AAL445",
+    "message": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
+    "isUrgent": true,
+    "type": "test_emergency",
+    "rawTranscript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
+    "instructions": [],
+    "runways": [],
+    "chunk": 1,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "AAL445"
+        }
+      ],
+      "instructions": [],
+      "runways": [],
+      "emergencies": true,
+      "summary": "Emergency communication from AAL445",
+      "confidence": "high",
+      "original_transcript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
+      "frequency": "121.5",
+      "timestamp": "2025-06-22T04:37:45.905045"
+    }
+  },
+  {
+    "id": "081b10c5-f802-4aaa-a69d-c30ae2c57462",
+    "timestamp": "2025-06-22T04:37:40.416113",
+    "callsign": "AAL445",
+    "message": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
+    "isUrgent": true,
+    "type": "test_emergency",
+    "rawTranscript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
+    "instructions": [],
+    "runways": [],
+    "chunk": 1,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "AAL445"
+        }
+      ],
+      "instructions": [],
+      "runways": [],
+      "emergencies": true,
+      "summary": "Emergency communication from AAL445",
+      "confidence": "high",
+      "original_transcript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
+      "frequency": "121.5",
+      "timestamp": "2025-06-22T04:37:40.416136"
+    }
+  },
+  {
     "id": "62be1668-0454-4f29-97a0-1eb8869fef8c",
     "timestamp": "2025-06-21T22:27:44.534355",
     "callsign": "L2",
