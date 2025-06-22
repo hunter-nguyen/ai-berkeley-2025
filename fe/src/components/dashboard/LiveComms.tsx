@@ -71,19 +71,20 @@ export default function LiveComms({ isCollapsed, onToggle, selectedCallsign, onC
           const convertedMessages: CommMessage[] = data
             .filter((msg: any) => 
               msg.message && 
+              msg.callsign && // Ensure callsign exists
               msg.callsign !== 'SYSTEM' && // Hide system messages completely
               isClientMeaningful(msg.message, msg.callsign)
             ) // Client-side filter
             .map((msg: any) => ({
-              id: msg.id,
+              id: msg.id || `msg-${Date.now()}-${Math.random()}`,
               timestamp: new Date(msg.timestamp).toLocaleTimeString('en-US', { hour12: false }),
-              callsign: msg.callsign,
-              message: msg.message,
-              isUrgent: msg.isUrgent,
-              type: msg.type,
+              callsign: msg.callsign || 'UNKNOWN',
+              message: msg.message || '',
+              isUrgent: msg.isUrgent || false,
+              type: msg.type || 'incoming',
               rawTranscript: msg.rawTranscript,
-              instructions: msg.instructions,
-              runways: msg.runways,
+              instructions: msg.instructions || [],
+              runways: msg.runways || [],
               chunk: msg.chunk,
             }));
           
@@ -144,15 +145,21 @@ export default function LiveComms({ isCollapsed, onToggle, selectedCallsign, onC
     }
   };
 
-  // Filter messages by callsign
+  // Filter messages by callsign - ADD NULL CHECKS
   const filteredMessages = filteredCallsign 
-    ? messages.filter(msg => 
-        msg.callsign.toLowerCase().includes(filteredCallsign.toLowerCase()) ||
-        msg.message.toLowerCase().includes(filteredCallsign.toLowerCase())
-      )
+    ? messages.filter(msg => {
+        const callsign = msg.callsign || '';
+        const message = msg.message || '';
+        const filter = filteredCallsign || '';
+        
+        return callsign.toLowerCase().includes(filter.toLowerCase()) ||
+               message.toLowerCase().includes(filter.toLowerCase());
+      })
     : messages;
 
   const handleCallsignClick = (callsign: string) => {
+    if (!callsign) return; // Safety check for null/undefined callsign
+    
     if (filteredCallsign === callsign) {
       setFilteredCallsign(null);
     } else {
@@ -319,27 +326,31 @@ export default function LiveComms({ isCollapsed, onToggle, selectedCallsign, onC
                 {/* Show extracted ATC data */}
                 {message.instructions && message.instructions.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-2">
-                    {message.instructions.map((instruction, idx) => (
-                      <span 
-                        key={idx}
-                        className="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded font-mono"
-                      >
-                        {instruction.replace(/_/g, ' ').toUpperCase()}
-                      </span>
-                    ))}
+                    {message.instructions
+                      .filter(instruction => instruction != null && instruction !== '') // Filter out null/empty instructions
+                      .map((instruction, idx) => (
+                        <span 
+                          key={idx}
+                          className="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded font-mono"
+                        >
+                          {String(instruction).replace(/_/g, ' ').toUpperCase()}
+                        </span>
+                      ))}
                   </div>
                 )}
 
                 {message.runways && message.runways.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-2">
-                    {message.runways.map((runway, idx) => (
-                      <span 
-                        key={idx}
-                        className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded font-mono"
-                      >
-                        RWY {runway.toUpperCase()}
-                      </span>
-                    ))}
+                    {message.runways
+                      .filter(runway => runway != null && runway !== '') // Filter out null/empty runways
+                      .map((runway, idx) => (
+                        <span 
+                          key={idx}
+                          className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded font-mono"
+                        >
+                          RWY {String(runway).toUpperCase()}
+                        </span>
+                      ))}
                   </div>
                 )}
 
