@@ -9,6 +9,7 @@ import FlightDetails from './FlightDetails';
 import LiveComms from './LiveComms';
 import AlertsAndTasks from './AlertsAndTasks';
 import '@/utils/aircraftConfig'; // Import for console utilities
+import { debugAircraft } from '@/utils/debug-aircraft';
 
 // Dynamic import for Leaflet to avoid SSR issues
 const DynamicRadarMap = dynamic(() => import('./RadarMap'), {

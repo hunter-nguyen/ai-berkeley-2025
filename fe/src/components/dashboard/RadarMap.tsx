@@ -6,6 +6,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { flightRadar24, AIRCRAFT_CONFIG } from '@/utils/api/flightradar24';
 import { aviationSafety, type TFR, type NOTAM, type SIGMET } from '@/utils/api/aviationSafety';
+import { debugAircraft } from '@/utils/debug-aircraft';
 
 // Add custom CSS for popup styling
 const customPopupStyles = `
@@ -463,19 +464,46 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
     try {
       setLoading(true);
       setError(null);
+      
+      // Debug logging for aircraft fetching
+      console.log('🛩️ RadarMap: Fetching aircraft data...');
+      await debugAircraft.checkAircraftData();
+      
       const realAircraft = await flightRadar24.getAircraftInSFOArea();
       setAircraft(realAircraft);
       
-      // Determine if we're using real or fallback data
+      // Determine if we're using real data or no data (NO MORE FALLBACK)
       const hasApiKey = !!process.env.NEXT_PUBLIC_FLIGHTRADAR24_API_KEY;
-      setDataSource(hasApiKey ? 'live' : 'fallback');
       
-      console.log(`Updated with ${realAircraft.length} aircraft (${hasApiKey ? 'live' : 'fallback'} data)`);
+      console.log(`✅ RadarMap: Updated with ${realAircraft.length} aircraft`);
+      
+      // Check if we actually got real data
+      if (realAircraft.length > 0 && hasApiKey) {
+        const isRealData = realAircraft.some(aircraft => 
+          aircraft.lastUpdated && 
+          aircraft.lastUpdated > Date.now() - 60000 // Updated in last minute
+        );
+        
+        if (isRealData) {
+          console.log('✅ RadarMap: Confirmed REAL aircraft data received!');
+          setDataSource('live');
+        } else {
+          console.log('⚠️ RadarMap: Aircraft data may be cached');
+          setDataSource('live'); // Still treat as live if we have API key
+        }
+      } else if (realAircraft.length === 0) {
+        console.log('📭 RadarMap: No aircraft data - empty map');
+        setDataSource('loading');
+      } else {
+        console.log('❌ RadarMap: No API key - empty map');
+        setDataSource('loading');
+      }
+      
       if (onAircraftUpdate) {
         onAircraftUpdate(realAircraft.length);
       }
     } catch (err) {
-      console.error('Failed to fetch aircraft data:', err);
+      console.error('❌ RadarMap: Failed to fetch aircraft data:', err);
       setError('Failed to load aircraft data');
       setDataSource('fallback');
     } finally {
@@ -1046,9 +1074,9 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
                 <div className="flex items-center justify-between mb-3 border-b border-gray-600 pb-2">
                   <div className="font-bold text-lg text-blue-400">{plane.callsign}</div>
                   <div className={`px-2 py-1 rounded text-xs font-bold ${
-                    dataSource === 'live' ? 'bg-green-600 text-white' : 'bg-yellow-600 text-black'
+                    dataSource === 'live' ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300'
                   }`}>
-                    {dataSource === 'live' ? 'LIVE' : 'DEMO'}
+                    {dataSource === 'live' ? 'LIVE' : 'No Data'}
                   </div>
                 </div>
                 
@@ -1095,8 +1123,8 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
                   </div>
                   <div className="flex justify-between items-center text-xs mt-1">
                     <span className="text-gray-400">Data Source:</span>
-                    <span className={dataSource === 'live' ? 'text-green-400' : 'text-yellow-400'}>
-                      {dataSource === 'live' ? 'FlightRadar24' : 'Mock Data'}
+                    <span className={dataSource === 'live' ? 'text-green-400' : 'text-gray-400'}>
+                      {dataSource === 'live' ? 'FlightRadar24' : 'No Data'}
                     </span>
                   </div>
                 </div>
@@ -1115,12 +1143,12 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
             <div className={`w-2 h-2 rounded-full ${
               loading ? 'bg-yellow-500 animate-pulse' : 
               error ? 'bg-red-500' : 
-              dataSource === 'live' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'
+              dataSource === 'live' ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
             }`}></div>
             <span className="text-xs font-bold">
               {loading ? 'UPD' : 
                error ? 'ERR' : 
-               dataSource === 'live' ? 'LIVE' : 'DEMO'}
+               dataSource === 'live' ? 'LIVE' : 'EMPTY'}
             </span>
             {dataSource === 'live' && (
               <button
@@ -1237,9 +1265,12 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
       {loading && aircraft.length === 0 && (
         <div className="absolute inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-30">
           <div className="text-center">
-            <div className="text-cyan-400 font-mono text-lg mb-2">LOADING AIRCRAFT DATA</div>
+            <div className="text-cyan-400 font-mono text-lg mb-2">LOADING REAL AIRCRAFT DATA</div>
             <div className="text-gray-400 font-mono text-sm">
-              {dataSource === 'live' ? 'Connecting to FlightRadar24...' : 'Loading demo aircraft...'}
+              Connecting to FlightRadar24 API...
+            </div>
+            <div className="text-gray-500 font-mono text-xs mt-2">
+              No mock data - Real flights only
             </div>
           </div>
         </div>

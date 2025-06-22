@@ -30,10 +30,9 @@ const API_KEY = process.env.NEXT_PUBLIC_FLIGHTRADAR24_API_KEY;
 // ✈️ AIRCRAFT DISPLAY CONFIGURATION
 // Adjust these values to control how many aircraft are shown
 export const AIRCRAFT_CONFIG = {
-  MAX_AIRCRAFT_DISPLAY: 20,  // Maximum aircraft to show on map (change this!)
-  API_FETCH_LIMIT: 25,       // How many to fetch from API (should be higher than display limit)
-  MIN_ALTITUDE: 1000,        // Minimum altitude to show (feet)
-  MAX_FALLBACK_AIRCRAFT: 7   // Number of demo aircraft when no API key
+  MAX_AIRCRAFT_DISPLAY: 25,  // Maximum aircraft to show on map (increased for better visibility!)
+  API_FETCH_LIMIT: 30,       // How many to fetch from API (should be higher than display limit)
+  MIN_ALTITUDE: 0,           // Minimum altitude to show (feet) - include ground aircraft at airports
 };
 
 // San Francisco Bay Area bounds for filtering aircraft
@@ -42,6 +41,15 @@ const SFO_BOUNDS = {
   south: 37.6,
   east: -122.2,
   west: -122.7
+};
+
+// Official FlightRadar24 API endpoints
+const FR24_API_BASE = 'https://fr24api.flightradar24.com';
+const FR24_ENDPOINTS = {
+  FLIGHTS: '/api/live/flight-positions/full',
+  LIGHT: '/api/live/flight-positions/light', 
+  AIRPORTS: '/api/airports',
+  AIRLINES: '/api/airlines'
 };
 
 export class FlightRadar24Service {
@@ -91,6 +99,7 @@ export class FlightRadar24Service {
     // Debug logging
     console.log('🔍 FlightRadar24Service Debug:');
     console.log('   - API Key present:', !!API_KEY);
+    console.log('   - API Key prefix:', API_KEY ? API_KEY.substring(0, 8) + '...' : 'None');
     console.log('   - Cache age:', now - this.lastFetch, 'ms');
     console.log('   - Cache size:', this.cache.length);
     console.log('   - Max aircraft display:', AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY);
@@ -103,113 +112,241 @@ export class FlightRadar24Service {
       return this.cache;
     }
 
-    // If no API key, return fallback data immediately
+    // If no API key, return EMPTY - NO MOCK DATA
     if (!API_KEY) {
-      console.log('🔑 No API key found, using fallback aircraft data');
-      const fallback = this.getFallbackAircraft();
-      this.cache = fallback;
+      console.log('❌ No API key found - returning EMPTY (no mock data)');
+      this.cache = [];
       this.lastFetch = now;
-      return fallback;
+      return [];
     }
 
     // Skip API call if conditions aren't favorable
     if (this.shouldSkipAPICall()) {
-      // Return cached data if available, otherwise fallback
-      return this.cache.length > 0 ? this.cache : this.getFallbackAircraft();
+      // Return cached data if available, otherwise EMPTY - NO MOCK DATA
+      if (this.cache.length > 0) {
+        return this.cache;
+      } else {
+        console.log('⏰ Skipping API call - returning EMPTY (no mock data)');
+        return [];
+      }
     }
 
     try {
-      // Official FlightRadar24 API endpoint - use configurable limit
-      const bounds = `${SFO_BOUNDS.north},${SFO_BOUNDS.south},${SFO_BOUNDS.west},${SFO_BOUNDS.east}`;
-      const endpoint = `https://fr24api.flightradar24.com/api/live/flight-positions/light?bounds=${bounds}&limit=${AIRCRAFT_CONFIG.API_FETCH_LIMIT}`;
+      console.log(`🛩️ Fetching REAL aircraft data from FlightRadar24 Official API...`);
+      console.log(`🔑 Using API base: ${FR24_API_BASE}`);
       
-      console.log(`🛩️ Fetching live aircraft data from official FR24 API...`);
-      console.log(`📍 Endpoint: ${endpoint}`);
+      // Use the OFFICIAL FlightRadar24 API endpoint with authentication
+      const aircraft = await this.fetchFromOfficialAPI();
       
-      const response = await fetch(endpoint, {
-        headers: {
-          'Accept': 'application/json',
-          'Accept-Version': 'v1',
-          'Authorization': `Bearer ${API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      console.log(`📊 API Response: ${response.status} ${response.statusText}`);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`❌ FR24 API error details:`, errorText);
-        throw new Error(`FR24 API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      // Transform the official API response
-      const aircraft: Aircraft[] = [];
-      
-      if (data.data && Array.isArray(data.data)) {
-        console.log(`🔄 Processing ${data.data.length} aircraft from API`);
+      if (aircraft.length > 0) {
+        // Limit to configured maximum for performance and clarity
+        this.cache = aircraft.slice(0, AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY);
+        this.lastFetch = now;
         
-        for (const flight of data.data) {
-          // Only include airborne aircraft (configurable altitude) to avoid ground traffic
-          if (flight.lat && flight.lon && flight.alt > AIRCRAFT_CONFIG.MIN_ALTITUDE) {
-            const aircraftId = flight.fr24_id || flight.hex;
-            const currentPosition = {
-              lat: parseFloat(flight.lat),
-              lng: parseFloat(flight.lon),
-              timestamp: now,
-              altitude: parseInt(flight.alt) || 0
-            };
-
-            // Update flight trail
-            this.updateFlightTrail(aircraftId, currentPosition);
-
-            aircraft.push({
-              id: aircraftId,
-              callsign: flight.callsign || flight.hex || `AC${flight.fr24_id?.substring(0, 4)}`,
-              lat: currentPosition.lat,
-              lng: currentPosition.lng,
-              altitude: currentPosition.altitude,
-              heading: this.normalizeHeading(parseInt(flight.track) || 0),
-              speed: parseInt(flight.gspeed) || 0,
-              trail: this.flightTrails.get(aircraftId) || [],
-              origin: this.estimateOrigin(aircraftId),
-              destination: this.estimateDestination(aircraftId),
-              lastUpdated: now,
-            });
-          }
-        }
+        // Reset error count on successful call
+        this.errorCount = 0;
+        
+        console.log(`✅ Successfully processed ${this.cache.length}/${aircraft.length} REAL aircraft from FlightRadar24 Official API`);
+        return this.cache;
       } else {
-        console.warn('⚠️ Unexpected API response format:', data);
+        console.log('⚠️ No aircraft data received from official API - returning EMPTY');
+        this.cache = [];
+        this.lastFetch = now;
+        return [];
       }
-
-      // Limit to configured maximum for performance and clarity
-      this.cache = aircraft.slice(0, AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY);
-      this.lastFetch = now;
-      
-      // Reset error count on successful call
-      this.errorCount = 0;
-      
-      console.log(`✅ Successfully processed ${this.cache.length}/${aircraft.length} aircraft from official FR24 API`);
-      return this.cache;
 
     } catch (error) {
-      console.error('❌ Error fetching FR24 API data:', error);
+      console.error('❌ Error fetching FR24 Official API data:', error);
       
       // Increment error count and record time
       this.errorCount++;
       this.lastErrorTime = now;
       
-      // Return cached data if available, otherwise fallback
+      // Return cached data if available, otherwise EMPTY - NO MOCK DATA
       if (this.cache.length > 0) {
-        console.log(`🔄 Using cached data due to API error (${this.cache.length} aircraft)`);
+        console.log(`🔄 Using cached REAL data due to API error (${this.cache.length} aircraft)`);
         return this.cache;
       } else {
-        const fallback = this.getFallbackAircraft();
-        console.log(`🔄 Using ${fallback.length} fallback aircraft due to API error`);
-        return fallback;
+        console.log('❌ API failed and no cached data - returning EMPTY (no mock data)');
+        this.cache = [];
+        this.lastFetch = now;
+        return [];
       }
+    }
+  }
+
+  private async fetchFromOfficialAPI(): Promise<Aircraft[]> {
+    // Official FlightRadar24 API endpoint
+    const endpoint = `${FR24_API_BASE}${FR24_ENDPOINTS.LIGHT}`;
+    const bounds = `${SFO_BOUNDS.north},${SFO_BOUNDS.south},${SFO_BOUNDS.west},${SFO_BOUNDS.east}`;
+    
+    console.log(`📡 Using Official FR24 API: ${endpoint}`);
+    console.log(`📍 Bounds: ${bounds}`);
+    
+    try {
+      const response = await fetch(`${endpoint}?bounds=${bounds}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`,
+          'Accept-Version': 'v1',
+          'Content-Type': 'application/json',
+          'User-Agent': 'AI-Berkeley-2025-ATC-Agent/1.0',
+        },
+      });
+
+      console.log(`📊 Official API Response:`, {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ Official API Error Details:`, {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        
+        // Check for specific error types
+        if (response.status === 401) {
+          throw new Error(`Authentication failed - check your API key: ${response.status} ${response.statusText}`);
+        } else if (response.status === 402) {
+          throw new Error(`Insufficient credits - check your subscription: ${response.status} ${response.statusText}`);
+        } else if (response.status === 403) {
+          throw new Error(`Access forbidden - check your API permissions: ${response.status} ${response.statusText}`);
+        } else if (response.status === 429) {
+          throw new Error(`Rate limit exceeded - too many requests: ${response.status} ${response.statusText}`);
+        } else {
+          throw new Error(`Official API error: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+      }
+
+      const responseText = await response.text();
+      console.log(`📊 Raw response preview:`, responseText.substring(0, 200) + '...');
+      
+      try {
+        const data = JSON.parse(responseText);
+        console.log(`✅ JSON parsed successfully from Official API`);
+        return this.parseOfficialAPIResponse(data);
+      } catch (parseError) {
+        console.error(`❌ JSON Parse Error:`, parseError);
+        console.error(`❌ Raw response:`, responseText.substring(0, 500));
+        throw new Error(`Failed to parse JSON response: ${parseError}`);
+      }
+    } catch (fetchError) {
+      console.error(`❌ Fetch Error Details:`, {
+        name: (fetchError as Error).name,
+        message: (fetchError as Error).message,
+        stack: (fetchError as Error).stack
+      });
+      throw fetchError;
+    }
+  }
+
+  private parseOfficialAPIResponse(data: any): Aircraft[] {
+    const aircraft: Aircraft[] = [];
+    
+    if (!data) {
+      console.log('⚠️ Empty response from official API');
+      return aircraft;
+    }
+
+    console.log('📊 Official API response structure:', Object.keys(data));
+    
+    // Handle different possible response formats from the official API
+    let flightData = data;
+    
+    // The official API returns flights in different formats:
+    // 1. data.flights array
+    // 2. direct array
+    // 3. object with flight IDs as keys
+    if (data.flights && Array.isArray(data.flights)) {
+      flightData = data.flights;
+      console.log(`🔄 Processing ${flightData.length} flights from flights array`);
+    } else if (data.data && Array.isArray(data.data)) {
+      flightData = data.data;
+      console.log(`🔄 Processing ${flightData.length} flights from data array`);
+    } else if (Array.isArray(data)) {
+      flightData = data;
+      console.log(`🔄 Processing ${flightData.length} flights from direct array`);
+    } else if (typeof data === 'object') {
+      console.log(`🔄 Processing object with keys:`, Object.keys(data));
+      // Handle object format (flight ID as keys)
+      flightData = Object.entries(data).map(([id, flight]) => {
+        if (typeof flight === 'object' && flight !== null) {
+          return { ...flight, id };
+        } else {
+          return { id, flight };
+        }
+      });
+    }
+
+    // Parse the flight data
+    if (Array.isArray(flightData)) {
+      for (const flight of flightData) {
+        const aircraft_obj = this.parseFlightFromOfficialAPI(flight);
+        if (aircraft_obj) {
+          aircraft.push(aircraft_obj);
+        }
+      }
+    }
+
+    console.log(`📊 Parsed ${aircraft.length} aircraft from Official API response`);
+    return aircraft;
+  }
+
+  private parseFlightFromOfficialAPI(flight: any): Aircraft | null {
+    try {
+      // Handle different possible field names from official FR24 API
+      const lat = parseFloat(flight.lat || flight.latitude || flight.position?.latitude || 0);
+      const lng = parseFloat(flight.lng || flight.lon || flight.longitude || flight.position?.longitude || 0);
+      const altitude = parseInt(flight.alt || flight.altitude || flight.position?.altitude || 0);
+      const speed = parseInt(flight.spd || flight.speed || flight.ground_speed || flight.velocity?.speed || 0);
+      const heading = parseInt(flight.hdg || flight.heading || flight.track || flight.velocity?.heading || 0);
+      const callsign = (flight.callsign || flight.flight || flight.call_sign || flight.identification?.callsign || '').trim();
+      const aircraftId = flight.id || flight.hex || flight.aircraft_id || flight.identification?.id || callsign;
+
+      // Validate required fields
+      if (!lat || !lng || lat === 0 || lng === 0) {
+        return null;
+      }
+
+      // Filter by altitude and bounds
+      if (altitude >= AIRCRAFT_CONFIG.MIN_ALTITUDE && 
+          lat >= SFO_BOUNDS.south && lat <= SFO_BOUNDS.north &&
+          lng >= SFO_BOUNDS.west && lng <= SFO_BOUNDS.east) {
+        
+        const currentPosition = {
+          lat,
+          lng,
+          timestamp: Date.now(),
+          altitude
+        };
+
+        // Update flight trail
+        this.updateFlightTrail(aircraftId, currentPosition);
+
+        return {
+          id: aircraftId,
+          callsign: callsign || `AC${aircraftId.toString().substring(0, 4)}`,
+          lat,
+          lng,
+          altitude,
+          heading: this.normalizeHeading(heading),
+          speed,
+          trail: this.flightTrails.get(aircraftId) || [],
+          origin: this.estimateOrigin(aircraftId),
+          destination: this.estimateDestination(aircraftId),
+          lastUpdated: Date.now(),
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('❌ Error parsing flight data:', error, flight);
+      return null;
     }
   }
 
@@ -297,105 +434,6 @@ export class FlightRadar24Service {
       isVisible: this.isPageVisible(),
       nextRefreshIn: Math.max(0, this.CACHE_DURATION - (now - this.lastFetch))
     };
-  }
-
-  private getFallbackAircraft(): Aircraft[] {
-    // Enhanced mock data that looks realistic for SFO area
-    // Limit fallback aircraft to configured amount
-    const fallbackAircraft = [
-      {
-        id: 'UAL123',
-        callsign: 'UAL123',
-        lat: 37.7749,
-        lng: -122.4194,
-        altitude: 35000,
-        heading: 90,
-        speed: 480,
-      },
-      {
-        id: 'DAL456',
-        callsign: 'DAL456',
-        lat: 37.7849,
-        lng: -122.4094,
-        altitude: 37000,
-        heading: 270,
-        speed: 520,
-      },
-      {
-        id: 'AAL789',
-        callsign: 'AAL789',
-        lat: 37.7649,
-        lng: -122.4294,
-        altitude: 33000,
-        heading: 180,
-        speed: 460,
-      },
-      {
-        id: 'SWA901',
-        callsign: 'SWA901',
-        lat: 37.7949,
-        lng: -122.3994,
-        altitude: 39000,
-        heading: 45,
-        speed: 490,
-      },
-      {
-        id: 'JBU234',
-        callsign: 'JBU234',
-        lat: 37.7549,
-        lng: -122.4394,
-        altitude: 31000,
-        heading: 315,
-        speed: 470,
-      },
-      {
-        id: 'ASA567',
-        callsign: 'ASA567',
-        lat: 37.7849,
-        lng: -122.4294,
-        altitude: 36000,
-        heading: 120,
-        speed: 505,
-      },
-      {
-        id: 'VIR890',
-        callsign: 'VIR890',
-        lat: 37.7649,
-        lng: -122.4094,
-        altitude: 34000,
-        heading: 240,
-        speed: 485,
-      },
-      {
-        id: 'LUV123',
-        callsign: 'LUV123',
-        lat: 37.8049,
-        lng: -122.3894,
-        altitude: 32000,
-        heading: 60,
-        speed: 495,
-      },
-      {
-        id: 'FFT456',
-        callsign: 'FFT456',
-        lat: 37.7349,
-        lng: -122.4494,
-        altitude: 38000,
-        heading: 300,
-        speed: 515,
-      },
-      {
-        id: 'UAL789',
-        callsign: 'UAL789',
-        lat: 37.7949,
-        lng: -122.4194,
-        altitude: 36000,
-        heading: 150,
-        speed: 485,
-      }
-    ];
-    
-    return fallbackAircraft.slice(0, AIRCRAFT_CONFIG.MAX_FALLBACK_AIRCRAFT);
   }
 
   private normalizeHeading(heading: number): number {
