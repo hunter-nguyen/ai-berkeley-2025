@@ -1157,9 +1157,9 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
         ))}
 
         {/* Aircraft Markers - Configurable limit for performance */}
-        {aircraft.slice(0, AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY).map((plane) => (
+        {aircraft.slice(0, AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY).map((plane, index) => (
           <Marker
-            key={plane.id}
+            key={plane.id || `aircraft-${index}-${plane.callsign}-${plane.lat}-${plane.lng}`}
             position={[plane.lat, plane.lng]}
             icon={createAircraftIcon(plane, selectedAircraft?.id === plane.id)}
             eventHandlers={{

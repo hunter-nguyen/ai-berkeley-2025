@@ -1,5 +1,424 @@
 [
   {
+    "id": "emergency_mic_1750615453746_bmncfh",
+    "timestamp": "2025-06-22T18:04:13.746Z",
+    "source_message_id": "mic_1750615453746",
+    "source_timestamp": "2025-06-22T18:04:13.746Z",
+    "callsign": "UAL145678910",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday this is United 1 4 5 6 7 8 9 10 and we are going down mayday mayday mayday we need your help as soon as possible and we need help may they may day",
+    "raw_transcript": "mayday mayday mayday this is United 1 4 5 6 7 8 9 10 and we are going down mayday mayday mayday we need your help as soon as possible and we need help may they may day",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL145678910",
+          "airline": "United Airlines",
+          "flight_number": "145678910",
+          "aircraft_type": "unknown"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UAL145678910",
+          "instruction": "immediate assistance required",
+          "runway": null,
+          "details": "aircraft is going down"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "United Airlines flight UAL145678910 issued a mayday call, indicating the aircraft is going down and requires immediate assistance."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T18:04:29.927Z",
+    "dispatched": true
+  },
+  {
+    "id": "emergency_mic_1750615217329_ypccrk",
+    "timestamp": "2025-06-22T18:00:17.329Z",
+    "source_message_id": "mic_1750615217329",
+    "source_timestamp": "2025-06-22T18:00:17.329Z",
+    "callsign": "UNKNOWN",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": " we are going down we are not going to make it mayday mayday mayday",
+    "raw_transcript": " we are going down we are not going to make it mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "ACKNOWLEDGED",
+    "acknowledged": true,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": null,
+          "instruction": "emergency descent",
+          "runway": null,
+          "details": "declared mayday, not going to make it"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "The aircraft declared a mayday emergency, stating they are going down and will not make it."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T18:03:48.134Z"
+  },
+  {
+    "id": "emergency_mic_1750615213391_yf4kbu",
+    "timestamp": "2025-06-22T18:00:13.391Z",
+    "source_message_id": "mic_1750615213391",
+    "source_timestamp": "2025-06-22T18:00:13.391Z",
+    "callsign": "UAL1574",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday this is United ual1574",
+    "raw_transcript": "mayday mayday mayday this is United ual1574",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL1574",
+          "airline": "United Airlines",
+          "flight_number": "1574",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "United Airlines flight UAL1574 declared a mayday emergency."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T18:00:18.528Z",
+    "dispatched": true
+  },
+  {
+    "id": "emergency_mic_1750615007916_dvfjky",
+    "timestamp": "2025-06-22T17:56:47.916Z",
+    "source_message_id": "mic_1750615007916",
+    "source_timestamp": "2025-06-22T17:56:47.916Z",
+    "callsign": "UAL5675",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday we are going down to the water this is United it's 5675 mayday mayday mayday we are not going to make it",
+    "raw_transcript": "mayday mayday mayday we are going down to the water this is United it's 5675 mayday mayday mayday we are not going to make it",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL5675",
+          "airline": "United Airlines",
+          "flight_number": "5675",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UAL5675",
+          "instruction": "going down to the water",
+          "runway": null,
+          "details": "we are not going to make it"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "United Airlines flight UAL5675 declared a mayday call, indicating they are going down to the water and will not make it."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T17:58:29.574Z",
+    "dispatched": true
+  },
+  {
+    "id": "emergency_mic_1750615007449_wz05jd",
+    "timestamp": "2025-06-22T17:56:47.449Z",
+    "source_message_id": "mic_1750615007449",
+    "source_timestamp": "2025-06-22T17:56:47.449Z",
+    "callsign": "UNKNOWN",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": " mayday mayday mayday",
+    "raw_transcript": " mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "",
+          "instruction": "mayday",
+          "runway": "",
+          "details": ""
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "A mayday call was made without a callsign or additional details."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T17:57:08.482Z",
+    "dispatched": true
+  },
+  {
+    "id": "alert_mic_1750615007359_q4yihf",
+    "timestamp": "2025-06-22T17:56:47.359Z",
+    "source_message_id": "mic_1750615007359",
+    "source_timestamp": "2025-06-22T17:56:47.359Z",
+    "callsign": "UNKNOWN",
+    "severity": "LOW",
+    "category": "ALERT",
+    "emergency_type": "emergency",
+    "description": "Alert reported - details in transcript",
+    "original_message": " we need a emergency response now",
+    "raw_transcript": " we need a emergency response now",
+    "recommended_actions": [
+      "Monitor situation closely",
+      "Coordinate appropriate response",
+      "Maintain communication with aircraft",
+      "Document for follow-up"
+    ],
+    "confidence": 0.95,
+    "status": "ACTIVE",
+    "acknowledged": false,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [
+        {
+          "type": "emergency",
+          "callsign": "",
+          "instruction": "emergency response needed",
+          "runway": "",
+          "details": ""
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "emergency",
+      "summary": "A request for emergency response was made, but no specific callsign or details were provided."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T17:56:47.360Z"
+  },
+  {
+    "id": "emergency_mic_1750614177009_he8dm5",
+    "timestamp": "2025-06-22T17:42:57.009Z",
+    "source_message_id": "mic_1750614177009",
+    "source_timestamp": "2025-06-22T17:42:57.009Z",
+    "callsign": "UAL123",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday need help United one two three may day may day we need help I repeat we are going down we are going down we're not going to make it mayday mayday mayday",
+    "raw_transcript": "mayday mayday need help United one two three may day may day we need help I repeat we are going down we are going down we're not going to make it mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL123",
+          "airline": "United Airlines",
+          "flight_number": "123",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UAL123",
+          "instruction": "emergency_assistance_needed",
+          "runway": null,
+          "details": "aircraft going down"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "United Airlines Flight 123 declared a mayday emergency, stating they are going down and need immediate assistance."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T17:43:04.163Z",
+    "dispatched": true
+  },
+  {
+    "id": "emergency_mic_1750613957693_uag3it",
+    "timestamp": "2025-06-22T17:39:17.694Z",
+    "source_message_id": "mic_1750613957694",
+    "source_timestamp": "2025-06-22T17:39:17.694Z",
+    "callsign": "UAL123",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday this is United 1 2 3 we need help we're going down mayday mayday mayday",
+    "raw_transcript": "mayday mayday this is United 1 2 3 we need help we're going down mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL123",
+          "airline": "United Airlines",
+          "flight_number": "123",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UAL123",
+          "instruction": "emergency assistance required",
+          "runway": null,
+          "details": "going down"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "United Airlines flight UAL123 issued a mayday call indicating they are going down and require immediate assistance."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T17:39:32.062Z",
+    "dispatched": true
+  },
+  {
+    "id": "emergency_mic_1750613948960_c542a6",
+    "timestamp": "2025-06-22T17:39:08.961Z",
+    "source_message_id": "mic_1750613948961",
+    "source_timestamp": "2025-06-22T17:39:08.961Z",
+    "callsign": "UAL123",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "a meeting this is United 1 2 3 mayday mayday mayday this is reunited 1 2 3 we need help",
+    "raw_transcript": "a meeting this is United 1 2 3 mayday mayday mayday this is reunited 1 2 3 we need help",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL123",
+          "airline": "United Airlines",
+          "flight_number": "123",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UAL123",
+          "instruction": "need help",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "United Airlines flight UAL123 declared a mayday emergency, requesting help."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T17:39:29.029Z",
+    "dispatched": true
+  },
+  {
     "id": "emergency_mic_1750602733716_gsh1o6",
     "timestamp": "2025-06-22T14:32:13.716Z",
     "source_message_id": "mic_1750602733716",

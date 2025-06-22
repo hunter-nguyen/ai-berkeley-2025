@@ -24,65 +24,97 @@ interface DispatchRecord {
   call_duration?: number;
 }
 
-export async function POST(request: NextRequest) {
+function getEmergencyProtocols(): any {
+  const protocolsPath = path.join(process.cwd(), '..', 'be', 'emergency_protocols.json');
   try {
-    const body: DispatchRequest = await request.json();
-    const { alertId, callsign, emergencyType, description, originalMessage } = body;
-    
-    if (!alertId || !callsign || !emergencyType) {
-      return NextResponse.json(
-        { error: 'Missing required fields: alertId, callsign, emergencyType' },
-        { status: 400 }
-      );
+    if (fs.existsSync(protocolsPath)) {
+      return JSON.parse(fs.readFileSync(protocolsPath, 'utf8'));
     }
-
-    // Load emergency protocols
-    const protocolsPath = path.join(process.cwd(), '..', 'be', 'emergency_protocols.json');
-    const configsPath = path.join(process.cwd(), '..', 'be', 'dispatch_configs.json');
-    
-    let protocols: any = {};
-    let configs: any = {};
-    
-    try {
-      if (fs.existsSync(protocolsPath)) {
-        protocols = JSON.parse(fs.readFileSync(protocolsPath, 'utf8'));
-      }
-      if (fs.existsSync(configsPath)) {
-        configs = JSON.parse(fs.readFileSync(configsPath, 'utf8'));
-      }
-    } catch (error) {
-      console.error('Error loading dispatch configurations:', error);
-    }
-
-    // Get protocol for this emergency type
-    const protocol = protocols[emergencyType] || protocols['general_emergency'] || {
+  } catch (error) {
+    console.error('Error loading emergency protocols:', error);
+  }
+  
+  // Default protocols
+  return {
+    'general_emergency': {
       priority: 'high',
       recipients: ['airport_ops'],
       script: 'General emergency declared by {callsign}. Nature: {description}.'
-    };
+    }
+  };
+}
 
-    // Determine recipient
-    const recipients = protocol.recipients || ['airport_ops'];
-    const primaryRecipient = recipients[0];
-    const emergencyServices = configs.emergency_services || {
+function getDispatchConfigs(): any {
+  const configsPath = path.join(process.cwd(), '..', 'be', 'dispatch_configs.json');
+  try {
+    if (fs.existsSync(configsPath)) {
+      return JSON.parse(fs.readFileSync(configsPath, 'utf8'));
+    }
+  } catch (error) {
+    console.error('Error loading dispatch configs:', error);
+  }
+  
+  // Default configs
+  return {
+    emergency_services: {
       airport_ops: '+1-650-821-7014',
       fire_rescue: '+1-650-599-1378',
       medical: '+1-650-821-5151'
-    };
-    
-    const phoneNumber = emergencyServices[primaryRecipient] || emergencyServices['airport_ops'];
+    },
+    default_recipient: 'airport_ops'
+  };
+}
 
-    // Generate call script
-    const script = generateCallScript({
-      callsign,
-      description,
-      originalMessage,
-      protocol
-    });
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { alertId, callsign, emergencyType, description, originalMessage } = body;
+
+    console.log(`🚨 DISPATCH REQUEST: ${callsign} - ${emergencyType}`);
+
+    // Load emergency protocols
+    const protocols = getEmergencyProtocols();
+    const protocol = protocols[emergencyType] || protocols['general_emergency'];
+
+    // Determine recipient and phone number
+    const recipients = protocol.recipients || ['airport_ops'];
+    const primaryRecipient = recipients[0];
+    
+    const dispatchConfigs = getDispatchConfigs();
+    const phoneNumber = dispatchConfigs.emergency_services[primaryRecipient] || 
+                       dispatchConfigs.emergency_services[dispatchConfigs.default_recipient];
+
+    // Generate emergency script
+    const script = protocol.script
+      .replace('{callsign}', callsign)
+      .replace('{description}', description)
+      .replace('{emergency_type}', emergencyType);
+
+    // Create emergency data structure for MayDay assistant
+    const emergencyData = {
+      dispatch_id: `dispatch_${Date.now()}_${alertId.slice(0, 8)}`,
+      alert_id: alertId,
+      callsign: callsign,
+      emergency_type: emergencyType,
+      airport_code: "KSFO", // Could be dynamic based on your setup
+      urgency_level: protocol.priority === 'critical' ? 'critical' : 
+                    protocol.priority === 'high' ? 'high' : 'medium',
+      timestamp: new Date().toISOString(),
+      description: description,
+      original_message: originalMessage,
+      recipients: recipients,
+      protocol: protocol,
+      details: {
+        location: "KSFO Tower Control",
+        reported_by: "ATC System",
+        contact_info: "KSFO Tower +1-650-876-2778",
+        script: script
+      }
+    };
 
     // Create dispatch record
     const dispatchRecord: DispatchRecord = {
-      id: `dispatch_${Date.now()}_${alertId.slice(0, 8)}`,
+      id: emergencyData.dispatch_id,
       alert_id: alertId,
       callsign,
       emergency_type: emergencyType,
@@ -92,8 +124,8 @@ export async function POST(request: NextRequest) {
       initiated_at: new Date().toISOString()
     };
 
-    // Simulate VAPI call (replace with actual VAPI integration)
-    const vapiSuccess = await makeRealVAPICall(phoneNumber, script, dispatchRecord.id);
+    // Make VAPI call with proper emergency data
+    const vapiSuccess = await makeRealVAPICall(phoneNumber, emergencyData, script);
     
     if (vapiSuccess.success) {
       dispatchRecord.call_status = 'calling';
@@ -116,7 +148,14 @@ export async function POST(request: NextRequest) {
       call_status: dispatchRecord.call_status,
       call_id: dispatchRecord.call_id,
       recipient: primaryRecipient,
-      script: script
+      emergency_data: emergencyData,
+      mayday_variables: {
+        emergency_data: JSON.stringify(emergencyData),
+        emergency_type: emergencyType,
+        airport_code: emergencyData.airport_code,
+        urgency_level: emergencyData.urgency_level,
+        timestamp: emergencyData.timestamp
+      }
     });
 
   } catch (error) {
@@ -199,7 +238,7 @@ function generateCallScript(data: {
   return script;
 }
 
-async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId: string): Promise<{
+async function makeRealVAPICall(phoneNumber: string, emergencyData: any, script: string): Promise<{
   success: boolean;
   callId?: string;
   error?: string;
@@ -211,7 +250,11 @@ async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId:
   
   if (!vapiToken || !assistantId) {
     console.log(`🔄 SIMULATED VAPI CALL to ${phoneNumber} (Missing credentials)`);
-    console.log(`📞 Script: ${script}`);
+    console.log(`🔧 Variables would be passed to MayDay assistant:`);
+    console.log(`   - emergency_type: ${emergencyData.emergency_type}`);
+    console.log(`   - airport_code: ${emergencyData.airport_code}`);
+    console.log(`   - urgency_level: ${emergencyData.urgency_level}`);
+    console.log(`   - callsign: ${emergencyData.callsign}`);
     
     // Fallback to simulation if credentials missing
     return {
@@ -223,9 +266,9 @@ async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId:
   try {
     console.log(`📞 MAKING REAL VAPI CALL to ${phoneNumber}`);
     console.log(`🎯 Assistant ID: ${assistantId.slice(0, 8)}...`);
-    console.log(`📜 Script: ${script}`);
+    console.log(`🚨 Emergency Data:`, emergencyData);
 
-    // Correct VAPI API call format based on official documentation
+    // Correct VAPI API call format for MayDay assistant
     const response = await fetch('https://api.vapi.ai/call', {
       method: 'POST',
       headers: {
@@ -240,9 +283,17 @@ async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId:
         phoneNumberId: vapiPhoneNumberId,
         assistantOverrides: {
           variableValues: {
-            emergency_script: script,
-            dispatch_id: dispatchId,
-            caller_id: 'SFO_ATC_Emergency_Dispatch'
+            // MayDay assistant expected variables
+            emergency_data: JSON.stringify(emergencyData),
+            emergency_type: emergencyData.emergency_type,
+            airport_code: emergencyData.airport_code,
+            urgency_level: emergencyData.urgency_level,
+            timestamp: emergencyData.timestamp,
+            
+            // Additional context
+            dispatch_id: emergencyData.dispatch_id,
+            phone_number: phoneNumber,
+            script_details: script
           }
         }
       })
@@ -251,6 +302,13 @@ async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId:
     if (response.ok) {
       const result = await response.json();
       console.log(`✅ VAPI CALL SUCCESS: ${result.id}`);
+      console.log(`📋 Variables passed to MayDay assistant:
+        - emergency_data: ${JSON.stringify(emergencyData)}
+        - emergency_type: ${emergencyData.emergency_type}
+        - airport_code: ${emergencyData.airport_code}
+        - urgency_level: ${emergencyData.urgency_level}
+        - timestamp: ${emergencyData.timestamp}`);
+      
       return {
         success: true,
         callId: result.id

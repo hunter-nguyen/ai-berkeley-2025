@@ -948,4 +948,104 @@ async def get_comprehensive_status():
             ]
         }
     except Exception as e:
-        return {"status": "error", "agent_available": False, "error": str(e)} 
+        return {"status": "error", "agent_available": False, "error": str(e)}
+
+
+@app.post("/api/v1/letta/chat")
+async def chat_with_letta(data: dict):
+    """Chat with Letta agent - starts with recent events summary if first message"""
+    if not get_letta_agent:
+        raise HTTPException(status_code=503, detail="Letta service not available")
+    
+    agent = get_letta_agent()
+    if not agent:
+        raise HTTPException(status_code=503, detail="Letta agent not initialized")
+    
+    try:
+        message = data.get('message', '').strip()
+        is_first_message = data.get('is_first_message', False)
+        
+        # If first message, provide recent events summary
+        if is_first_message or message.lower() in ['start', 'begin', 'summary', 'recent events']:
+            # Load recent messages for context
+            messages = load_messages()
+            recent_messages = messages[:20]  # Last 20 messages
+            
+            # Count urgent messages and active callsigns
+            urgent_count = sum(1 for msg in recent_messages if msg.get('isUrgent', False))
+            active_callsigns = list(set(msg.get('callsign', '') for msg in recent_messages if msg.get('callsign') and msg.get('callsign') != 'SYSTEM'))
+            
+            # Get unique runway activity
+            runway_activity = list(set())
+            for msg in recent_messages:
+                runway_activity.extend(msg.get('runways', []))
+            runway_activity = list(set(runway_activity))
+            
+            summary_prompt = f"""
+👋 Hello! I'm your left agent for shift assistance. Let me start by giving you a summary of recent events:
+
+📊 **RECENT SHIFT ACTIVITY** (Last 20 messages)
+- **Total Messages**: {len(recent_messages)}
+- **Urgent Messages**: {urgent_count}
+- **Active Aircraft**: {len(active_callsigns)} ({', '.join(active_callsigns[:5])}{'...' if len(active_callsigns) > 5 else ''})
+- **Runway Activity**: {', '.join(runway_activity) if runway_activity else 'None detected'}
+
+🔍 **NOTABLE EVENTS**:
+"""
+            
+            # Add recent urgent messages or notable events
+            notable_events = []
+            for msg in recent_messages[:10]:
+                if msg.get('isUrgent', False):
+                    notable_events.append(f"⚠️ {msg.get('callsign', 'Unknown')}: {msg.get('message', '')[:50]}...")
+                elif any(keyword in msg.get('message', '').lower() for keyword in ['emergency', 'mayday', 'priority', 'medical']):
+                    notable_events.append(f"🚨 {msg.get('callsign', 'Unknown')}: {msg.get('message', '')[:50]}...")
+            
+            if notable_events:
+                summary_prompt += "\n".join(notable_events[:3])
+            else:
+                summary_prompt += "✅ No urgent events detected - routine operations"
+            
+            summary_prompt += "\n\n💬 **Ready to assist! Ask me about:**\n- Shift patterns and trends\n- Specific aircraft or incidents\n- Weather impacts\n- Handover preparation\n- Any other questions about current operations"
+            
+            # Send this as the initial message if user just wants to start
+            if not message or message.lower() in ['start', 'begin']:
+                message = summary_prompt
+            else:
+                # Prepend summary to user's actual message
+                message = f"{summary_prompt}\n\n**User Question**: {message}"
+        
+        # Send message to Letta agent
+        from letta_service import MessageCreate, TextContent
+        response = agent.client.agents.messages.create(
+            agent_id=agent.agent_id,
+            messages=[MessageCreate(
+                role="user",
+                content=[TextContent(
+                    type="text",
+                    text=message
+                )]
+            )]
+        )
+        
+        # Extract response content
+        response_text = ""
+        if response and hasattr(response, 'messages') and response.messages:
+            for msg in response.messages:
+                if hasattr(msg, 'content') and msg.content:
+                    for content in msg.content:
+                        if hasattr(content, 'text'):
+                            response_text += content.text + "\n"
+        
+        if not response_text:
+            response_text = "I'm here to help with your shift. What would you like to know?"
+        
+        return {
+            "status": "success",
+            "response": response_text.strip(),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Chat error: {e}")
+        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}") 

@@ -30,16 +30,16 @@ const API_KEY = process.env.NEXT_PUBLIC_FLIGHTRADAR24_API_KEY;
 // ✈️ AIRCRAFT DISPLAY CONFIGURATION
 // Adjust these values to control how many aircraft are shown
 export const AIRCRAFT_CONFIG = {
-  MAX_AIRCRAFT_DISPLAY: 25,  // Maximum aircraft to show on map (increased for better visibility!)
-  API_FETCH_LIMIT: 30,       // How many to fetch from API (should be higher than display limit)
+  MAX_AIRCRAFT_DISPLAY: 50,  // Maximum aircraft to show on map (increased for better visibility!)
+  API_FETCH_LIMIT: 60,       // How many to fetch from API (should be higher than display limit)
   MIN_ALTITUDE: 0,           // Minimum altitude to show (feet) - include ground aircraft at airports
 };
 
 // San Francisco Bay Area bounds for filtering aircraft
 const SFO_BOUNDS = {
   north: 37.9,
-  south: 37.6,
-  east: -122.2,
+  south: 37.5,    // Expanded 33% downwards (was 37.6)
+  east: -122.0,   // Expanded 33% eastwards (was -122.2) 
   west: -122.7
 };
 

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@letta-ai/letta-client": "^0.1.132",
     "@types/leaflet": "^1.9.18",
     "framer-motion": "^12.18.1",
     "leaflet": "^1.9.4",

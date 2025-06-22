@@ -1,7 +1,88 @@
 [
   {
-    "id": "3e2a25f3-3175-46e8-91c2-f0fbe0a00195",
-    "timestamp": "2025-06-22T08:23:36.617651",
+    "id": "6fb12c08-c1ef-4f4b-a021-3f5602816235",
+    "timestamp": "2025-06-22T11:10:16.053081",
+    "callsign": "KSFO Tower",
+    "message": "Let's echo, hold short. Run week 2 at last. Let's echo, hold short. Okay.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Let's echo, hold short. Run week 2 at last. Let's echo, hold short. Okay.",
+    "instructions": [
+      "hold_short"
+    ],
+    "runways": [],
+    "chunk": 4,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [
+        {
+          "type": "hold_short",
+          "callsign": null,
+          "instruction": "hold short",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Hold short instruction given to an unknown aircraft",
+      "processing_stats": {
+        "callsign_count": 0,
+        "instruction_count": 1,
+        "runway_count": 0,
+        "confidence": "low"
+      },
+      "original_transcript": "Let's echo, hold short. Run week 2 at last. Let's echo, hold short. Okay.",
+      "cleaned_transcript": "let's echo, hold short. run week 2 at last. let's echo, hold short. okay.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T11:10:15.451572",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "1d631dfe-1fb6-468c-830c-1a7e1bb8c3b0",
+    "timestamp": "2025-06-22T11:09:48.478659",
+    "callsign": "Canada 761",
+    "message": "Canada 761.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Canada 761.",
+    "instructions": [],
+    "runways": [],
+    "chunk": 3,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "Canada 761",
+          "airline": "Canada",
+          "flight_number": "761",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Initial call from Canada 761",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 0,
+        "runway_count": 0,
+        "confidence": "high"
+      },
+      "original_transcript": "Canada 761.",
+      "cleaned_transcript": "canada 761.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T11:09:48.478185",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "31c66046-4ab9-4dc7-9cd1-3767581bed8e",
+    "timestamp": "2025-06-22T11:08:59.956591",
     "callsign": "SYSTEM",
     "message": "\ud83c\udfa7 ATC Audio Agent started - listening to KSFO Tower",
     "isUrgent": false,

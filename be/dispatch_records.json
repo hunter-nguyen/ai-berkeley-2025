@@ -210,5 +210,78 @@
     "call_recipient": "fire_rescue",
     "call_status": "failed",
     "initiated_at": "2025-06-22T14:32:19.929Z"
+  },
+  {
+    "id": "dispatch_1750613968095_emergenc",
+    "alert_id": "emergency_mic_1750613948960_c542a6",
+    "callsign": "UAL123",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "failed",
+    "initiated_at": "2025-06-22T17:39:28.095Z"
+  },
+  {
+    "id": "dispatch_1750613971480_emergenc",
+    "alert_id": "emergency_mic_1750613957693_uag3it",
+    "callsign": "UAL123",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "failed",
+    "initiated_at": "2025-06-22T17:39:31.480Z"
+  },
+  {
+    "id": "dispatch_1750614183868_emergenc",
+    "alert_id": "emergency_mic_1750614177009_he8dm5",
+    "callsign": "UAL123",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "failed",
+    "initiated_at": "2025-06-22T17:43:03.869Z"
+  },
+  {
+    "id": "dispatch_1750615028122_emergenc",
+    "alert_id": "emergency_mic_1750615007449_wz05jd",
+    "callsign": "UNKNOWN",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "failed",
+    "initiated_at": "2025-06-22T17:57:08.122Z"
+  },
+  {
+    "id": "dispatch_1750615109076_emergenc",
+    "alert_id": "emergency_mic_1750615007916_dvfjky",
+    "callsign": "UAL5675",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "calling",
+    "initiated_at": "2025-06-22T17:58:29.076Z",
+    "call_id": "a5dee84a-c7aa-45da-a158-5b8218c5b358"
+  },
+  {
+    "id": "dispatch_1750615218080_emergenc",
+    "alert_id": "emergency_mic_1750615213391_yf4kbu",
+    "callsign": "UAL1574",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "calling",
+    "initiated_at": "2025-06-22T18:00:18.080Z",
+    "call_id": "a8eac706-2a86-4e73-bd58-84bdb8b85f2a"
+  },
+  {
+    "id": "dispatch_1750615469529_emergenc",
+    "alert_id": "emergency_mic_1750615453746_bmncfh",
+    "callsign": "UAL145678910",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "calling",
+    "initiated_at": "2025-06-22T18:04:29.530Z",
+    "call_id": "f51e2fb4-6bf4-4ef7-a16a-9674e41d2204"
   }
 ]
