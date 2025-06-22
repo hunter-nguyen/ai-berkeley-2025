@@ -5,6 +5,7 @@ uvicorn[standard]>=0.25.0
 # AI/ML Services
 groq>=0.9.0
 openai>=1.16.0
+letta>=0.3.0
 
 # Audio Processing
 pyaudio==0.2.14

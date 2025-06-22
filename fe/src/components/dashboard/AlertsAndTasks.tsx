@@ -284,9 +284,6 @@ export default function AlertsAndTasks({ isCollapsed, onToggle }: AlertsAndTasks
             <h3 className={`font-bold font-mono text-sm tracking-wide ${criticalAlerts.length > 0 ? 'text-red-400' : 'text-gray-300'}`}>
               {criticalAlerts.length > 0 ? 'EMERGENCY ALERTS' : 'SYSTEM ALERTS'}
             </h3>
-            <div className="text-xs text-gray-500 font-mono">
-              {alerts.length} total • {criticalAlerts.length} critical
-            </div>
           </div>
         </div>
         <div className="flex items-center space-x-2">

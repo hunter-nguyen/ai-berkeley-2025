@@ -29,7 +29,7 @@ interface EmergencyAlert {
   updated_at: string;
 }
 
-interface GroqATCData {
+interface ATCData {
   callsigns: Array<{
     callsign: string;
     airline?: string;
@@ -65,16 +65,16 @@ export async function POST(request: NextRequest) {
     console.log('🎤 Processing microphone transcript:', transcript);
     console.log('🚨 Emergency detected:', isEmergency);
 
-    // Process with Groq AI for structured data extraction
-    const groqData = await processWithGroq(transcript);
-    console.log('🤖 Groq processed data:', groqData);
+    // Process with ASI:One AI for structured data extraction
+    const asiOneData = await processWithASIOne(transcript);
+    console.log('🤖 ASI:One processed data:', asiOneData);
 
-    // Extract flight information from Groq data or fallback to manual extraction
-    const flightInfo = groqData.callsigns.length > 0 
-      ? groqData.callsigns[0] 
+    // Extract flight information from ASI:One data or fallback to manual extraction
+    const flightInfo = asiOneData.callsigns.length > 0 
+      ? asiOneData.callsigns[0] 
       : extractFlightInfo(transcript);
     
-    const emergencyType = groqData.emergencies || detectEmergencyType(transcript);
+    const emergencyType = asiOneData.emergencies || detectEmergencyType(transcript);
     const category = determineCategory(emergencyType);
     
     // Check if we should create an alert (emergency, warning, or report)
@@ -85,8 +85,8 @@ export async function POST(request: NextRequest) {
         success: true, 
         message: 'Transcript processed - no alert needed',
         emergency_created: false,
-        groq_data: groqData,
-        aircraft_mentioned: groqData.callsigns.length > 0 ? groqData.callsigns[0].callsign : null
+        asiOne_data: asiOneData,
+        aircraft_mentioned: asiOneData.callsigns.length > 0 ? asiOneData.callsigns[0].callsign : null
       });
     }
 
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       status: 'ACTIVE',
       acknowledged: false,
       escalated: false,
-      atc_data: groqData,
+      atc_data: asiOneData,
       created_by: 'microphone_demo_system',
       updated_at: new Date().toISOString()
     };
@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
       alert_type: emergency.emergency_type,
       severity: emergency.severity,
       category: emergency.category,
-      groq_data: groqData,
+      asiOne_data: asiOneData,
       aircraft_mentioned: flightInfo.callsign
     });
 
@@ -163,12 +163,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function processWithGroq(transcript: string): Promise<GroqATCData> {
+async function processWithASIOne(transcript: string): Promise<ATCData> {
   try {
-    const groqApiKey = process.env.GROQ_API_KEY;
-    if (!groqApiKey) {
-      console.warn('⚠️ GROQ_API_KEY not found, using fallback processing');
-      return createFallbackGroqData(transcript);
+    const fetchApiKey = process.env.FETCH_API_KEY;
+    if (!fetchApiKey) {
+      console.warn('⚠️ FETCH_API_KEY not found, using fallback processing');
+      return createFallbackATCData(transcript);
     }
 
     const prompt = `You are an expert Air Traffic Control (ATC) communication analyzer. Extract structured data from this radio communication transcript.
@@ -221,14 +221,15 @@ CRITICAL:
 - Include souls on board in details if mentioned
 - Return ONLY valid JSON, no other text or explanations`;
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://api.asi1.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${groqApiKey}`,
+        'Authorization': `Bearer ${fetchApiKey}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama3-70b-8192',
+        model: 'asi1-mini',
         messages: [
           {
             role: 'user',
@@ -237,24 +238,25 @@ CRITICAL:
         ],
         temperature: 0.1,
         max_tokens: 1000,
+        stream: false
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Groq API error: ${response.status}`);
+      throw new Error(`ASI:One API error: ${response.status}`);
     }
 
     const data = await response.json();
     const content = data.choices[0]?.message?.content;
     
     if (!content) {
-      throw new Error('No content from Groq API');
+      throw new Error('No content from ASI:One API');
     }
 
     // Clean and parse JSON
     let cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
     
-    // Handle cases where Groq returns explanatory text before JSON
+    // Handle cases where ASI:One returns explanatory text before JSON
     const jsonStart = cleanContent.indexOf('{');
     const jsonEnd = cleanContent.lastIndexOf('}');
     
@@ -264,16 +266,16 @@ CRITICAL:
     
     const parsedData = JSON.parse(cleanContent);
     
-    console.log('✅ Groq processing successful');
+    console.log('✅ ASI:One processing successful');
     return parsedData;
 
   } catch (error) {
-    console.error('❌ Groq processing failed:', error);
-    return createFallbackGroqData(transcript);
+    console.error('❌ ASI:One processing failed:', error);
+    return createFallbackATCData(transcript);
   }
 }
 
-function createFallbackGroqData(transcript: string): GroqATCData {
+function createFallbackATCData(transcript: string): ATCData {
   const flightInfo = extractFlightInfo(transcript);
   const emergencyType = detectEmergencyType(transcript);
   const runway = extractRunway(transcript);

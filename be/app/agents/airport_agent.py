@@ -4,8 +4,22 @@ import httpx
 import json
 import uuid
 from datetime import datetime
-from uagents import Agent, Context
+from uagents import Agent, Context, Protocol, Model
 from uagents.setup import fund_agent_if_low
+
+# --- Message Schemas ---
+class AirportRequest(Model):
+    airport_id: str
+
+class AirportResponse(Model):
+    id: str
+    timestamp: str
+    callsign: str
+    message: str
+    isUrgent: bool
+    type: str
+    rawTranscript: str
+    airport_data: dict
 
 # --- Agent Configuration ---
 AIRPORT_AGENT_SEED = os.environ.get("AIRPORT_AGENT_SEED", "airport_agent_seed_phrase_!@#$%")
@@ -21,9 +35,13 @@ agent = Agent(
     port=8500,
     seed=AIRPORT_AGENT_SEED,
     endpoint=["http://127.0.0.1:8500/submit"],
+    mailbox=True
 )
 
 fund_agent_if_low(agent.wallet.address())
+
+# --- Protocol ---
+airport_protocol = Protocol("airport_data")
 
 def load_messages() -> list:
     """Load messages from the JSON file."""
@@ -47,12 +65,11 @@ def save_messages(messages: list):
     except IOError as e:
         print(f"Error saving messages: {e}")
 
-@agent.on_interval(period=FETCH_INTERVAL_SECONDS)
-async def fetch_airport_data(ctx: Context):
-    """Periodically fetch airport data for a specific airport from aviationweather.gov."""
-    ctx.logger.info(f"Fetching airport data for {AIRPORT_ID}...")
+async def fetch_airport_data_for_id(airport_id: str, ctx: Context) -> dict:
+    """Fetch airport data for a specific airport ID."""
+    ctx.logger.info(f"Fetching airport data for {airport_id}...")
     
-    api_url = f"https://aviationweather.gov/api/data/metar?ids={AIRPORT_ID}&format=json"
+    api_url = f"https://aviationweather.gov/api/data/metar?ids={airport_id}&format=json"
     
     try:
         async with httpx.AsyncClient() as client:
@@ -61,8 +78,8 @@ async def fetch_airport_data(ctx: Context):
         
         data = response.json()
         if not data:
-            ctx.logger.warning(f"No airport data returned for {AIRPORT_ID}")
-            return
+            ctx.logger.warning(f"No airport data returned for {airport_id}")
+            return None
             
         airport_data = data[0]
         
@@ -79,7 +96,7 @@ async def fetch_airport_data(ctx: Context):
         new_message = {
             "id": str(uuid.uuid4()),
             "timestamp": datetime.now().isoformat(),
-            "callsign": f"AIRPORT-{AIRPORT_ID}",
+            "callsign": f"AIRPORT-{airport_id}",
             "message": summary,
             "isUrgent": is_urgent,
             "type": "airport_update",
@@ -87,16 +104,58 @@ async def fetch_airport_data(ctx: Context):
             "airport_data": airport_data,
         }
         
+        # Save to JSON
         messages = load_messages()
         messages.insert(0, new_message)
         save_messages(messages[:MAX_MESSAGES])
         
-        ctx.logger.info(f"Successfully fetched and saved airport data for {AIRPORT_ID}.")
+        ctx.logger.info(f"Successfully fetched and saved airport data for {airport_id}.")
+        return new_message
 
     except httpx.HTTPStatusError as e:
         ctx.logger.error(f"HTTP error fetching airport data: {e.response.status_code} - {e.response.text}")
+        return None
     except Exception as e:
         ctx.logger.error(f"An unexpected error occurred: {e}")
+        return None
+
+@agent.on_interval(period=FETCH_INTERVAL_SECONDS)
+async def fetch_airport_data(ctx: Context):
+    """Periodically fetch airport data for KSFO."""
+    await fetch_airport_data_for_id(AIRPORT_ID, ctx)
+
+@airport_protocol.on_message(model=AirportRequest, replies={AirportResponse})
+async def handle_airport_request(ctx: Context, sender: str, msg: AirportRequest):
+    """Handle incoming airport data requests."""
+    result = await fetch_airport_data_for_id(msg.airport_id, ctx)
+    
+    if result:
+        response = AirportResponse(
+            id=result["id"],
+            timestamp=result["timestamp"],
+            callsign=result["callsign"],
+            message=result["message"],
+            isUrgent=result["isUrgent"],
+            type=result["type"],
+            rawTranscript=result["rawTranscript"],
+            airport_data=result["airport_data"]
+        )
+        await ctx.send(sender, response)
+    else:
+        # Send error response
+        error_response = AirportResponse(
+            id=str(uuid.uuid4()),
+            timestamp=datetime.now().isoformat(),
+            callsign=f"AIRPORT-{msg.airport_id}",
+            message="Failed to fetch airport data",
+            isUrgent=False,
+            type="error",
+            rawTranscript="",
+            airport_data={}
+        )
+        await ctx.send(sender, error_response)
+
+agent.include(airport_protocol)
 
 if __name__ == "__main__":
     agent.run() 

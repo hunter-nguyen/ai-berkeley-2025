@@ -7,6 +7,9 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 import httpx
 from ..utils.logging import get_logger
+from uagents import Agent, Context, Protocol, Model
+from uagents.setup import fund_agent_if_low
+#Fetch AI
 
 logger = get_logger(__name__)
 

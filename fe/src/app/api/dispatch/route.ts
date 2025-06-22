@@ -207,6 +207,7 @@ async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId:
   // Get VAPI credentials from environment
   const vapiToken = process.env.VAPI_API_KEY || process.env.VAPI_TOKEN;
   const assistantId = process.env.VAPI_ASSISTANT_ID;
+  const vapiPhoneNumberId = process.env.VAPI_PHONE_NUMBER_ID; // Your VAPI phone number ID
   
   if (!vapiToken || !assistantId) {
     console.log(`🔄 SIMULATED VAPI CALL to ${phoneNumber} (Missing credentials)`);
@@ -221,10 +222,10 @@ async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId:
 
   try {
     console.log(`📞 MAKING REAL VAPI CALL to ${phoneNumber}`);
-    console.log(`🎯 Assistant ID: ${assistantId}`);
+    console.log(`🎯 Assistant ID: ${assistantId.slice(0, 8)}...`);
     console.log(`📜 Script: ${script}`);
 
-    // Real VAPI call to their API
+    // Correct VAPI API call format based on official documentation
     const response = await fetch('https://api.vapi.ai/call', {
       method: 'POST',
       headers: {
@@ -233,16 +234,14 @@ async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId:
       },
       body: JSON.stringify({
         assistantId: assistantId,
-        phoneNumberId: process.env.VAPI_PHONE_NUMBER_ID,
         customer: {
           number: phoneNumber
         },
+        phoneNumberId: vapiPhoneNumberId,
         assistantOverrides: {
-          firstMessage: `This is an automated emergency dispatch from San Francisco International Airport Air Traffic Control. ${script}`,
           variableValues: {
-            dispatch_id: dispatchId,
             emergency_script: script,
-            priority: 'emergency',
+            dispatch_id: dispatchId,
             caller_id: 'SFO_ATC_Emergency_Dispatch'
           }
         }
@@ -261,7 +260,7 @@ async function makeRealVAPICall(phoneNumber: string, script: string, dispatchId:
       console.error(`❌ VAPI CALL FAILED: ${response.status} - ${errorText}`);
       return {
         success: false,
-        error: `HTTP ${response.status}: ${errorText}`
+        error: `${response.status} - ${errorText}`
       };
     }
 

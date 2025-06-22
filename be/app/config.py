@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     # API Keys
     groq_api_key: str
     vapi_api_key: Optional[str] = None
+    letta_api_key: Optional[str] = None
     
     # Agent Settings
     transcriber_agent_address: str = "http://127.0.0.1:8001/transcribe"

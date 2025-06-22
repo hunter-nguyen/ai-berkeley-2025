@@ -3,11 +3,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { AdjustmentsHorizontalIcon, BellIcon } from '@heroicons/react/24/outline';
+import { AdjustmentsHorizontalIcon, BellIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import ATCStatusBar from './ATCStatusBar';
 import FlightDetails from './FlightDetails';
 import LiveComms from './LiveComms';
 import AlertsAndTasks from './AlertsAndTasks';
+import ShiftHandover from './ShiftHandover';
 import '@/utils/aircraftConfig'; // Import for console utilities
 import { debugAircraft } from '@/utils/debug-aircraft';
 
@@ -57,6 +58,9 @@ export default function MaydayDashboard() {
   
   // Panel visibility - LiveComms always visible, only emergency alerts auto-collapse
   const [showEmergencyAlerts, setShowEmergencyAlerts] = useState(false);
+  
+  // Right panel tab management
+  const [activeRightTab, setActiveRightTab] = useState<'comms' | 'shift'>('comms');
   
   // Auto-collapse logic - only for emergency alerts
   useEffect(() => {
@@ -368,66 +372,109 @@ export default function MaydayDashboard() {
           )}
         </AnimatePresence>
 
-        {/* Right Side - Always Visible LiveComms + Auto-Collapsing Emergency Alerts */}
+        {/* Right Side - Tabbed Interface for Communications and Shift Handover */}
         <div className="absolute right-0 top-0 bottom-0 w-80 p-3 space-y-2 z-10">
           
-          {/* Emergency Alerts - Only show when critical */}
-          <AnimatePresence>
-            {showEmergencyAlerts && (
-              <motion.div
-                initial={{ x: 320, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: 320, opacity: 0 }}
-                className="h-1/2"
-              >
-                <AlertsAndTasks 
+          {/* Tab Headers */}
+          <div className="bg-gray-900/90 backdrop-blur-sm rounded-lg border border-gray-600/60 p-1 flex space-x-1">
+            <button
+              onClick={() => setActiveRightTab('comms')}
+              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
+                activeRightTab === 'comms'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              }`}
+            >
+              <BellIcon className="w-4 h-4" />
+              <span>Comms</span>
+            </button>
+            <button
+              onClick={() => setActiveRightTab('shift')}
+              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
+                activeRightTab === 'shift'
+                  ? 'bg-green-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              }`}
+            >
+              <UserGroupIcon className="w-4 h-4" />
+              <span>Shift</span>
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          {activeRightTab === 'comms' && (
+            <>
+              {/* Emergency Alerts - Only show when critical */}
+              <AnimatePresence>
+                {showEmergencyAlerts && (
+                  <motion.div
+                    initial={{ x: 320, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: 320, opacity: 0 }}
+                    className="h-1/2"
+                  >
+                    <AlertsAndTasks 
+                      isCollapsed={false}
+                      onToggle={() => setShowEmergencyAlerts(!showEmergencyAlerts)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* LiveComms with Microphone Tab - Always Visible */}
+              <div className={showEmergencyAlerts ? "h-1/2" : "h-[calc(100%-60px)]"}>
+                <LiveComms 
                   isCollapsed={false}
-                  onToggle={() => setShowEmergencyAlerts(!showEmergencyAlerts)}
+                  onToggle={() => {}} // No toggle needed since always visible
+                  selectedCallsign={selectedCallsign}
+                  onCallsignSelect={handleCallsignSelect}
+                  onMessagesUpdate={handleMessagesUpdate}
+                  onMicrophoneTranscript={handleMicrophoneTranscript}
                 />
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+            </>
+          )}
 
-          {/* LiveComms with Microphone Tab - Always Visible */}
-          <div className={showEmergencyAlerts ? "h-1/2" : "h-2/3"}>
-            <LiveComms 
-              isCollapsed={false}
-              onToggle={() => {}} // No toggle needed since always visible
-              selectedCallsign={selectedCallsign}
-              onCallsignSelect={handleCallsignSelect}
-              onMessagesUpdate={handleMessagesUpdate}
-              onMicrophoneTranscript={handleMicrophoneTranscript}
-            />
-          </div>
+          {activeRightTab === 'shift' && (
+            <div className="h-[calc(100%-60px)]">
+              <div className="bg-gray-900/90 backdrop-blur-sm rounded-lg border border-gray-600/60 h-full overflow-hidden">
+                <div className="h-full overflow-y-auto p-1">
+                  <ShiftHandover />
+                </div>
+              </div>
+            </div>
+          )}
 
-          {/* Enhanced Floating Action Button - Only for Emergency Alerts */}
-          <div className="absolute bottom-4 right-4 space-y-2">
-            {!showEmergencyAlerts && criticalAlertsCount > 0 && (
-              <motion.button
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowEmergencyAlerts(true)}
-                className="relative bg-red-600/90 backdrop-blur-sm text-white p-4 rounded-full shadow-2xl hover:bg-red-500/90 transition-all duration-300 border border-red-500/50 group"
-              >
-                {/* Pulsing glow effect for critical alerts */}
-                <div className="absolute inset-0 rounded-full bg-red-500/30 animate-ping"></div>
-                <div className="absolute inset-0 rounded-full bg-red-500/20 animate-pulse"></div>
-                
-                <BellIcon className="w-6 h-6 relative z-10 group-hover:animate-bounce" />
-                
-                {/* Enhanced badge */}
-                <motion.span 
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="absolute -top-2 -right-2 bg-white text-red-600 text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-red-600"
+          {/* Enhanced Floating Action Button - Only for Emergency Alerts when on comms tab */}
+          {activeRightTab === 'comms' && (
+            <div className="absolute bottom-4 right-4 space-y-2">
+              {!showEmergencyAlerts && criticalAlertsCount > 0 && (
+                <motion.button
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowEmergencyAlerts(true)}
+                  className="relative bg-red-600/90 backdrop-blur-sm text-white p-4 rounded-full shadow-2xl hover:bg-red-500/90 transition-all duration-300 border border-red-500/50 group"
                 >
-                  {criticalAlertsCount}
-                </motion.span>
-              </motion.button>
-            )}
-          </div>
+                  {/* Pulsing glow effect for critical alerts */}
+                  <div className="absolute inset-0 rounded-full bg-red-500/30 animate-ping"></div>
+                  <div className="absolute inset-0 rounded-full bg-red-500/20 animate-pulse"></div>
+                  
+                  <BellIcon className="w-6 h-6 relative z-10 group-hover:animate-bounce" />
+                  
+                  {/* Enhanced badge */}
+                  <motion.span 
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="absolute -top-2 -right-2 bg-white text-red-600 text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-red-600"
+                  >
+                    {criticalAlertsCount}
+                  </motion.span>
+                </motion.button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

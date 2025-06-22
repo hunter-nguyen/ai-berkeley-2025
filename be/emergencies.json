@@ -1,5 +1,256 @@
 [
   {
+    "id": "emergency_mic_1750602733716_gsh1o6",
+    "timestamp": "2025-06-22T14:32:13.716Z",
+    "source_message_id": "mic_1750602733716",
+    "source_timestamp": "2025-06-22T14:32:13.716Z",
+    "callsign": "AIRCRAFT1234",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday this is aircraft1234 mayday mayday mayday",
+    "raw_transcript": "mayday mayday mayday this is aircraft1234 mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "AIRCRAFT1234",
+          "airline": null,
+          "flight_number": "1234",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "AIRCRAFT1234",
+          "instruction": "emergency declaration",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "Aircraft AIRCRAFT1234 declared a mayday emergency."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T14:32:20.074Z",
+    "dispatched": true
+  },
+  {
+    "id": "emergency_mic_1750602591378_mdnaay",
+    "timestamp": "2025-06-22T14:29:51.378Z",
+    "source_message_id": "mic_1750602591378",
+    "source_timestamp": "2025-06-22T14:29:51.378Z",
+    "callsign": "UAL1134",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday this is ual-1134 we're not going to make it mayday mayday mayday",
+    "raw_transcript": "mayday mayday mayday this is ual-1134 we're not going to make it mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL1134",
+          "airline": "United Airlines",
+          "flight_number": "1134",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UAL1134",
+          "instruction": "emergency declaration",
+          "runway": null,
+          "details": "not going to make it"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "UAL1134 declares a mayday emergency stating they are not going to make it"
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T14:29:59.377Z",
+    "dispatched": true
+  },
+  {
+    "id": "emergency_mic_1750600573388_9e5hjf",
+    "timestamp": "2025-06-22T13:56:13.388Z",
+    "source_message_id": "mic_1750600573389",
+    "source_timestamp": "2025-06-22T13:56:13.389Z",
+    "callsign": "EJA182",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday this is eja 182 we're coming into Leonard way 28 left at San Francisco and we have two engines that do not work we need to foam on the runway I repeat we need phone money will run away from mayday mayday mayday",
+    "raw_transcript": "mayday mayday mayday this is eja 182 we're coming into Leonard way 28 left at San Francisco and we have two engines that do not work we need to foam on the runway I repeat we need phone money will run away from mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "EJA182",
+          "airline": "Executive Jet Aviation",
+          "flight_number": "182",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "engine_failure",
+          "callsign": "EJA182",
+          "instruction": "foam on the runway",
+          "runway": "28L",
+          "details": "two engines that do not work"
+        }
+      ],
+      "runways": [
+        "28L"
+      ],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "EJA182 declared a mayday due to two engine failures, requesting foam on runway 28L at San Francisco."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T13:56:39.451Z",
+    "dispatched": true
+  },
+  {
+    "id": "emergency_mic_1750600523765_n5icci",
+    "timestamp": "2025-06-22T13:55:23.765Z",
+    "source_message_id": "mic_1750600523765",
+    "source_timestamp": "2025-06-22T13:55:23.765Z",
+    "callsign": "UAL717",
+    "severity": "HIGH",
+    "category": "EMERGENCY",
+    "emergency_type": "fuel_emergency",
+    "description": "Fuel emergency declared - minimum fuel remaining",
+    "original_message": "mayday mayday mayday this is ual717 we have a fuel emergency we have seven passengers on board low feel",
+    "raw_transcript": "mayday mayday mayday this is ual717 we have a fuel emergency we have seven passengers on board low feel",
+    "recommended_actions": [
+      "Clear airspace for priority approach",
+      "Prepare for immediate landing",
+      "Alert emergency vehicles as precaution",
+      "Monitor fuel status"
+    ],
+    "confidence": 0.95,
+    "status": "ACKNOWLEDGED",
+    "acknowledged": true,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL717",
+          "airline": "United Airlines",
+          "flight_number": "717",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "fuel_emergency",
+          "callsign": "UAL717",
+          "instruction": "fuel emergency declaration",
+          "runway": null,
+          "details": "7 passengers on board, low fuel"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "fuel_emergency",
+      "summary": "UAL717 declared a fuel emergency with 7 passengers on board and low fuel."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T13:55:43.342Z"
+  },
+  {
+    "id": "emergency_mic_1750600434478_v47314",
+    "timestamp": "2025-06-22T13:53:54.478Z",
+    "source_message_id": "mic_1750600434478",
+    "source_timestamp": "2025-06-22T13:53:54.478Z",
+    "callsign": "UAL1969",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "69 mayday mayday mayday ual 1969",
+    "raw_transcript": "69 mayday mayday mayday ual 1969",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL1969",
+          "airline": "United Airlines",
+          "flight_number": "1969",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UAL1969",
+          "instruction": "mayday",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "UAL1969 declared a mayday emergency."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T13:54:06.018Z",
+    "dispatched": true
+  },
+  {
     "id": "warning_mic_1750598865817_zrln1q",
     "timestamp": "2025-06-22T13:27:45.817Z",
     "source_message_id": "mic_1750598865817",

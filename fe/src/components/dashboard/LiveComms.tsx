@@ -192,42 +192,50 @@ export default function LiveComms({
     <motion.div
       initial={{ opacity: 0, x: 300 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-black/90 backdrop-blur-sm border border-gray-600 rounded-lg h-full flex flex-col"
+      className="bg-gray-900/95 backdrop-blur-sm border border-gray-600/60 rounded-lg h-full flex flex-col shadow-xl"
     >
-      {/* Header with Tabs */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-700">
+      {/* Header with Enhanced Tabs */}
+      <div className="flex items-center justify-between p-3 border-b border-gray-700/50 bg-gray-800/30">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <div className="flex bg-gray-800 rounded-lg p-1">
+            <div className="flex bg-gray-800/80 backdrop-blur-sm rounded-lg p-1 border border-gray-700/50">
               <button
                 onClick={() => setActiveTab('live')}
-                className={`px-3 py-1 rounded text-xs font-mono transition-colors ${
+                className={`px-4 py-2 rounded-md text-xs font-mono font-semibold transition-all duration-200 flex items-center space-x-2 ${
                   activeTab === 'live'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-blue-600/90 text-white shadow-lg border border-blue-500/30'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                 }`}
               >
-                <RadioIcon className="w-4 h-4 inline mr-1" />
-                LIVE ATC
+                <RadioIcon className="w-4 h-4" />
+                <span>LIVE ATC</span>
               </button>
               <button
                 onClick={() => setActiveTab('microphone')}
-                className={`px-3 py-1 rounded text-xs font-mono transition-colors ${
+                className={`px-4 py-2 rounded-md text-xs font-mono font-semibold transition-all duration-200 flex items-center space-x-2 ${
                   activeTab === 'microphone'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-green-600/90 text-white shadow-lg border border-green-500/30'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                 }`}
               >
-                <MicrophoneIcon className="w-4 h-4 inline mr-1" />
-                MIC
+                <MicrophoneIcon className="w-4 h-4" />
+                <span>MIC</span>
               </button>
             </div>
           </div>
+          
+          {/* Status Indicator */}
+          {activeTab === 'live' && (
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${getStatusColor()}`}></div>
+              <span className="text-xs font-mono text-gray-300">{getStatusText()}</span>
+            </div>
+          )}
         </div>
         
         <button
           onClick={onToggle}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-gray-400 hover:text-white transition-colors p-1 rounded hover:bg-gray-700/50"
         >
           {isCollapsed ? (
             <ChevronUpIcon className="w-4 h-4" />
@@ -249,27 +257,38 @@ export default function LiveComms({
           >
             {activeTab === 'live' && (
               <div className="h-full flex flex-col">
-                {/* Filter Controls */}
-                <div className="p-3 border-b border-gray-700">
+                {/* Enhanced Filter Controls */}
+                <div className="p-3 border-b border-gray-700/50 bg-gray-800/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-mono text-gray-400 font-semibold uppercase tracking-wider">MESSAGE FILTER</span>
+                    <span className="text-xs font-mono text-gray-500">{finalFilteredMessages.length} showing</span>
+                  </div>
                   <div className="flex space-x-2">
                     {(['all', 'urgent', 'normal'] as const).map((filterType) => (
                       <button
                         key={filterType}
                         onClick={() => setFilter(filterType)}
-                        className={`px-3 py-1 rounded text-xs font-mono transition-colors ${
+                        className={`px-3 py-1.5 rounded-md text-xs font-mono font-semibold transition-all duration-200 border ${
                           filter === filterType
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            ? filterType === 'urgent' 
+                              ? 'bg-red-600/90 text-white border-red-500/50 shadow-lg'
+                              : filterType === 'normal'
+                              ? 'bg-blue-600/90 text-white border-blue-500/50 shadow-lg'
+                              : 'bg-gray-600/90 text-white border-gray-500/50 shadow-lg'
+                            : 'bg-gray-800/50 text-gray-400 border-gray-600/50 hover:bg-gray-700/50 hover:text-white hover:border-gray-500/50'
                         }`}
                       >
                         {filterType.toUpperCase()}
+                        {filter === filterType && (
+                          <span className="ml-1 text-xs opacity-75">●</span>
+                        )}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Messages List */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                {/* Enhanced Messages List */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-900/30">
                   <AnimatePresence>
                     {finalFilteredMessages.map((message) => (
                       <motion.div
@@ -277,32 +296,42 @@ export default function LiveComms({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
+                        className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 backdrop-blur-sm ${
                           message.isUrgent
-                            ? 'bg-red-900/30 border-red-500 hover:bg-red-900/50'
+                            ? 'bg-red-900/40 border-red-500/60 hover:bg-red-900/60 shadow-lg shadow-red-500/10'
                             : selectedCallsign === message.callsign
-                            ? 'bg-blue-900/30 border-blue-500 hover:bg-blue-900/50'
-                            : 'bg-gray-800/50 border-gray-600 hover:bg-gray-800/70'
+                            ? 'bg-blue-900/40 border-blue-500/60 hover:bg-blue-900/60 shadow-lg shadow-blue-500/10'
+                            : 'bg-gray-800/50 border-gray-600/50 hover:bg-gray-800/70 hover:border-gray-500/60'
                         }`}
                         onClick={() => onCallsignSelect(message.callsign)}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-white font-mono text-sm font-bold">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`font-mono text-sm font-bold tracking-wide ${
+                            message.isUrgent ? 'text-red-300' : 'text-white'
+                          }`}>
                             {message.callsign}
                           </span>
-                          <span className="text-gray-400 text-xs font-mono">
-                            {formatTime(message.timestamp)}
-                          </span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-gray-400 text-xs font-mono">
+                              {formatTime(message.timestamp)}
+                            </span>
+                            {message.isUrgent && (
+                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            )}
+                          </div>
                         </div>
                         
-                        <div className="text-gray-300 text-xs font-mono leading-relaxed">
+                        <div className={`text-xs font-mono leading-relaxed ${
+                          message.isUrgent ? 'text-red-200 font-medium' : 'text-gray-300'
+                        }`}>
                           {message.message}
                         </div>
                         
                         {message.isUrgent && (
-                          <div className="mt-2 flex items-center space-x-1">
-                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                            <span className="text-red-400 text-xs font-mono font-bold">URGENT</span>
+                          <div className="mt-2 flex items-center space-x-2">
+                            <span className="bg-red-600/80 text-white text-xs px-2 py-1 rounded-full font-mono font-bold tracking-wide">
+                              🚨 URGENT
+                            </span>
                           </div>
                         )}
                       </motion.div>
@@ -311,7 +340,18 @@ export default function LiveComms({
                   
                   {finalFilteredMessages.length === 0 && (
                     <div className="text-center text-gray-500 text-sm font-mono py-8">
-                      {filter === 'all' ? 'No communications yet...' : `No ${filter} messages`}
+                      <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-6">
+                        <div className="text-gray-400 mb-2">📡</div>
+                        <div className="font-semibold text-gray-400 mb-1">
+                          {filter === 'all' ? 'No communications yet...' : `No ${filter} messages`}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {filter === 'all' 
+                            ? 'Waiting for ATC transmissions' 
+                            : `Switch to "ALL" to see other message types`
+                          }
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -319,7 +359,7 @@ export default function LiveComms({
             )}
 
             {activeTab === 'microphone' && onMicrophoneTranscript && (
-              <div className="h-full p-3">
+              <div className="h-full p-4 bg-gray-900/30">
                 <MicrophoneDemo onTranscript={onMicrophoneTranscript} />
               </div>
             )}
@@ -327,11 +367,22 @@ export default function LiveComms({
         )}
       </AnimatePresence>
 
-      {/* Collapsed State */}
+      {/* Enhanced Collapsed State */}
       {isCollapsed && (
-        <div className="p-4 text-center">
-          <div className="text-gray-400 text-xs font-mono">
-            {activeTab === 'live' ? 'LIVE ATC' : 'MICROPHONE'} COLLAPSED
+        <div className="p-4 text-center bg-gray-800/20">
+          <div className="flex items-center justify-center space-x-2">
+            {activeTab === 'live' ? (
+              <>
+                <RadioIcon className="w-4 h-4 text-blue-400" />
+                <span className="text-blue-400 text-xs font-mono font-semibold">LIVE ATC</span>
+              </>
+            ) : (
+              <>
+                <MicrophoneIcon className="w-4 h-4 text-green-400" />
+                <span className="text-green-400 text-xs font-mono font-semibold">MICROPHONE</span>
+              </>
+            )}
+            <span className="text-gray-500 text-xs font-mono">COLLAPSED</span>
           </div>
         </div>
       )}

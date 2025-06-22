@@ -5,12 +5,16 @@ import asyncio
 import json
 import os
 import shutil
+import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 from datetime import datetime
 import uuid
+
+# Add src directory to path for Letta service
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from .config import get_settings, validate_settings
 from .utils.logging import setup_logging, get_logger
@@ -19,6 +23,13 @@ from .core.audio import AudioProcessor
 from .core.transcription import TranscriptionService
 from .agents.atc_agent import ATCAgent
 from .agents.vapi_voice_agent import VAPIVoiceAgent
+
+try:
+    from letta_service import init_letta_agent, get_letta_agent
+except ImportError:
+    print("Warning: Letta service not available. Shift handover features will be disabled.")
+    init_letta_agent = None
+    get_letta_agent = None
 
 # Global services
 audio_processor = None
@@ -153,6 +164,40 @@ def add_message(transcript: str, atc_data: Dict[str, Any], chunk_number: int):
     save_messages(messages)
     
     logger.info(f"💬 Added meaningful message to JSON file. Total: {len(messages)}")
+    
+    # Auto-update Letta with new message if available
+    try:
+        if get_letta_agent:
+            agent = get_letta_agent()
+            if agent:
+                # Create a real-time update for Letta
+                update_message = f"""
+📡 **LIVE ATC UPDATE** - {datetime.now().strftime('%H:%M:%S')}
+
+**Callsign**: {primary_callsign}
+**Message**: {transcript}
+**Urgency**: {'🚨 URGENT' if message['isUrgent'] else '✅ Normal'}
+**Instructions**: {', '.join(message['instructions']) if message['instructions'] else 'None'}
+**Runways**: {', '.join(message['runways']) if message['runways'] else 'None'}
+
+This is a live update from the ATC communications system. Please incorporate this information into your ongoing shift awareness.
+"""
+                
+                from letta_service import MessageCreate, TextContent
+                agent.client.agents.messages.create(
+                    agent_id=agent.agent_id,
+                    messages=[MessageCreate(
+                        role="user",
+                        content=[TextContent(
+                            type="text",
+                            text=update_message
+                        )]
+                    )]
+                )
+                logger.info(f"🤖 Auto-updated Letta with new message: {primary_callsign}")
+    except Exception as e:
+        logger.debug(f"⚠️ Could not auto-update Letta: {e}")
+    
     return message
 
 
@@ -192,6 +237,19 @@ async def lifespan(app: FastAPI):
         logger.info("✅ VAPI Voice Agent initialized")
     else:
         logger.warning("⚠️ VAPI not configured - emergency calling disabled")
+    
+    # Initialize Letta agent if API key is configured
+    if hasattr(settings, 'letta_api_key') and settings.letta_api_key and init_letta_agent:
+        try:
+            init_letta_agent(settings.letta_api_key)
+            logger.info("✅ Letta Shift Agent initialized")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize Letta agent: {e}")
+    else:
+        if not init_letta_agent:
+            logger.warning("⚠️ Letta service not available - shift summaries disabled")
+        else:
+            logger.warning("⚠️ Letta not configured - shift summaries disabled")
     
     # Add initial system message (allow system messages through)
     system_message = {
@@ -253,8 +311,26 @@ async def start_audio_processing(settings):
     try:
         connection_manager = get_connection_manager()
         
+        # Auto-load existing data into Letta on startup if available
+        try:
+            if get_letta_agent:
+                agent = get_letta_agent()
+                if agent:
+                    logger.info("🤖 Auto-loading existing ATC data into Letta...")
+                    comprehensive_data = agent.load_comprehensive_data(MESSAGES_FILE)
+                    agent.update_comprehensive_memory(comprehensive_data)
+                    logger.info(f"✅ Loaded {comprehensive_data.get('total_messages', 0)} existing messages into Letta")
+        except Exception as e:
+            logger.debug(f"⚠️ Could not auto-load data into Letta: {e}")
+        
+        # Counter for periodic comprehensive updates
+        chunk_counter = 0
+        
         async def process_chunk(audio_chunk: bytes, chunk_number: int):
             """Process each audio chunk"""
+            nonlocal chunk_counter
+            chunk_counter += 1
+            
             logger.info(f"🎯 Processing chunk #{chunk_number}")
             
             # Transcribe audio using Groq Whisper
@@ -266,7 +342,7 @@ async def start_audio_processing(settings):
                 # Process with ATC language agent
                 atc_result = await atc_agent.process_transcript(transcript, "LIVE_ATC")
                 
-                # Add to message store only if meaningful
+                # Add to message store only if meaningful (this will auto-update Letta)
                 message = add_message(transcript, atc_result, chunk_number)
                 
                 if message:  # Only process if message was actually added
@@ -301,6 +377,45 @@ async def start_audio_processing(settings):
                     logger.debug("🚫 Transcript filtered out as meaningless")
             else:
                 logger.debug("❌ No meaningful transcription")
+            
+            # Periodic comprehensive update to Letta every 50 chunks (~4-5 minutes)
+            if chunk_counter % 50 == 0:
+                try:
+                    if get_letta_agent:
+                        agent = get_letta_agent()
+                        if agent:
+                            logger.info("🔄 Performing periodic comprehensive Letta update...")
+                            comprehensive_data = agent.load_comprehensive_data(MESSAGES_FILE)
+                            
+                            # Send a summary update instead of full reload
+                            summary_update = f"""
+🔄 **PERIODIC SHIFT UPDATE** - {datetime.now().strftime('%H:%M:%S')}
+
+📊 **Current Status:**
+- Total messages processed: {comprehensive_data.get('total_messages', 0)}
+- Active callsigns: {len(comprehensive_data.get('callsigns', []))}
+- Urgent messages: {len(comprehensive_data.get('urgent_messages', []))}
+- Active runways: {', '.join(comprehensive_data.get('runway_activity', [])) or 'None'}
+
+📡 **Recent Activity:** {len([msg for msg in comprehensive_data.get('full_messages', [])[:10]])} messages in last batch
+
+This is an automated shift status update to keep you current with ongoing operations.
+"""
+                            
+                            from letta_service import MessageCreate, TextContent
+                            agent.client.agents.messages.create(
+                                agent_id=agent.agent_id,
+                                messages=[MessageCreate(
+                                    role="user",
+                                    content=[TextContent(
+                                        type="text",
+                                        text=summary_update
+                                    )]
+                                )]
+                            )
+                            logger.info("✅ Completed periodic Letta update")
+                except Exception as e:
+                    logger.debug(f"⚠️ Periodic Letta update failed: {e}")
         
         # Start live audio streaming with processing
         logger.info("🎵 Starting live audio stream...")
@@ -570,83 +685,267 @@ async def get_messages_json():
 
 @app.post("/api/v1/emergency/process-data")
 async def process_emergency_data_for_vapi(data: dict):
-    """
-    VAPI function endpoint - Process emergency data for voice communication
-    """
-    try:
-        action = data.get("action", "format_emergency")
-        emergency_type = data.get("emergency_type", "unknown")
-        detail_type = data.get("detail_type", "all")
-        format_style = data.get("format_style", "brief")
-        
-        # Get emergency data from global context or load recent emergency
-        messages = load_messages()
-        recent_emergency = None
-        
-        # Find most recent emergency message
-        for msg in messages:
-            if msg.get("isUrgent") or msg.get("type") == "emergency":
-                recent_emergency = msg
-                break
-        
-        if not recent_emergency and emergency_type != "unknown":
-            # Create mock emergency data for function testing
-            recent_emergency = {
-                "airport_code": "KSFO",
-                "emergency_type": emergency_type,
-                "location": "Terminal Area",
-                "urgency_level": "high",
-                "timestamp": datetime.now().isoformat()
-            }
-        
-        result = {}
-        
-        if action == "format_emergency":
-            if recent_emergency:
-                airport = recent_emergency.get("airport_code", "Unknown Airport")
-                location = recent_emergency.get("location", "Unknown Location")
-                urgency = recent_emergency.get("urgency_level", "medium")
-                
-                if format_style == "urgent":
-                    result["formatted_text"] = f"URGENT: {emergency_type} emergency at {airport}, {location}. This is a {urgency} priority situation requiring immediate response."
-                elif format_style == "detailed":
-                    details = recent_emergency.get("atc_data", {}).get("details", {})
-                    result["formatted_text"] = f"Emergency report for {airport}: {emergency_type} at {location}. Urgency level: {urgency}. Additional details: {details}"
-                else:  # brief
-                    result["formatted_text"] = f"{emergency_type} emergency at {airport}, {location}. Priority: {urgency}."
-            else:
-                result["formatted_text"] = f"No active emergency data available for {emergency_type} emergency."
-        
-        elif action == "get_details":
-            if recent_emergency and detail_type in recent_emergency:
-                result["detail_value"] = recent_emergency[detail_type]
-                result["detail_text"] = f"The {detail_type} is: {recent_emergency[detail_type]}"
-            else:
-                result["detail_text"] = f"No {detail_type} information available."
-        
-        elif action == "check_status":
-            # Check if there are any active emergencies
-            emergency_count = sum(1 for msg in messages[:10] if msg.get("isUrgent"))
-            result["status"] = "active" if emergency_count > 0 else "clear"
-            result["status_text"] = f"Currently {emergency_count} active emergency situations."
-        
-        elif action == "escalate":
-            result["escalation_text"] = f"Escalating {emergency_type} emergency. Notifying additional emergency services."
-            result["escalated"] = True
-        
-        return {
-            "success": True,
-            "action": action,
+    """Process emergency data and return formatted structure for VAPI calls"""
+    # Extract emergency information from the input data
+    aircraft_id = data.get("aircraft_id", "Unknown")
+    emergency_type = data.get("emergency_type", "Unknown Emergency")
+    location = data.get("location", "Unknown Location")
+    details = data.get("details", "No additional details")
+    
+    # Format emergency message
+    emergency_message = f"""
+    EMERGENCY ALERT: {emergency_type}
+    Aircraft: {aircraft_id}
+    Location: {location}
+    Details: {details}
+    Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+    
+    This is an automated emergency notification from the ATC Audio Agent system.
+    Please respond immediately and coordinate with airport emergency services.
+    """.strip()
+    
+    # Return formatted data for VAPI
+    return {
+        "emergency_data": {
+            "aircraft_id": aircraft_id,
             "emergency_type": emergency_type,
-            "result": result,
-            "timestamp": datetime.now().isoformat()
+            "location": location,
+            "details": details,
+            "emergency_message": emergency_message,
+            "timestamp": datetime.now().isoformat(),
+            "priority": "high"
+        },
+        "call_data": {
+            "message": emergency_message,
+            "urgency": "immediate",
+            "requires_response": True
         }
-        
+    }
+
+
+# === LETTA SHIFT HANDOVER ENDPOINTS ===
+
+@app.post("/api/v1/letta/init")
+async def initialize_letta_agent(data: dict):
+    """Initialize Letta agent with API key"""
+    if not init_letta_agent:
+        raise HTTPException(status_code=503, detail="Letta service not available")
+    
+    api_key = data.get("api_key")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="api_key is required")
+    
+    try:
+        init_letta_agent(api_key)
+        return {"status": "success", "message": "Letta agent initialized"}
     except Exception as e:
-        logger.error(f"Error processing VAPI emergency data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to initialize Letta agent: {str(e)}")
+
+
+@app.post("/api/v1/letta/load-events")
+async def load_todays_events():
+    """Load today's events from messages.json into Letta memory"""
+    if not get_letta_agent:
+        raise HTTPException(status_code=503, detail="Letta service not available")
+    
+    agent = get_letta_agent()
+    if not agent:
+        raise HTTPException(status_code=503, detail="Letta agent not initialized")
+    
+    try:
+        events = agent.load_todays_messages(MESSAGES_FILE)
+        agent.update_agent_memory(events)
+        
         return {
-            "success": False,
-            "error": str(e),
-            "fallback_text": "Emergency data processing unavailable. Please proceed with manual communication.",
-            "timestamp": datetime.now().isoformat()
-        } 
+            "status": "success", 
+            "events_loaded": len(events),
+            "events": [
+                {
+                    "timestamp": event.timestamp,
+                    "callsign": event.callsign,
+                    "summary": event.summary,
+                    "urgency": event.urgency
+                } for event in events[:10]  # Return first 10 for preview
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load events: {str(e)}")
+
+
+@app.post("/api/v1/letta/add-note")
+async def add_manual_note(data: dict):
+    """Add manual note to Letta agent memory"""
+    if not get_letta_agent:
+        raise HTTPException(status_code=503, detail="Letta service not available")
+    
+    agent = get_letta_agent()
+    if not agent:
+        raise HTTPException(status_code=503, detail="Letta agent not initialized")
+    
+    note = data.get("note")
+    category = data.get("category", "general")
+    
+    if not note:
+        raise HTTPException(status_code=400, detail="note is required")
+    
+    try:
+        agent.add_manual_note(note, category)
+        return {"status": "success", "message": "Note added to agent memory"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add note: {str(e)}")
+
+
+@app.get("/api/v1/letta/shift-summary")
+async def get_shift_summary(shift_type: str = "handover"):
+    """Generate comprehensive shift summary"""
+    if not get_letta_agent:
+        raise HTTPException(status_code=503, detail="Letta service not available")
+    
+    agent = get_letta_agent()
+    if not agent:
+        raise HTTPException(status_code=503, detail="Letta agent not initialized")
+    
+    try:
+        summary = agent.generate_shift_summary(shift_type)
+        patterns = agent.get_shift_patterns()
+        
+        return {
+            "summary": summary,
+            "patterns": patterns,
+            "generated_at": datetime.now().isoformat(),
+            "shift_type": shift_type
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate summary: {str(e)}")
+
+
+@app.get("/api/v1/letta/patterns")
+async def get_shift_patterns():
+    """Get shift patterns analysis"""
+    if not get_letta_agent:
+        raise HTTPException(status_code=503, detail="Letta service not available")
+    
+    agent = get_letta_agent()
+    if not agent:
+        raise HTTPException(status_code=503, detail="Letta agent not initialized")
+    
+    try:
+        patterns = agent.get_shift_patterns()
+        return patterns
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get patterns: {str(e)}")
+
+
+@app.get("/api/v1/letta/status")
+async def get_letta_status():
+    """Get Letta agent status"""
+    if not get_letta_agent:
+        return {"status": "not_available", "agent_available": False, "message": "Letta service not installed"}
+    
+    agent = get_letta_agent()
+    if not agent:
+        return {"status": "not_initialized", "agent_available": False}
+    
+    try:
+        return {
+            "status": "active",
+            "agent_available": True,
+            "agent_id": agent.agent_id,
+            "initialized": True
+        }
+    except Exception as e:
+        return {"status": "error", "agent_available": False, "error": str(e)}
+
+
+@app.post("/api/v1/letta/load-comprehensive")
+async def load_comprehensive_data():
+    """Load comprehensive shift data including full messages and context"""
+    if not get_letta_agent:
+        raise HTTPException(status_code=503, detail="Letta service not available")
+    
+    agent = get_letta_agent()
+    if not agent:
+        raise HTTPException(status_code=503, detail="Letta agent not initialized")
+    
+    try:
+        comprehensive_data = agent.load_comprehensive_data(MESSAGES_FILE)
+        agent.update_comprehensive_memory(comprehensive_data)
+        
+        return {
+            "status": "success",
+            "data": {
+                "shift_date": comprehensive_data.get("shift_date"),
+                "total_messages": comprehensive_data.get("total_messages", 0),
+                "active_callsigns": comprehensive_data.get("callsigns", []),
+                "urgent_count": len(comprehensive_data.get("urgent_messages", [])),
+                "runway_activity": comprehensive_data.get("runway_activity", []),
+                "instruction_types": comprehensive_data.get("instruction_types", []),
+                "recent_messages": comprehensive_data.get("full_messages", [])[:5]  # Last 5 for preview
+            },
+            "message": "Comprehensive data loaded into agent memory"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load comprehensive data: {str(e)}")
+
+
+@app.get("/api/v1/letta/markdown-summary")
+async def get_markdown_summary(shift_type: str = "handover", include_weather: bool = True):
+    """Generate comprehensive markdown-style shift summary"""
+    if not get_letta_agent:
+        raise HTTPException(status_code=503, detail="Letta service not available")
+    
+    agent = get_letta_agent()
+    if not agent:
+        raise HTTPException(status_code=503, detail="Letta agent not initialized")
+    
+    try:
+        markdown_summary = agent.generate_markdown_summary(shift_type, include_weather)
+        patterns = agent.get_shift_patterns()
+        
+        return {
+            "summary": markdown_summary,
+            "patterns": patterns,
+            "generated_at": datetime.now().isoformat(),
+            "shift_type": shift_type,
+            "format": "markdown"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate markdown summary: {str(e)}")
+
+
+@app.get("/api/v1/letta/comprehensive-status")
+async def get_comprehensive_status():
+    """Get comprehensive status of shift data and agent"""
+    if not get_letta_agent:
+        return {"status": "not_available", "agent_available": False, "message": "Letta service not installed"}
+    
+    agent = get_letta_agent()
+    if not agent:
+        return {"status": "not_initialized", "agent_available": False}
+    
+    try:
+        # Get current data overview
+        comprehensive_data = agent.load_comprehensive_data(MESSAGES_FILE)
+        
+        return {
+            "status": "active",
+            "agent_available": True,
+            "agent_id": agent.agent_id,
+            "shift_overview": {
+                "date": comprehensive_data.get("shift_date"),
+                "total_messages": comprehensive_data.get("total_messages", 0),
+                "active_callsigns": len(comprehensive_data.get("callsigns", [])),
+                "urgent_messages": len(comprehensive_data.get("urgent_messages", [])),
+                "runway_activity": comprehensive_data.get("runway_activity", []),
+                "last_update": comprehensive_data.get("analysis_timestamp")
+            },
+            "capabilities": [
+                "Comprehensive data loading",
+                "Markdown summary generation", 
+                "Pattern analysis",
+                "Weather integration",
+                "Manual note management"
+            ]
+        }
+    except Exception as e:
+        return {"status": "error", "agent_available": False, "error": str(e)} 
