@@ -14,6 +14,194 @@ from groq import Groq
 
 logger = logging.getLogger(__name__)
 
+class ATCPhraseologyFormatter:
+    """
+    Prompt Engineer Layer: Cleans up garbled Whisper transcriptions 
+    and formats them as proper ATC communications
+    """
+    
+    def __init__(self, groq_api_key: str, model: str = "llama3-70b-8192"):
+        self.client = Groq(api_key=groq_api_key)
+        self.model = model
+        self.stats = {
+            "processed_transcripts": 0,
+            "cleaned_transcripts": 0,
+            "start_time": datetime.now()
+        }
+        
+        logger.info(f"Initialized ATC Phraseology Formatter with model: {model}")
+    
+    async def format_transcript(self, raw_transcript: str, frequency: str = "unknown") -> Dict[str, Any]:
+        """
+        Clean up and format a raw Whisper transcript as proper ATC communication
+        
+        Args:
+            raw_transcript: Raw, potentially garbled Whisper output
+            frequency: Radio frequency/tower identifier
+            
+        Returns:
+            Dict with cleaned transcript and confidence
+        """
+        try:
+            self.stats["processed_transcripts"] += 1
+            
+            if not raw_transcript.strip():
+                return {
+                    "original": raw_transcript,
+                    "formatted": "",
+                    "confidence": 0.0,
+                    "changes_made": []
+                }
+            
+            # Use Groq to clean up the transcript
+            formatted_result = await self._format_with_groq(raw_transcript, frequency)
+            
+            # Track if significant cleaning was done
+            if formatted_result.get("formatted", "").strip() != raw_transcript.strip():
+                self.stats["cleaned_transcripts"] += 1
+            
+            return formatted_result
+            
+        except Exception as e:
+            logger.error(f"Error formatting transcript: {e}")
+            return {
+                "original": raw_transcript,
+                "formatted": raw_transcript,  # Fallback to original
+                "confidence": 0.5,
+                "error": str(e),
+                "changes_made": []
+            }
+    
+    async def _format_with_groq(self, raw_transcript: str, frequency: str) -> Dict[str, Any]:
+        """Use Groq to clean up and format the transcript as proper ATC communication"""
+        
+        prompt = f"""
+You are an expert ATC communications formatter for San Francisco International Airport (KSFO). Your job is to take potentially garbled or unclear Whisper transcriptions and convert them into proper, realistic ATC phraseology.
+
+IMPORTANT: Even if the input is garbled, you should produce a realistic ATC communication that makes sense in the KSFO context. Never output nonsense - always make educated guesses to create proper ATC phraseology.
+
+Raw Whisper Transcript: "{raw_transcript}"
+Frequency: {frequency}
+
+KSFO CONTEXT:
+- Primary runways: 28L/R (arrivals), 01L/R (departures) in normal ops
+- Common airlines: United, Southwest, American, Delta, Alaska, international carriers
+- Typical operations: Takeoff clearances, landing clearances, taxi instructions, frequency changes
+
+COMMON WHISPER ERRORS TO FIX:
+- "run made 23" → "runway 28L" or appropriate runway
+- "united two nine seven heavy" → "United 297 Heavy"
+- "clear to land run way two eight left" → "cleared to land runway 28L"
+- "taxi to gate a twelve" → "taxi to gate A12"
+- "contact departure one two zero point nine" → "contact departure 120.9"
+- "line up and weight" → "line up and wait"
+- "take off cleared" → "cleared for takeoff"
+- "american twelve thirty four" → "American 1234"
+- "ground point eight" → "ground point eight" (121.8)
+- Numbers: "tree" → "three", "fife" → "five", "niner" → "nine"
+
+KSFO-SPECIFIC CORRECTIONS:
+- "twenty eight left" → "28L"
+- "twenty eight right" → "28R" 
+- "zero one left" → "01L"
+- "zero one right" → "01R"
+- "taxi a" → "taxi via Alpha"
+- "taxi b" → "taxi via Bravo"
+- "taxi z" → "taxi via Zulu"
+- "international terminal" → "International Terminal A" or "International Terminal G"
+- "terminal tree" → "Terminal 3"
+
+FORMATTING RULES:
+1. Always use proper callsigns (e.g., "United 297", "American 1234")
+2. Use standard runway designations (28L, 28R, 01L, 01R)
+3. Include "Heavy" designation for wide-body aircraft
+4. Use proper ATC phraseology: "cleared to land", "cleared for takeoff", "line up and wait"
+5. Format frequencies properly: "contact departure 120.9", "ground point eight"
+6. Use standard taxi phraseology: "taxi via Alpha", "hold short runway 28R"
+7. If unclear, make reasonable assumptions based on KSFO operations
+
+EXAMPLES:
+Input: "run made 23 clear land"
+Output: "runway 28L cleared to land"
+
+Input: "united two nine seven heavy contact ground"
+Output: "United 297 Heavy contact ground"
+
+Input: "american twelve tree four taxi gate a twelve"
+Output: "American 1234 taxi to gate A12"
+
+Return a JSON object:
+{{
+    "original": "{raw_transcript}",
+    "formatted": "properly formatted ATC communication",
+    "confidence": 0.8,
+    "changes_made": ["list of specific corrections made"],
+    "reasoning": "brief explanation of corrections"
+}}
+
+CRITICAL: Never output gibberish. Always produce realistic ATC phraseology that would make sense at KSFO, even if you have to guess the intended meaning. Better to make an educated guess than output nonsense.
+
+Return ONLY the JSON object, no other text.
+"""
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1,
+                max_tokens=500
+            )
+            
+            # Parse the JSON response
+            json_text = response.choices[0].message.content.strip()
+            
+            # Clean up the response if it has markdown formatting
+            if json_text.startswith("```"):
+                json_text = re.sub(r'^```json\s*', '', json_text)
+                json_text = re.sub(r'\s*```$', '', json_text)
+            
+            result = json.loads(json_text)
+            
+            # Ensure we have all required fields
+            result.setdefault("original", raw_transcript)
+            result.setdefault("formatted", raw_transcript)
+            result.setdefault("confidence", 0.5)
+            result.setdefault("changes_made", [])
+            
+            return result
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse formatter JSON response: {e}")
+            return {
+                "original": raw_transcript,
+                "formatted": raw_transcript,
+                "confidence": 0.5,
+                "error": "Failed to parse AI response",
+                "changes_made": []
+            }
+        except Exception as e:
+            logger.error(f"Groq API error in formatter: {e}")
+            return {
+                "original": raw_transcript,
+                "formatted": raw_transcript,
+                "confidence": 0.5,
+                "error": str(e),
+                "changes_made": []
+            }
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get formatting statistics"""
+        runtime = datetime.now() - self.stats["start_time"]
+        return {
+            "processed_transcripts": self.stats["processed_transcripts"],
+            "cleaned_transcripts": self.stats["cleaned_transcripts"],
+            "cleanup_rate": (
+                self.stats["cleaned_transcripts"] / max(1, self.stats["processed_transcripts"])
+            ),
+            "start_time": self.stats["start_time"].isoformat(),
+            "runtime_seconds": runtime.total_seconds()
+        }
+
 class ATCLanguageAgent:
     """AI Agent that processes ATC transcriptions and extracts structured aviation data"""
     
@@ -381,42 +569,66 @@ Return ONLY the JSON object, no other text.
 
 # Integration with audio pipeline
 class ATCTranscriptProcessor:
-    """Processes audio transcripts through the ATC Language Agent"""
+    """Processes audio transcripts through the ATC Phraseology Formatter and Language Agent"""
     
     def __init__(self, groq_api_key: str):
+        self.phraseology_formatter = ATCPhraseologyFormatter(groq_api_key)
         self.atc_agent = ATCLanguageAgent(groq_api_key)
         self.processed_data = []
         
+        logger.info("Initialized ATC processing pipeline: Formatter → Language Agent")
+        
     async def process_audio_transcript(self, transcript_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process a transcript from the audio pipeline"""
+        """Process a transcript from the audio pipeline through the complete ATC processing chain"""
         try:
             # Extract the text and metadata
-            text = transcript_data.get("text", "")
+            raw_text = transcript_data.get("text", "")
             frequency = transcript_data.get("frequency", "unknown")
             
-            if not text.strip():
+            if not raw_text.strip():
                 return {"error": "Empty transcript", "original": transcript_data}
             
-            # Process with ATC agent
-            structured_data = await self.atc_agent.process_transcript(text, frequency)
+            logger.info(f"🎯 Processing: '{raw_text}'")
             
-            # Combine with original transcript metadata
+            # Step 1: Format/clean the raw transcript 
+            logger.info("📝 Formatting with ATC Phraseology Formatter...")
+            formatting_result = await self.phraseology_formatter.format_transcript(raw_text, frequency)
+            
+            formatted_text = formatting_result.get("formatted", raw_text)
+            
+            # Log what the formatter did
+            if formatting_result.get("changes_made"):
+                logger.info(f"✨ Formatter corrections: {formatting_result['changes_made']}")
+                logger.info(f"📞 Formatted: '{formatted_text}'")
+            else:
+                logger.info("✅ No formatting changes needed")
+            
+            # Step 2: Process the formatted transcript with ATC Language Agent
+            logger.info("🤖 Analyzing with ATC Language Agent...")
+            structured_data = await self.atc_agent.process_transcript(formatted_text, frequency)
+            
+            # Combine all results
             result = {
                 **transcript_data,  # Original audio metadata
-                "atc_analysis": structured_data,
-                "processed_at": datetime.now().isoformat()
+                "formatting": formatting_result,  # Formatter results
+                "atc_analysis": structured_data,   # Language agent results
+                "processed_at": datetime.now().isoformat(),
+                "pipeline_version": "formatter_v1"
             }
             
             # Store for analysis
             self.processed_data.append(result)
             
-            logger.info(f"ATC Analysis - Callsigns: {len(structured_data.get('callsigns', []))}, "
-                       f"Instructions: {len(structured_data.get('instructions', []))}")
+            # Log final results
+            if "callsigns" in structured_data:
+                callsigns = [cs.get("callsign", "Unknown") for cs in structured_data.get("callsigns", [])]
+                instructions = len(structured_data.get("instructions", []))
+                logger.info(f"🛩️  Final Analysis - Callsigns: {callsigns}, Instructions: {instructions}")
             
             return result
             
         except Exception as e:
-            logger.error(f"Error in transcript processor: {e}")
+            logger.error(f"Error in transcript processor pipeline: {e}")
             return {"error": str(e), "original": transcript_data}
     
     def get_recent_data(self, limit: int = 10) -> List[Dict[str, Any]]:
@@ -424,55 +636,115 @@ class ATCTranscriptProcessor:
         return self.processed_data[-limit:]
     
     def get_agent_stats(self) -> Dict[str, Any]:
-        """Get ATC agent statistics"""
-        return self.atc_agent.get_stats()
+        """Get combined statistics from both components"""
+        formatter_stats = self.phraseology_formatter.get_stats()
+        agent_stats = self.atc_agent.get_stats()
+        
+        return {
+            "formatter": formatter_stats,
+            "language_agent": agent_stats,
+            "pipeline": {
+                "total_processed": len(self.processed_data),
+                "components": ["ATCPhraseologyFormatter", "ATCLanguageAgent"]
+            }
+        }
 
 # Example usage and testing
 if __name__ == "__main__":
-    async def test_atc_agent():
-        """Test the ATC Language Agent"""
+    async def test_atc_pipeline():
+        """Test the complete ATC processing pipeline with garbled transcripts"""
         groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
             raise ValueError("GROQ_API_KEY environment variable required")
         
-        # Test transcripts
+        # Test transcripts - mix of clean and garbled Whisper output
         test_transcripts = [
+            # Clean transcripts
             "United 297 heavy runway 28R cleared to land",
-            "Emirates 225 heavy contact SFO ground point eight",
-            "Alaska 567 taxi to gate A12 via taxiway A, hold short runway 01L",
             "American 1234 runway 01R cleared for takeoff",
-            "Singapore 2 heavy line up and wait runway 28L",
-            "Lufthansa 441 contact departure, good day"
+            
+            # Garbled transcripts that need cleaning
+            "run made 23 clear land",  # Should become runway 28L cleared to land
+            "united two nine seven heavy contact ground",  # Should format properly
+            "american twelve tree four taxi gate a twelve",  # Numbers and gate formatting
+            "line up and weight run way two eight left",  # Common phraseology errors
+            "take off cleared zero one right",  # Word order and runway format
+            "emirates two two five heavy contact departure one two zero point niner",  # Frequency formatting
+            "delta five six seven taxi via a hold short run way two eight right",  # Multiple formatting issues
+            "singapore two taxi to international terminal",  # Terminal assignment
         ]
         
         processor = ATCTranscriptProcessor(groq_api_key)
         
+        print("🎧 ATC PHRASEOLOGY FORMATTER + LANGUAGE AGENT TEST")
+        print("=" * 80)
+        
         for i, transcript in enumerate(test_transcripts):
             print(f"\n--- Test {i+1} ---")
-            print(f"Input: {transcript}")
+            print(f"🎤 Raw Input:  '{transcript}'")
             
             # Simulate transcript data from audio pipeline
             transcript_data = {
                 "text": transcript,
-                "frequency": "KEWR_TWR",
+                "frequency": "KSFO_TWR",
                 "timestamp": datetime.now().isoformat(),
-                "chunk": i+1
+                "chunk": i+1,
+                "engine": "groq_whisper"
             }
             
             result = await processor.process_audio_transcript(transcript_data)
             
+            # Show formatter results
+            if "formatting" in result:
+                formatting = result["formatting"]
+                formatted_text = formatting.get("formatted", transcript)
+                changes = formatting.get("changes_made", [])
+                confidence = formatting.get("confidence", 0)
+                
+                print(f"📝 Formatted:  '{formatted_text}' (confidence: {confidence:.1f})")
+                if changes:
+                    print(f"✨ Changes:    {', '.join(changes)}")
+            
+            # Show language agent results
             if "atc_analysis" in result:
                 analysis = result["atc_analysis"]
-                print(f"Callsigns: {analysis.get('callsigns', [])}")
-                print(f"Instructions: {analysis.get('instructions', [])}")
-                print(f"Runways: {analysis.get('runways', [])}")
-                print(f"Summary: {analysis.get('summary', 'N/A')}")
-            else:
-                print(f"Error: {result.get('error', 'Unknown error')}")
+                callsigns = analysis.get('callsigns', [])
+                instructions = analysis.get('instructions', [])
+                runways = analysis.get('runways', [])
+                summary = analysis.get('summary', '')
+                
+                print(f"🛩️  Callsigns:  {[cs.get('callsign', 'Unknown') for cs in callsigns]}")
+                print(f"📋 Instructions: {[inst.get('type', 'Unknown') for inst in instructions]}")
+                print(f"🛬 Runways:    {runways}")
+                if summary:
+                    print(f"📄 Summary:    {summary}")
+            
+            if "error" in result:
+                print(f"❌ Error:      {result['error']}")
         
-        # Print statistics
-        print(f"\n--- Statistics ---")
+        # Print comprehensive statistics
+        print(f"\n{'='*80}")
+        print("📊 PIPELINE STATISTICS")
+        print("=" * 80)
         stats = processor.get_agent_stats()
-        print(json.dumps(stats, indent=2))
+        
+        formatter_stats = stats.get("formatter", {})
+        agent_stats = stats.get("language_agent", {})
+        pipeline_stats = stats.get("pipeline", {})
+        
+        print(f"\n🔧 Phraseology Formatter:")
+        print(f"   Processed: {formatter_stats.get('processed_transcripts', 0)}")
+        print(f"   Cleaned: {formatter_stats.get('cleaned_transcripts', 0)}")
+        print(f"   Cleanup Rate: {formatter_stats.get('cleanup_rate', 0):.1%}")
+        
+        print(f"\n🤖 Language Agent:")
+        print(f"   Processed: {agent_stats.get('processed_transcripts', 0)}")
+        print(f"   Callsigns Extracted: {agent_stats.get('extracted_callsigns', 0)}")
+        print(f"   Instructions Extracted: {agent_stats.get('extracted_instructions', 0)}")
+        print(f"   Avg Callsigns/Transcript: {agent_stats.get('avg_callsigns_per_transcript', 0):.1f}")
+        
+        print(f"\n🔄 Pipeline:")
+        print(f"   Total Processed: {pipeline_stats.get('total_processed', 0)}")
+        print(f"   Components: {' → '.join(pipeline_stats.get('components', []))}")
     
-    asyncio.run(test_atc_agent()) 
+    asyncio.run(test_atc_pipeline()) 

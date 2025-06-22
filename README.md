@@ -1,265 +1,91 @@
-# 🎯 AI Berkeley 2025 - ATC Audio Agent
+# 🛩️ MayDay - ATC Intelligence Platform
 
-**Real-time ATC audio transcription and analysis system powered by AI**
+**Real-time Air Traffic Control monitoring with AI-powered transcription, analysis, and emergency detection**
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15+-black.svg)](https://nextjs.org)
-[![Groq](https://img.shields.io/badge/Groq-API-orange.svg)](https://groq.com)
+[![Fetch.ai](https://img.shields.io/badge/Fetch.ai-Agents-purple.svg)](https://fetch.ai)
 
 ## 🚀 Quick Start
 
-### 1. Get API Keys
-```bash
-# Required: Groq API (free tier available)
-# Get from: https://console.groq.com/keys
+### Prerequisites
+# Required system dependencies
+sudo apt-get install ffmpeg  # Linux
+brew install ffmpeg          # macOS
 
-# Required: FlightRadar24 API (subscription required)
-# Get from: https://fr24api.flightradar24.com/
-# Plans: Explorer ($19/month), Essential ($99/month), Advanced ($499/month)
-# Note: The project uses official FR24 API endpoints with proper authentication
-```
+## 🏗️ Architecture
 
-### 2. Configure Environment Variables
-```bash
-# There is only ONE .env file at the root directory
-# No .env files in fe/ or be/ subdirectories
+**Multi-Agent System** (Powered by Fetch.ai)
+- **Transcriber Agent** - Converts live ATC audio to text using ATC-optimized Whisper
+- **ATC Parser Agent** - Extracts callsigns, instructions, and aviation data
+- **Emergency Agent** - Detects anomalies, mayday calls, and safety events  
+- **VAPI Voice Agent** - Handles emergency dispatch calls when approved by controllers
+- **Letta Memory Agent** - Maintains context and generates shift handover summaries
 
-# Update your .env file with the working FlightRadar24 API key:
-# NEXT_PUBLIC_FLIGHTRADAR24_API_KEY=01979748-42e7-71ee-a582-73aa21f2b5df|EuLNvcXiLkYRiiWp9qQNdO0mx55LA8Hy0dohX8E0d11997e4
+**Data Sources**
+- LiveATC.net - Real-time ATC audio streams
+- FlightRadar24 - Live aircraft positions and flight data
 
-# The single root .env file is read by:
-# - Frontend: via symlink fe/.env.local -> ../.env  
-# - Backend: via load_dotenv(PROJECT_ROOT / '.env')
-# - All scripts: automatically detect root .env
-```
-
-### 3. FlightRadar24 API Setup
-The project now uses the **official FlightRadar24 API** with proper authentication:
-
-- **Endpoint**: `https://fr24api.flightradar24.com/api/live/flight-positions/light`
-- **Authentication**: Bearer token
-- **Rate limits**: Based on subscription plan
-- **Caching**: 30 second cache to minimize API calls
-- **Error handling**: Graceful fallback with proper error messages
-
-**API Plans:**
-- **Explorer**: $19/month - 10K credits/month
-- **Essential**: $99/month - 100K credits/month  
-- **Advanced**: $499/month - 1M credits/month
-
-**Credits Usage:**
-- Live flight positions: ~1-5 credits per request
-- Request frequency: Every 30 seconds (when page visible)
-- SF Bay Area filter: Reduces data transfer costs
-
-### 4. Run the Application
-```bash
-# 1. Clone and enter directory
-git clone <repo-url>
-cd ai-berkeley-2025
-
-# 2. One-command setup
-python setup.py
-
-# 3. Run the full stack
-npm run dev
-```
-
-## 🏗 Project Structure
-
-```
-ai-berkeley-2025/
-├── 📁 be/                 # Python Backend (FastAPI + WebSocket)
-│   ├── src/               # Source code
-│   ├── scripts/           # Utility scripts  
-│   ├── app/               # FastAPI application
-│   └── requirements.txt   # Python dependencies
-├── 📁 fe/                 # React Frontend (Next.js)
-│   ├── src/               # Source code
-│   ├── public/            # Static assets
-│   ├── .env.local -> ../.env  # Symlink to root .env
-│   └── package.json       # Node.js dependencies
-├── .env                   # ✨ SINGLE environment file (ALL CONFIG HERE)
-├── .env.example           # Template for environment variables
-├── .gitignore             # Unified ignore patterns
-├── package.json           # Root package.json with scripts
-├── setup.py               # One-command setup script
-└── README.md              # This file
-```
-
-## 🔑 Environment Variables
-
-All configuration is in **one place**: `.env` file at the root.
-
-```bash
-# ==============================================
-# 🔑 API KEYS (Required)
-# ==============================================
-
-# Groq API Key for audio transcription and ATC analysis
-GROQ_API_KEY=your_groq_api_key_here
-
-# FlightRadar24 API Key for live aircraft data
-# Get from: https://fr24api.flightradar24.com/
-# Subscription required - Explorer plan minimum
-NEXT_PUBLIC_FLIGHTRADAR24_API_KEY=your_flightradar24_api_key_here
-
-# OpenAIP API Key for airport/airspace data (optional)
-NEXT_PUBLIC_OPENAIP_KEY=your_openaip_key_here
-
-# Audio Source
-LIVEATC_URL=https://d.liveatc.net/ksfo_twr
-
-# Ports
-WEBSOCKET_PORT=8765
-PORT=3000
-```
-
-## 🛠 Development Scripts
-
-```bash
-# Setup everything
-npm run setup              # Python setup.py
-
-# Development (runs both frontend + backend)
-npm run dev                # Runs both in parallel
-
-# Individual services
-npm run dev:frontend       # Next.js dev server
-npm run dev:backend        # Python ATC agent
-
-# Building & Production
-npm run build              # Build frontend
-npm run start              # Start production server
-
-# Utilities
-npm run clean              # Clean all build artifacts
-npm run install:all        # Install all dependencies
-```
-
-## 🎧 Features
-
-### 🔊 **Real-time Audio Processing**
-- Live ATC audio stream processing
-- WebSocket-based real-time transcription
-- Groq Whisper integration for speech-to-text
-
-### ✈️ **Aviation Intelligence**
-- KSFO-specific ATC language understanding
-- 50+ airline callsign recognition
-- Runway, taxiway, and gate extraction
-- Flight instruction categorization
-
-### 🗺 **Live Flight Tracking**
-- Real-time aircraft positions
-- FlightRadar24 API integration
-- Interactive radar map visualization
-- Aircraft trail tracking
-
-### 📊 **Modern UI**
-- Real-time dashboard
-- Audio waveform visualization
-- Flight data tables
-- Responsive design
-
-## 🏃‍♂️ Running the Project
-
-### Option 1: Full Stack (Recommended)
-```bash
-npm run dev
-```
-This runs both frontend (port 3000) and backend (port 8765) simultaneously.
-
-### Option 2: Individual Services
-```bash
-# Terminal 1: Backend
-cd be
-source venv/bin/activate
-python scripts/run_atc_agent.py
-
-# Terminal 2: Frontend  
-cd fe
-npm run dev
-```
+**Frontend**
+- Next.js dashboard with real-time WebSocket updates
+- Interactive radar map with aircraft tracking
+- Emergency alerts and communication logs
 
 ## 🔧 Configuration
 
-### Audio Source
-Change the ATC audio source in `.env`:
+Create `.env` file in root directory:
 ```bash
-# San Francisco Tower (default)
+# Core AI Services
+GROQ_API_KEY=your_groq_api_key
+VAPI_API_KEY=your_vapi_api_key  
+LETTA_API_KEY=your_letta_api_key
+
+# Audio Source (default: KSFO Tower)
 LIVEATC_URL=https://d.liveatc.net/ksfo_twr
 
-# Los Angeles Tower
-LIVEATC_URL=https://d.liveatc.net/klax_twr
+# Optional: Live Flight Data
+FLIGHTRADAR24_API_KEY=your_fr24_key
 
-# New York Approach
-LIVEATC_URL=https://d.liveatc.net/kjfk_app
+# Ports
+PORT=3000
+WEBSOCKET_PORT=8765
 ```
 
-### API Keys
-1. **Groq API** (Required): [Get free key](https://console.groq.com)
-2. **FlightRadar24** (Optional): [Get API access](https://flightradar24.com/premium)
-3. **OpenAIP** (Optional): [Get free key](https://openaip.net)
+## 🎯 Key Features
 
-## 🐛 Troubleshooting
+- **Real-time ATC Transcription** - Live audio processing with aviation-specific language models
+- **Emergency Detection** - Automated detection of mayday calls and safety events
+- **Multi-Agent Intelligence** - Coordinated AI agents for comprehensive ATC analysis
+- **Controller Dashboard** - Real-time visualization of air traffic and communications
+- **Emergency Dispatch** - AI-assisted emergency response coordination via VAPI
+- **Context Memory** - Letta-powered session memory and shift handover generation
 
-### Python Issues
+## 🛠️ Development
+
 ```bash
-# Recreate virtual environment
-cd be
-rm -rf venv
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+# Install dependencies
+npm run install:all
 
-### Node.js Issues
-```bash
-# Clear cache and reinstall
-cd fe
-rm -rf node_modules package-lock.json
-npm install
-```
+# Run individual services
+npm run dev:frontend      # Next.js (port 3000)
+npm run dev:backend       # Python agents (port 8765)
 
-### Audio Issues
-- Check if LIVEATC_URL is accessible
-- Verify GROQ_API_KEY is valid
-- Check WEBSOCKET_PORT (8765) is available
+# Build for production
+npm run build
+npm run start
+```
 
 ## 📡 API Endpoints
 
-### Backend (Port 8765)
-- `ws://localhost:8765` - WebSocket for real-time audio
-- `http://localhost:8765/health` - Health check
-- `http://localhost:8765/stats` - Processing statistics
+- **Frontend**: `http://localhost:3000` - Main dashboard
+- **WebSocket**: `ws://localhost:8765` - Real-time audio/data stream
+- **Health**: `http://localhost:8765/health` - System status
 
-### Frontend (Port 3000)
-- `http://localhost:3000` - Main dashboard
-- `http://localhost:3000/api/health` - Frontend health
+## 🔐 Agent Architecture
 
-## 🤝 Contributing
+The system uses **Fetch.ai uAgents** for distributed intelligence:
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature-name`
-3. Make changes
-4. Test: `npm run dev`
-5. Commit: `git commit -m "Add feature"`
-6. Push: `git push origin feature-name`
-7. Create Pull Request
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- **Groq** for lightning-fast AI inference
-- **LiveATC** for real-time ATC audio streams
-- **FlightRadar24** for live flight data
-- **KSFO** for being an awesome airport to monitor
-
----
-
-**Built with ❤️ for AI Berkeley 2025**
+1. **Audio Processing Flow**: LiveATC → Transcriber Agent → ATC Parser Agent
+2. **Intelligence Layer**: Emergency Agent + Letta Memory Agent  
+3. **Action Layer**: VAPI Voice Agent (controller-approved emergency dispatch)
+4. **Frontend Updates**: Real-time WebSocket broadcasting to dashboard

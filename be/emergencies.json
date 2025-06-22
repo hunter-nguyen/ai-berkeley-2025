@@ -1,5 +1,96 @@
 [
   {
+    "id": "emergency_mic_1750617377521_fxiojd",
+    "timestamp": "2025-06-22T18:36:17.521Z",
+    "source_message_id": "mic_1750617377521",
+    "source_timestamp": "2025-06-22T18:36:17.521Z",
+    "callsign": "EGA661",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday e g a 661 mayday mayday mayday we're going down",
+    "raw_transcript": "mayday mayday mayday e g a 661 mayday mayday mayday we're going down",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "ACTIVE",
+    "acknowledged": false,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "EGA661",
+          "airline": null,
+          "flight_number": "661",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "Aircraft EGA661 declared a Mayday, indicating they are going down."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T18:36:17.521Z"
+  },
+  {
+    "id": "emergency_mic_1750617082510_hiwrjk",
+    "timestamp": "2025-06-22T18:31:22.510Z",
+    "source_message_id": "mic_1750617082510",
+    "source_timestamp": "2025-06-22T18:31:22.510Z",
+    "callsign": "N596JR",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday this is n596jr I'm going down I need help mayday mayday mayday",
+    "raw_transcript": "mayday mayday mayday this is n596jr I'm going down I need help mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "N596JR",
+          "airline": null,
+          "flight_number": null,
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "N596JR",
+          "instruction": "I need help",
+          "runway": null,
+          "details": "I'm going down"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "Aircraft N596JR issued a mayday call, stating they are going down and need help."
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T18:31:33.973Z",
+    "dispatched": true
+  },
+  {
     "id": "emergency_mic_1750615453746_bmncfh",
     "timestamp": "2025-06-22T18:04:13.746Z",
     "source_message_id": "mic_1750615453746",

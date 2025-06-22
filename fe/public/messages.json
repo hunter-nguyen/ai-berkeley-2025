@@ -1,88 +1,352 @@
 [
   {
-    "id": "6fb12c08-c1ef-4f4b-a021-3f5602816235",
-    "timestamp": "2025-06-22T11:10:16.053081",
+    "id": "319e345e-136f-44ce-86f7-e2dace9717c2",
+    "timestamp": "2025-06-22T11:30:25.088946",
     "callsign": "KSFO Tower",
-    "message": "Let's echo, hold short. Run week 2 at last. Let's echo, hold short. Okay.",
+    "message": "Error in transcription: 'float' object has no attribute 'strip'",
     "isUrgent": false,
     "type": "atc_analysis",
-    "rawTranscript": "Let's echo, hold short. Run week 2 at last. Let's echo, hold short. Okay.",
-    "instructions": [
-      "hold_short"
-    ],
+    "rawTranscript": "Error in transcription: 'float' object has no attribute 'strip'",
+    "instructions": [],
     "runways": [],
-    "chunk": 4,
+    "chunk": 7,
     "atc_data": {
       "callsigns": [],
-      "instructions": [
-        {
-          "type": "hold_short",
-          "callsign": null,
-          "instruction": "hold short",
-          "runway": null,
-          "details": null
-        }
-      ],
+      "instructions": [],
       "runways": [],
       "frequencies": [],
-      "weather_info": null,
-      "emergencies": null,
-      "summary": "Hold short instruction given to an unknown aircraft",
+      "weather_info": "",
+      "emergencies": "",
+      "summary": "No relevant information found in the transcript.",
       "processing_stats": {
         "callsign_count": 0,
-        "instruction_count": 1,
+        "instruction_count": 0,
         "runway_count": 0,
         "confidence": "low"
       },
-      "original_transcript": "Let's echo, hold short. Run week 2 at last. Let's echo, hold short. Okay.",
-      "cleaned_transcript": "let's echo, hold short. run week 2 at last. let's echo, hold short. okay.",
+      "original_transcript": "Error in transcription: 'float' object has no attribute 'strip'",
+      "cleaned_transcript": "error in transcription: 'float' object has no attribute 'strip'",
       "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-22T11:10:15.451572",
+      "timestamp": "2025-06-22T11:30:25.084840",
       "processing_agent": "ATC_Agent_v2"
     }
   },
   {
-    "id": "1d631dfe-1fb6-468c-830c-1a7e1bb8c3b0",
-    "timestamp": "2025-06-22T11:09:48.478659",
-    "callsign": "Canada 761",
-    "message": "Canada 761.",
+    "id": "9e9c99d5-eb4c-4652-950a-3863f4193504",
+    "timestamp": "2025-06-22T11:30:11.345299",
+    "callsign": "United 1939",
+    "message": "United 1939, runway to your right, clear to land, your number one, cross-fix, clear to North Heavy, little fire.",
     "isUrgent": false,
     "type": "atc_analysis",
-    "rawTranscript": "Canada 761.",
+    "rawTranscript": "United 1939, runway to your right, clear to land, your number one, cross-fix, clear to North Heavy, little fire.",
+    "instructions": [
+      "landing_clearance"
+    ],
+    "runways": [],
+    "chunk": 6,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "United 1939",
+          "airline": "United",
+          "flight_number": "1939",
+          "aircraft_type": "heavy"
+        },
+        {
+          "callsign": "UAL1939",
+          "source": "regex_extraction"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "landing_clearance",
+          "callsign": "United 1939",
+          "instruction": "clear to land",
+          "runway": "",
+          "details": "runway to your right, cross-fix, clear to north"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": "",
+      "emergencies": "",
+      "summary": "Clearance to land for United 1939",
+      "processing_stats": {
+        "callsign_count": 2,
+        "instruction_count": 1,
+        "runway_count": 0,
+        "confidence": "high"
+      },
+      "original_transcript": "United 1939, runway to your right, clear to land, your number one, cross-fix, clear to North Heavy, little fire.",
+      "cleaned_transcript": "united 1939, runway to your right, clear to land, your number 1, cross-fix, clear to north heavy, little fire.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T11:30:11.344764",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "2b4b2957-0b7b-4a35-acba-a15e4aa6ae2b",
+    "timestamp": "2025-06-22T11:29:57.887845",
+    "callsign": "United 1791",
+    "message": "Number 2, following traffic on a 2 mile final. 2-8 left, clear to land. Number 2, United, 1791.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Number 2, following traffic on a 2 mile final. 2-8 left, clear to land. Number 2, United, 1791.",
+    "instructions": [
+      "landing_clearance"
+    ],
+    "runways": [
+      "28L"
+    ],
+    "chunk": 5,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "United 1791",
+          "airline": "United",
+          "flight_number": "1791",
+          "aircraft_type": ""
+        }
+      ],
+      "instructions": [
+        {
+          "type": "landing_clearance",
+          "callsign": "United 1791",
+          "instruction": "clear to land",
+          "runway": "28L",
+          "details": "following traffic on a 2 mile final"
+        }
+      ],
+      "runways": [
+        "28L"
+      ],
+      "frequencies": [
+        "LIVE_ATC"
+      ],
+      "weather_info": "",
+      "emergencies": "",
+      "summary": "Clearance to land on runway 28L",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 1,
+        "runway_count": 1,
+        "confidence": "high"
+      },
+      "original_transcript": "Number 2, following traffic on a 2 mile final. 2-8 left, clear to land. Number 2, United, 1791.",
+      "cleaned_transcript": "number 2, following traffic on a 2 mile final. 2-8 left, clear to land. number 2, united, 1791.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T11:29:57.887613",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "4eafd76d-57b9-4689-915f-b535bc4025cb",
+    "timestamp": "2025-06-22T11:29:44.546451",
+    "callsign": "KSFO Tower",
+    "message": "Arizona, Zulu, okay, I mean I don't have to go down.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Arizona, Zulu, okay, I mean I don't have to go down.",
     "instructions": [],
+    "runways": [],
+    "chunk": 4,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": "",
+      "emergencies": "",
+      "summary": "No specific instructions or information provided in the transcript.",
+      "processing_stats": {
+        "callsign_count": 0,
+        "instruction_count": 0,
+        "runway_count": 0,
+        "confidence": "low"
+      },
+      "original_transcript": "Arizona, Zulu, okay, I mean I don't have to go down.",
+      "cleaned_transcript": "arizona, zulu, okay, i mean i don't have to go down.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T11:29:44.546144",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "c0e5388c-45e8-4891-9aa3-686087f33326",
+    "timestamp": "2025-06-22T11:29:31.806753",
+    "callsign": "United 114 heavy",
+    "message": "Thank you, United 114 Heavy, once you're on tier, I'm all sure to do is go to ground.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Thank you, United 114 Heavy, once you're on tier, I'm all sure to do is go to ground.",
+    "instructions": [
+      "taxi"
+    ],
     "runways": [],
     "chunk": 3,
     "atc_data": {
       "callsigns": [
         {
-          "callsign": "Canada 761",
-          "airline": "Canada",
-          "flight_number": "761",
-          "aircraft_type": null
+          "callsign": "United 114 heavy",
+          "airline": "United",
+          "flight_number": "114",
+          "aircraft_type": "heavy"
+        },
+        {
+          "callsign": "UAL114 Heavy",
+          "source": "regex_extraction"
         }
       ],
-      "instructions": [],
+      "instructions": [
+        {
+          "type": "taxi",
+          "callsign": "United 114 heavy",
+          "instruction": "go to ground",
+          "runway": null,
+          "details": null
+        }
+      ],
       "runways": [],
-      "frequencies": [],
+      "frequencies": [
+        "ground"
+      ],
       "weather_info": null,
       "emergencies": null,
-      "summary": "Initial call from Canada 761",
+      "summary": "Taxi instruction to United 114 heavy",
       "processing_stats": {
-        "callsign_count": 1,
-        "instruction_count": 0,
+        "callsign_count": 2,
+        "instruction_count": 1,
         "runway_count": 0,
         "confidence": "high"
       },
-      "original_transcript": "Canada 761.",
-      "cleaned_transcript": "canada 761.",
+      "original_transcript": "Thank you, United 114 Heavy, once you're on tier, I'm all sure to do is go to ground.",
+      "cleaned_transcript": "thank you, united 114 heavy, once you're on tier, i'm all sure to do is go to ground.",
       "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-22T11:09:48.478185",
+      "timestamp": "2025-06-22T11:29:31.806476",
       "processing_agent": "ATC_Agent_v2"
     }
   },
   {
-    "id": "31c66046-4ab9-4dc7-9cd1-3767581bed8e",
-    "timestamp": "2025-06-22T11:08:59.956591",
+    "id": "827ba788-617e-4214-b210-b65426e61aa4",
+    "timestamp": "2025-06-22T11:29:18.272523",
+    "callsign": "North Delta",
+    "message": "North Delta, Holt Short Runway 28L Uh, left on Delta, Holt Short Runway 28L 2990",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "North Delta, Holt Short Runway 28L Uh, left on Delta, Holt Short Runway 28L 2990",
+    "instructions": [
+      "hold_short",
+      "taxi"
+    ],
+    "runways": [
+      "28L"
+    ],
+    "chunk": 2,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "North Delta",
+          "airline": "Delta",
+          "flight_number": null,
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "hold_short",
+          "callsign": "North Delta",
+          "instruction": "hold short runway 28L",
+          "runway": "28L",
+          "details": null
+        },
+        {
+          "type": "taxi",
+          "callsign": "North Delta",
+          "instruction": "left on delta",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [
+        "28L"
+      ],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "North Delta instructed to hold short of runway 28L and turn left on delta",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 2,
+        "runway_count": 1,
+        "confidence": "high"
+      },
+      "original_transcript": "North Delta, Holt Short Runway 28L Uh, left on Delta, Holt Short Runway 28L 2990",
+      "cleaned_transcript": "north delta, holt short runway 28l uh, left on delta, holt short runway 28l 2990",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T11:29:18.272277",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "485b5aad-86cc-4450-9ea7-94e7a63f025a",
+    "timestamp": "2025-06-22T11:29:05.765433",
+    "callsign": "United 1957",
+    "message": "Line up to the weight, one left, 92441. United 1957 on Tingo.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Line up to the weight, one left, 92441. United 1957 on Tingo.",
+    "instructions": [
+      "line_up_wait"
+    ],
+    "runways": [
+      "1L"
+    ],
+    "chunk": 1,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "United 1957",
+          "airline": "United",
+          "flight_number": "1957",
+          "aircraft_type": null
+        },
+        {
+          "callsign": "UAL1957",
+          "source": "regex_extraction"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "line_up_wait",
+          "callsign": "United 1957",
+          "instruction": "line up to the weight",
+          "runway": "1L",
+          "details": null
+        }
+      ],
+      "runways": [
+        "1L"
+      ],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Line up instruction to United 1957",
+      "processing_stats": {
+        "callsign_count": 2,
+        "instruction_count": 1,
+        "runway_count": 1,
+        "confidence": "high"
+      },
+      "original_transcript": "Line up to the weight, one left, 92441. United 1957 on Tingo.",
+      "cleaned_transcript": "line up to the weight, 1 left, 92441. united 1957 on tingo.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T11:29:05.765111",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "b4d3a653-05bc-4b52-87c4-58c936e88ec9",
+    "timestamp": "2025-06-22T11:28:54.837040",
     "callsign": "SYSTEM",
     "message": "\ud83c\udfa7 ATC Audio Agent started - listening to KSFO Tower",
     "isUrgent": false,

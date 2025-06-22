@@ -283,5 +283,16 @@
     "call_status": "calling",
     "initiated_at": "2025-06-22T18:04:29.530Z",
     "call_id": "f51e2fb4-6bf4-4ef7-a16a-9674e41d2204"
+  },
+  {
+    "id": "dispatch_1750617093511_emergenc",
+    "alert_id": "emergency_mic_1750617082510_hiwrjk",
+    "callsign": "N596JR",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "calling",
+    "initiated_at": "2025-06-22T18:31:33.511Z",
+    "call_id": "708aed24-8456-40ab-96fc-50628ee33671"
   }
 ]
