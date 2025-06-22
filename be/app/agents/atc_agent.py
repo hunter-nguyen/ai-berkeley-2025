@@ -7,7 +7,8 @@ import re
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from groq import Groq
-
+from uagents import Agent, Context, Protocol, Model
+from uagents.setup import fund_agent_if_low
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
