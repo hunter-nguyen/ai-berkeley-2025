@@ -27,9 +27,15 @@ python-dotenv>=1.0.0
 # Async Support
 asyncio-mqtt>=0.13.0
 
+# MCP Integration for Emergency Calling
+mcp>=0.9.0
+# model-context-protocol>=0.4.0  # Not needed, included in mcp
+
+# Agent Framework
+uagents>=0.20.0
+
 # Development Tools
 pytest>=8.0.0
 black>=24.0.0
 isort>=5.13.0
 mypy>=1.11.0
-uagents

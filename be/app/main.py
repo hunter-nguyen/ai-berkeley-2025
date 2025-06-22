@@ -18,11 +18,15 @@ from .api.websocket import router as websocket_router, get_connection_manager
 from .core.audio import AudioProcessor
 from .core.transcription import TranscriptionService
 from .agents.atc_agent import ATCAgent
+from .agents.asi_one_agent import get_asi_one_agent, analyze_atc_emergency, EmergencyLevel
+from .core.mcp_integration import initialize_mcp, shutdown_mcp, get_mcp_manager
 
 # Global services
 audio_processor = None
 transcription_service = None
 atc_agent = None
+asi_one_agent = None
+mcp_manager = None
 background_task = None
 
 # JSON file path for messages
@@ -123,18 +127,30 @@ def add_message(transcript: str, atc_data: Dict[str, Any], chunk_number: int):
     callsigns = atc_data.get('callsigns', [])
     primary_callsign = callsigns[0].get('callsign', 'KSFO Tower') if callsigns else 'KSFO Tower'
     
+    # Check for emergency from ASI:One assessment
+    emergency_assessment = atc_data.get('emergency_assessment', {})
+    is_emergency = (
+        emergency_assessment.get('level') in ['critical', 'high', 'medium'] or
+        atc_data.get('emergencies', False) or 
+        'mayday' in transcript.lower() or 
+        'emergency' in transcript.lower()
+    )
+    
     message = {
         "id": str(uuid.uuid4()),
         "timestamp": datetime.now().isoformat(),
         "callsign": primary_callsign,
         "message": transcript,
-        "isUrgent": atc_data.get('emergencies', False) or 'mayday' in transcript.lower() or 'emergency' in transcript.lower(),
+        "isUrgent": is_emergency,
         "type": "atc_analysis",
         "rawTranscript": transcript,
         "instructions": [inst.get('type', '') for inst in atc_data.get('instructions', [])],
         "runways": atc_data.get('runways', []),
         "chunk": chunk_number,
-        "atc_data": atc_data
+        "atc_data": atc_data,
+        "emergency_level": emergency_assessment.get('level', 'none'),
+        "emergency_confidence": emergency_assessment.get('confidence', 0.0),
+        "call_triggered": emergency_assessment.get('call_required', False)
     }
     
     # Load existing messages
@@ -157,13 +173,13 @@ def add_message(transcript: str, atc_data: Dict[str, Any], chunk_number: int):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan management"""
-    global audio_processor, transcription_service, atc_agent, background_task
+    global audio_processor, transcription_service, atc_agent, asi_one_agent, mcp_manager, background_task
     
     settings = get_settings()
     
     # Setup logging
     setup_logging(settings.log_level)
-    logger.info("🎧 Starting ATC Audio Agent - Full Version...")
+    logger.info("🎧 Starting ATC Audio Agent with ASI:One Emergency System...")
     
     # Clean messages file on startup
     clean_messages_file()
@@ -180,6 +196,36 @@ async def lifespan(app: FastAPI):
     audio_processor = AudioProcessor(sample_rate=settings.sample_rate)
     transcription_service = TranscriptionService(settings.transcriber_agent_address)
     atc_agent = ATCAgent(settings.groq_api_key)
+    
+    # Initialize ASI:One Emergency System
+    logger.info("🧠 Initializing ASI:One Emergency Detection System...")
+    try:
+        asi_one_agent = get_asi_one_agent()
+        logger.info("✅ ASI:One agent initialized")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize ASI:One: {e}")
+        asi_one_agent = None
+    
+    # Initialize MCP connections for emergency calling
+    logger.info("🔌 Initializing MCP connections...")
+    try:
+        await initialize_mcp()
+        mcp_manager = get_mcp_manager()
+        
+        # Test Vapi connection if configured
+        if mcp_manager.is_server_connected("vapi"):
+            test_number = os.getenv("TEST_PHONE_NUMBER")
+            success = await mcp_manager.test_vapi_connection(test_number)
+            if success:
+                logger.info("✅ Vapi MCP connection verified")
+            else:
+                logger.warning("⚠️  Vapi MCP connection test failed")
+        else:
+            logger.warning("⚠️  Vapi MCP not configured - emergency calling disabled")
+            
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize MCP: {e}")
+        mcp_manager = None
     
     # Add initial system message (allow system messages through)
     system_message = {
@@ -233,6 +279,14 @@ async def lifespan(app: FastAPI):
     if audio_processor:
         audio_processor.stop()
     
+    # Shutdown MCP connections
+    if mcp_manager:
+        try:
+            await shutdown_mcp()
+            logger.info("🔌 MCP connections closed")
+        except Exception as e:
+            logger.error(f"❌ Error shutting down MCP: {e}")
+    
     logger.info("ATC Audio Agent stopped")
 
 
@@ -253,6 +307,49 @@ async def start_audio_processing(settings):
                 
                 # Process with ATC language agent
                 atc_result = await atc_agent.process_transcript(transcript, "LIVE_ATC")
+                
+                # ASI:One Emergency Analysis
+                emergency_assessment = None
+                if asi_one_agent and atc_result:
+                    try:
+                        # Extract data for emergency analysis
+                        callsigns = atc_result.get('callsigns', [])
+                        instructions = [inst.get('type', '') for inst in atc_result.get('instructions', [])]
+                        runways = atc_result.get('runways', [])
+                        
+                        if callsigns:
+                            primary_callsign = callsigns[0].get('callsign', 'UNKNOWN')
+                            
+                            # Analyze for emergencies
+                            emergency_assessment = await analyze_atc_emergency(
+                                callsign=primary_callsign,
+                                transcript=transcript,
+                                instructions=instructions,
+                                runways=runways
+                            )
+                            
+                            # Log emergency assessment
+                            if emergency_assessment.level != EmergencyLevel.NONE:
+                                logger.warning(f"🚨 EMERGENCY DETECTED - {primary_callsign}: "
+                                             f"{emergency_assessment.level.value} "
+                                             f"({emergency_assessment.confidence:.2f} confidence)")
+                                logger.warning(f"🧠 ASI:One Analysis: {emergency_assessment.reasoning}")
+                                
+                                if emergency_assessment.call_required:
+                                    logger.critical(f"📞 EMERGENCY CALL TRIGGERED for {primary_callsign}")
+                            
+                            # Add emergency data to ATC result
+                            atc_result['emergency_assessment'] = {
+                                'level': emergency_assessment.level.value,
+                                'emergency_type': emergency_assessment.emergency_type.value,
+                                'confidence': emergency_assessment.confidence,
+                                'reasoning': emergency_assessment.reasoning,
+                                'call_required': emergency_assessment.call_required,
+                                'call_recipients': emergency_assessment.call_recipients
+                            }
+                            
+                    except Exception as e:
+                        logger.error(f"❌ Emergency analysis failed: {e}")
                 
                 # Add to message store only if meaningful
                 message = add_message(transcript, atc_result, chunk_number)
