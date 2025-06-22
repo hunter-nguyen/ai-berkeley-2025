@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     chunk_duration: int = 5
     sample_rate: int = 16000
     
+    # Transcription Model Settings
+    use_atc_optimized_model: bool = True
+    atc_model_name: str = "jacktol/whisper-medium.en-fine-tuned-for-ATC"
+    fallback_model: str = "whisper-large-v3-turbo"
+    model_confidence_threshold: float = 0.85
+    
     # Server Settings
     host: str = "0.0.0.0"
     port: int = 8002

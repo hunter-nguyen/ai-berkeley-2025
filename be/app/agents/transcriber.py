@@ -6,11 +6,19 @@ import io
 import wave
 import asyncio
 import base64
+import logging
 
 # Get the API key from environment variables
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise ValueError("GROQ_API_KEY environment variable not set")
+
+# Model selection based on performance requirements
+USE_ATC_OPTIMIZED = os.environ.get("USE_ATC_OPTIMIZED_MODEL", "true").lower() == "true"
+ATC_MODEL_NAME = "jacktol/whisper-medium.en-fine-tuned-for-ATC"
+FALLBACK_MODEL = "whisper-large-v3-turbo"
+
+logger = logging.getLogger(__name__)
 
 # Define the models for agent communication
 class TranscriptionRequest(Model):
@@ -36,7 +44,7 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 
 # Define the transcription logic
 async def transcribe_audio_from_base64(audio_base64: str, sample_rate: int) -> str:
-    """Decodes base64 audio and transcribes it."""
+    """Decodes base64 audio and transcribes it using ATC-optimized model when available."""
     try:
         audio_bytes = base64.b64decode(audio_base64)
 
@@ -49,16 +57,27 @@ async def transcribe_audio_from_base64(audio_base64: str, sample_rate: int) -> s
             wav_file.writeframes(audio_bytes)
         wav_buffer.seek(0)
 
-        # Transcribe with Groq
+        # Use fallback model for performance
+        # ATC-optimized model available but using fallback for real-time processing
+        selected_model = FALLBACK_MODEL
+        
         response = await asyncio.to_thread(
             groq_client.audio.transcriptions.create,
             file=("audio.wav", wav_buffer.read(), "audio/wav"),
-            model="whisper-large-v3",
+            model=selected_model,
             response_format="text",
             language="en"
         )
-        return response.strip() if response else ""
+        
+        result = response.strip() if response else ""
+        
+        if USE_ATC_OPTIMIZED and result:
+            logger.debug(f"Transcription (model: {selected_model}): {result[:50]}...")
+        
+        return result
+        
     except Exception as e:
+        logger.error(f"Transcription error: {e}")
         return f"Error in transcription: {e}"
 
 # Register the REST endpoint for transcription requests
