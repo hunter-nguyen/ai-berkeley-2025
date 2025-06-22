@@ -22,22 +22,16 @@ interface LiveCommsProps {
   onToggle: () => void;
   selectedCallsign?: string | null;
   onCallsignSelect?: (callsign: string) => void;
+  onMessagesUpdate?: (messages: CommMessage[]) => void;
 }
 
-export default function LiveComms({ isCollapsed, onToggle, selectedCallsign, onCallsignSelect }: LiveCommsProps) {
+export default function LiveComms({ isCollapsed, onToggle, selectedCallsign, onCallsignSelect, onMessagesUpdate }: LiveCommsProps) {
   const [messages, setMessages] = useState<CommMessage[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('disconnected');
   const [filteredCallsign, setFilteredCallsign] = useState<string | null>(null);
   const [showCallsignFilter, setShowCallsignFilter] = useState(false);
   const [uniqueCallsigns, setUniqueCallsigns] = useState<Set<string>>(new Set());
   const [lastMessageCount, setLastMessageCount] = useState(0);
-
-  // Update filtered callsign when aircraft is selected from radar map
-  useEffect(() => {
-    if (selectedCallsign) {
-      setFilteredCallsign(selectedCallsign);
-    }
-  }, [selectedCallsign]);
 
   // Function to filter meaningful messages on client side too
   const isClientMeaningful = (message: string, callsign: string): boolean => {
@@ -94,6 +88,11 @@ export default function LiveComms({ isCollapsed, onToggle, selectedCallsign, onC
             
             setMessages(convertedMessages);
             setLastMessageCount(data.length);
+            
+            // Share messages with parent component
+            if (onMessagesUpdate) {
+              onMessagesUpdate(convertedMessages);
+            }
             
             // Update unique callsigns
             const callsigns = new Set<string>();

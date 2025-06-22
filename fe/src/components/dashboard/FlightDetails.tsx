@@ -13,18 +13,36 @@ interface Aircraft {
   speed: number;
 }
 
+interface CommMessage {
+  id: string;
+  timestamp: string;
+  callsign: string;
+  message: string;
+  isUrgent: boolean;
+  type: 'incoming' | 'outgoing' | 'atc_analysis';
+  rawTranscript?: string;
+  instructions?: string[];
+  runways?: string[];
+  chunk?: number;
+}
+
 interface FlightDetailsProps {
   aircraft: Aircraft | null;
   isOpen: boolean;
   onClose: () => void;
+  messages?: CommMessage[];
 }
 
-export default function FlightDetails({ aircraft, isOpen, onClose }: FlightDetailsProps) {
-  const recentComms = [
-    { time: '14:32:15', message: 'UAL123, maintain flight level 350' },
-    { time: '14:31:48', message: 'Roger, flight level 350, UAL123' },
-    { time: '14:30:22', message: 'UAL123, turn left heading 090' },
-  ];
+export default function FlightDetails({ aircraft, isOpen, onClose, messages = [] }: FlightDetailsProps) {
+  // Filter messages for the selected aircraft
+  const filteredMessages = aircraft && messages ? messages.filter(msg => {
+    const callsign = msg.callsign || '';
+    const message = msg.message || '';
+    const aircraftCallsign = aircraft.callsign || '';
+    
+    return callsign.toLowerCase().includes(aircraftCallsign.toLowerCase()) ||
+           message.toLowerCase().includes(aircraftCallsign.toLowerCase());
+  }).slice(-10) : []; // Show last 10 messages
 
   return (
     <AnimatePresence>
@@ -92,30 +110,91 @@ export default function FlightDetails({ aircraft, isOpen, onClose }: FlightDetai
             </div>
           </div>
 
-          {/* Recent Communications */}
+          {/* Aircraft-Specific Communications */}
           <div className="flex-1 min-h-0 flex flex-col">
-            <h3 className="text-xs font-semibold text-blue-400 mb-2 font-mono border-b border-gray-700 pb-1">RECENT COMMS</h3>
-            <div className="space-y-1 overflow-y-auto flex-1">
-              {recentComms.map((comm, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-gray-800 border border-gray-600 rounded p-2"
-                >
-                  <div className="text-xs text-green-400 font-mono">{comm.time}</div>
-                  <div className="text-xs text-gray-300 leading-tight">{comm.message}</div>
-                </motion.div>
-              ))}
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold text-blue-400 font-mono border-b border-gray-700 pb-1">
+                {aircraft.callsign} COMMS
+              </h3>
+              <span className="text-xs text-gray-400 font-mono">
+                {filteredMessages.length} msgs
+              </span>
             </div>
-          </div>
+            <div className="space-y-1 overflow-y-auto flex-1">
+              {filteredMessages.length === 0 ? (
+                <div className="text-center text-gray-400 text-xs py-4">
+                  No communications found for {aircraft.callsign}
+                </div>
+              ) : (
+                filteredMessages.map((comm, index) => (
+                  <motion.div
+                    key={comm.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`p-2 rounded text-xs border ${
+                      comm.isUrgent 
+                        ? 'bg-red-900 bg-opacity-50 border-red-500' 
+                        : 'bg-gray-800 border-gray-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`font-mono font-bold text-xs ${
+                        comm.isUrgent ? 'text-red-400' : 'text-cyan-400'
+                      }`}>
+                        {comm.callsign}
+                      </span>
+                      <span className="text-gray-400 font-mono text-xs">
+                        {comm.timestamp}
+                      </span>
+                    </div>
+                    <div className={`text-xs leading-tight ${
+                      comm.isUrgent ? 'text-red-300 font-semibold' : 'text-gray-300'
+                    }`}>
+                      "{comm.message}"
+                    </div>
+                    
+                    {/* Show extracted ATC data */}
+                    {comm.instructions && comm.instructions.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {comm.instructions
+                          .filter(instruction => instruction != null && instruction !== '')
+                          .map((instruction, idx) => (
+                            <span 
+                              key={idx}
+                              className="inline-block bg-blue-600 text-white text-xs px-1 py-0.5 rounded font-mono"
+                            >
+                              {String(instruction).replace(/_/g, ' ').toUpperCase()}
+                            </span>
+                          ))}
+                      </div>
+                    )}
 
-          {/* Track History placeholder - now smaller */}
-          <div className="mt-2 bg-gray-800 border border-gray-600 rounded p-2 flex-shrink-0">
-            <div className="text-xs text-blue-400 mb-1 font-mono">TRACK HISTORY</div>
-            <div className="h-12 bg-gray-700 border border-gray-600 rounded flex items-center justify-center">
-              <span className="text-xs text-gray-400 font-mono">TRACK DATA</span>
+                    {comm.runways && comm.runways.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {comm.runways
+                          .filter(runway => runway != null && runway !== '')
+                          .map((runway, idx) => (
+                            <span 
+                              key={idx}
+                              className="inline-block bg-green-600 text-white text-xs px-1 py-0.5 rounded font-mono"
+                            >
+                              RWY {String(runway).toUpperCase()}
+                            </span>
+                          ))}
+                      </div>
+                    )}
+
+                    {comm.isUrgent && (
+                      <div className="mt-1">
+                        <span className="inline-block bg-red-600 text-white text-xs px-1 py-0.5 rounded font-bold animate-pulse">
+                          🚨 URGENT
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                ))
+              )}
             </div>
           </div>
         </motion.div>

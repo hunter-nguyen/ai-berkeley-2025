@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, Polygon } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, Polygon, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { flightRadar24, AIRCRAFT_CONFIG } from '@/utils/api/flightradar24';
@@ -104,9 +104,22 @@ interface RadarMapProps {
   selectedAircraft?: Aircraft | null;
   onAircraftUpdate?: (count: number) => void;
   selectedCallsign?: string | null;
+  onMapClick?: () => void;
 }
 
-export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraftUpdate, selectedCallsign }: RadarMapProps) {
+// Add MapEvents component for handling map clicks
+function MapEvents({ onMapClick }: { onMapClick?: () => void }) {
+  useMapEvents({
+    click: () => {
+      if (onMapClick) {
+        onMapClick();
+      }
+    },
+  });
+  return null;
+}
+
+export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraftUpdate, selectedCallsign, onMapClick }: RadarMapProps) {
   const [aircraft, setAircraft] = useState<Aircraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -719,6 +732,9 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
         className="w-full h-full z-0"
         style={{ height: '100%', width: '100%' }}
       >
+        {/* Map Events Handler for deselecting aircraft */}
+        <MapEvents onMapClick={onMapClick} />
+        
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
