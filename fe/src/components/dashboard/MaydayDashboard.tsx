@@ -30,6 +30,7 @@ interface Aircraft {
 
 export default function MaydayDashboard() {
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(null);
+  const [selectedCallsign, setSelectedCallsign] = useState<string | null>(null);
   const [isFlightDetailsOpen, setIsFlightDetailsOpen] = useState(false);
   const [isLiveCommsCollapsed, setIsLiveCommsCollapsed] = useState(false);
   const [isAlertsCollapsed, setIsAlertsCollapsed] = useState(false);
@@ -37,12 +38,35 @@ export default function MaydayDashboard() {
 
   const handleAircraftSelect = (aircraft: Aircraft) => {
     setSelectedAircraft(aircraft);
+    setSelectedCallsign(aircraft.callsign);
     setIsFlightDetailsOpen(true);
+    
+    // Auto-expand LiveComms when aircraft is selected to show chat history
+    if (isLiveCommsCollapsed) {
+      setIsLiveCommsCollapsed(false);
+    }
+  };
+
+  const handleCallsignSelect = (callsign: string) => {
+    setSelectedCallsign(callsign);
+    
+    // Try to find and highlight the aircraft on the radar map
+    // Note: This would need access to the aircraft list from RadarMap
+    // For now, we'll just store the selected callsign
+    console.log(`Selected callsign from LiveComms: ${callsign}`);
   };
 
   const handleCloseFlightDetails = () => {
     setIsFlightDetailsOpen(false);
+    // Keep the aircraft/callsign selected for LiveComms filtering
+    // setSelectedAircraft(null);
+    // setSelectedCallsign(null);
+  };
+
+  const handleClearSelection = () => {
     setSelectedAircraft(null);
+    setSelectedCallsign(null);
+    setIsFlightDetailsOpen(false);
   };
 
   const handleAircraftUpdate = (count: number) => {
@@ -52,7 +76,11 @@ export default function MaydayDashboard() {
   return (
     <div className="min-h-screen bg-gray-900 overflow-hidden">
       {/* ATC Status Bar */}
-      <ATCStatusBar aircraftCount={aircraftCount} />
+      <ATCStatusBar 
+        aircraftCount={aircraftCount} 
+        selectedCallsign={selectedCallsign}
+        onClearSelection={handleClearSelection}
+      />
       
       {/* Main Content Area */}
       <div className="h-[calc(100vh-60px)] flex">
@@ -62,6 +90,7 @@ export default function MaydayDashboard() {
             onAircraftSelect={handleAircraftSelect}
             selectedAircraft={selectedAircraft}
             onAircraftUpdate={handleAircraftUpdate}
+            selectedCallsign={selectedCallsign}
           />
         </div>
 
@@ -71,6 +100,8 @@ export default function MaydayDashboard() {
             <LiveComms 
               isCollapsed={isLiveCommsCollapsed}
               onToggle={() => setIsLiveCommsCollapsed(!isLiveCommsCollapsed)}
+              selectedCallsign={selectedCallsign}
+              onCallsignSelect={handleCallsignSelect}
             />
           </div>
           <div className="h-1/2">
@@ -95,7 +126,7 @@ export default function MaydayDashboard() {
           <h2 className="text-xl font-bold text-gray-900 mb-4">Desktop Required</h2>
           <p className="text-gray-700 leading-relaxed">
             The Mayday ATC Dashboard is optimized for desktop and large tablet displays. 
-            Please use a device with a screen width of at least 1024px for the best experience.
+            Please use a device with at least 1024px screen width for the best experience.
           </p>
         </div>
       </div>

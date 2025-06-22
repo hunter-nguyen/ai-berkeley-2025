@@ -35,8 +35,31 @@ class ATCLanguageAgent:
         }
         
         self.common_airlines = {
-            "united": "UAL", "american": "AAL", "delta": "DAL", "southwest": "SWA",
-            "jetblue": "JBU", "alaska": "ASA", "spirit": "NKS", "frontier": "FFT"
+            # North American Carriers
+            "alaska": "ASA", "american": "AAL", "breeze": "MX", "delta": "DAL", 
+            "jetblue": "JBU", "porter": "POE", "southwest": "SWA", "sun country": "SCX",
+            "united": "UAL", "westjet": "WJA",
+            
+            # Americas/Canada/Mexico  
+            "aer lingus": "EIN", "shamrock": "EIN", "aeromexico": "AMX", "air canada": "ACA",
+            "avianca": "AVA", "copa": "CMP",
+            
+            # Asia-Pacific & Oceania
+            "air china": "CCA", "air india": "AIC", "air new zealand": "ANZ", "new zealand": "ANZ",
+            "ana": "ANA", "all nippon": "ANA", "asiana": "AAR", "cathay": "CPA", "cathay pacific": "CPA",
+            "china airlines": "CAL", "dynasty": "CAL", "china eastern": "CES", "china southern": "CSN",
+            "eva": "EVA", "eva air": "EVA", "fiji": "FJI", "hawaiian": "HAL", "japan air": "JAL",
+            "jal": "JAL", "korean": "KAL", "korean air": "KAL", "level": "LVL", "philippine": "PAL",
+            "qantas": "QFA", "singapore": "SIA", "starlux": "JX", "vietnam": "HVN", "zipair": "TZP",
+            
+            # Europe & Middle East
+            "air france": "AFR", "british": "BAW", "speedbird": "BAW", "condor": "CFG",
+            "emirates": "UAE", "iberia": "IBE", "ita": "ITY", "klm": "KLM", "lufthansa": "DLH",
+            "qatar": "QTR", "qatari": "QTR", "sas": "SAS", "scandinavian": "SAS", "swiss": "SWR",
+            "tap": "TAP", "air portugal": "TAP", "turkish": "THY", "virgin": "VIR",
+            
+            # Low-cost/Specialized
+            "air premia": "APZ", "flair": "FLE", "frenchbee": "BF", "frontier": "FFT"
         }
         
         logger.info(f"Initialized ATC Language Agent with model: {model}")
@@ -114,49 +137,146 @@ class ATCLanguageAgent:
         """Use Groq to extract structured data from ATC transcript"""
         
         prompt = f"""
-You are an expert ATC (Air Traffic Control) language processor. Analyze this ATC radio transcript and extract structured information.
+You are an expert ATC (Air Traffic Control) language processor specialized in San Francisco International Airport (KSFO) operations. Analyze this ATC radio transcript and extract structured information specific to KSFO.
 
 Transcript: "{transcript}"
 Frequency: {frequency}
+
+KSFO AIRPORT LAYOUT:
+Runways:
+- 10L/28R (11,870 x 200 ft) - Primary arrival runway 28R, departure runway 10L
+- 10R/28L (11,381 x 200 ft) - Primary arrival runway 28L, departure runway 10R  
+- 01R/19L (8,650 x 200 ft) - Primary departure runway 01R, arrival runway 19L
+- 01L/19R (7,650 x 200 ft) - Primary departure runway 01L, arrival runway 19R
+
+Major Taxiways: A, B, A1, B1, C, C3, E, F, M, U, Z
+- Taxiway A: Terminal to departure runways
+- Taxiway B: Arrival runways to terminals
+- Taxiway Z: Between runways 28L/10R and 28R/10L
+
+KSFO AIRLINES & CALLSIGNS:
+
+NORTH AMERICAN CARRIERS:
+- Alaska Airlines: ASA/Alaska (Terminal 1, 2)
+- American Airlines: AAL/American (Terminal 1) 
+- Breeze Airways: MX/Breeze (Various terminals)
+- Delta Air Lines: DAL/Delta (Terminal 2)
+- JetBlue Airways: JBU/JetBlue (Terminal 1)
+- Porter Airlines: POE/Porter (Terminal 1, Intl A)
+- Southwest Airlines: SWA/Southwest (Terminal 1)
+- Sun Country Airlines: SCX/Sun Country (Intl G)
+- United Airlines: UAL/United (Terminal 3 domestic, Intl G international)
+- WestJet: WJA/WestJet (Intl A)
+
+AMERICAS/CANADA/MEXICO:
+- Aer Lingus: EIN/Shamrock (Terminal 1)
+- AeroMexico: AMX/Aeromexico (Intl A)
+- Air Canada: ACA/Air Canada (Terminal 2)
+- Avianca: AVA/Avianca (Intl A)
+- Copa Airlines: CMP/Copa (Intl A, Intl G)
+
+ASIA-PACIFIC & OCEANIA:
+- Air China: CCA/Air China (Intl G)
+- Air India: AIC/Air India (Intl A)
+- Air New Zealand: ANZ/New Zealand (Intl G)
+- All Nippon Airways: ANA/All Nippon (Intl G)
+- Asiana Airlines: AAR/Asiana (Intl G)
+- Cathay Pacific: CPA/Cathay (Intl A)
+- China Airlines: CAL/Dynasty (Intl A)
+- China Eastern: CES/China Eastern (Intl A)
+- China Southern: CSN/China Southern (Intl A)
+- EVA Air: EVA/Eva (Intl A, Intl G)
+- Fiji Airways: FJI/Fiji (Intl G)
+- Hawaiian Airlines: HAL/Hawaiian (Intl G)
+- Japan Airlines: JAL/Japan Air (Intl A)
+- Korean Air: KAL/Korean Air (Intl A)
+- LEVEL: LVL/Level (Intl A)
+- Philippine Airlines: PAL/Philippine (Intl A)
+- Qantas: QFA/Qantas (Intl A)
+- Singapore Airlines: SIA/Singapore (Intl G)
+- Starlux Airlines: JX/Starlux (Intl G)
+- Vietnam Airlines: HVN/Vietnam (Intl G)
+- ZIPAIR: TZP/Zipair (Intl G)
+
+EUROPE & MIDDLE EAST:
+- Air France: AFR/Air France (Intl A)
+- British Airways: BAW/Speedbird (Intl A)
+- Condor: CFG/Condor (Intl A)
+- Emirates: UAE/Emirates (Intl A)
+- Iberia: IBE/Iberia (Intl A)
+- ITA Airways: ITY/Itavia (Intl A)
+- KLM: KLM/KLM (Intl A)
+- Lufthansa: DLH/Lufthansa (Intl G)
+- Qatar Airways: QTR/Qatari (Intl A)
+- SAS: SAS/Scandinavian (Intl G)
+- Swiss Air: SWR/Swiss (Intl G)
+- TAP Air Portugal: TAP/Air Portugal (Intl G)
+- Turkish Airlines: THY/Turkish (Intl G)
+- Virgin Atlantic: VIR/Virgin (Intl A)
+
+LOW-COST/SPECIALIZED:
+- Air Premia: APZ/Air Premia (Intl A)
+- Flair Airlines: FLE/Flair (Seasonal)
+- Frenchbee: BF/Frenchbee (Intl A)
+- Frontier Airlines: FFT/Frontier (Intl A)
+
+KSFO AIRCRAFT TYPES:
+Heavy: Boeing 747, 777, 787, Airbus A330, A340, A350, A380
+Medium: Boeing 737, 757, Airbus A320 family
+Light: Regional jets, turboprops, general aviation
+
+KSFO OPERATIONAL FLOWS:
+West Plan (95-98% of time): Departures 01L/01R, Arrivals 28L/28R
+Southeast Plan (<5% of time): Departures 10L/10R, Arrivals 19L/19R
 
 Extract and return a JSON object with the following structure:
 {{
     "callsigns": [
         {{
-            "callsign": "UAL297",
-            "airline": "United",
+            "callsign": "United 297",
+            "airline_code": "UAL",
+            "airline": "United Airlines", 
             "flight_number": "297",
-            "aircraft_type": "heavy" // if mentioned
+            "aircraft_type": "heavy|medium|light",
+            "terminal": "Terminal_1|Terminal_2|Terminal_3|International_A|International_G|unknown"
         }}
     ],
     "instructions": [
         {{
-            "type": "takeoff_clearance|landing_clearance|taxi|frequency_change|line_up_wait|hold_short",
-            "callsign": "UAL297",
-            "instruction": "runway 22R takeoff",
-            "runway": "22R",
-            "details": "additional details if any"
+            "type": "takeoff_clearance|landing_clearance|taxi|frequency_change|line_up_wait|hold_short|ground_stop|gate_assignment",
+            "callsign": "United 297",
+            "instruction": "runway 28R cleared to land",
+            "runway": "28R|28L|01R|01L|19R|19L|10R|10L",
+            "taxiway": "A|B|A1|B1|C|C3|E|F|M|U|Z",
+            "gate": "gate number if mentioned",
+            "details": "wind, weather, or other details"
         }}
     ],
-    "runways": ["22R", "04L"],
-    "frequencies": ["departure", "ground"],
-    "weather_info": "any weather mentioned",
-    "emergencies": "any emergency situations",
-    "summary": "brief summary of the communication"
+    "runways": ["28R", "01L"],
+    "taxiways": ["A", "B", "Z"],
+    "operational_flow": "west_plan|southeast_plan|unknown",
+    "frequencies": ["departure", "ground", "tower"],
+    "weather_info": "wind direction/speed, visibility, conditions",
+    "summary": "brief summary specific to KSFO operations"
 }}
 
-Common ATC patterns to recognize:
-- Callsigns: "United 297", "American 1234 heavy", "Delta 567"
-- Runway operations: "runway 22R takeoff", "land runway 04L"
-- Taxi instructions: "taxi to gate", "hold short runway 22R"
-- Frequency changes: "contact departure", "switch to ground"
-- Line up and wait: "line up and wait runway 22R"
+KSFO-Specific ATC Patterns:
+- Heavy aircraft clearances: "United 297 Heavy runway 28R cleared to land", "Emirates 225 Heavy line up and wait"
+- International arrivals: "Singapore 2 contact SFO ground point eight", "Lufthansa 441 taxi to International Terminal G"
+- Domestic operations: "Alaska 567 runway 01L cleared for takeoff", "Southwest 1234 taxi to Terminal 1 gate B12"
+- Taxi instructions: "American 1234 taxi to gate A12 via taxiway A", "Delta 567 hold short runway 28R"
+- Frequency changes: "Contact SFO departure", "Switch to ground point eight", "NorCal approach"
+- Terminal-specific operations: "Cathay 888 taxi to International Terminal A", "United 1844 Terminal 3 gate F20"
+- Asian carriers: "ANA 7", "Korean Air 123", "Japan Air 456", "Asiana 789"
+- European carriers: "British Airways 285", "Air France 83", "KLM 604", "Turkish 1"
+- Cargo operations: "FedEx 1234 taxi via Zulu to cargo ramp", "UPS 567 runway 28R"
 
 Important: 
-- Extract actual callsigns, not just "297" but "United 297" or "UAL297"
-- Recognize heavy aircraft designations
-- Identify specific runway numbers
-- Parse complex multi-part instructions
+- Match airline codes to KSFO terminal assignments when possible
+- Recognize KSFO's specific runway configuration and operational flows
+- Extract actual KSFO runway and taxiway identifiers
+- Identify heavy aircraft designations common at KSFO
+- Parse terminal-specific operations and gate assignments
 
 Return ONLY the JSON object, no other text.
 """
@@ -317,11 +437,12 @@ if __name__ == "__main__":
         
         # Test transcripts
         test_transcripts = [
-            "United 297 heavy runway 22R takeoff",
-            "222-Ride at Whiskey Clip. Take off. 2-2-Ride at Whiskey Clip.",
-            "contact departure. Have a good night. Good night, Les. 297. United 14 heavy, runway 287.",
-            "American 1234 line up and wait runway 04L",
-            "Delta 567 taxi to gate A12 via taxiway Charlie"
+            "United 297 heavy runway 28R cleared to land",
+            "Emirates 225 heavy contact SFO ground point eight",
+            "Alaska 567 taxi to gate A12 via taxiway A, hold short runway 01L",
+            "American 1234 runway 01R cleared for takeoff",
+            "Singapore 2 heavy line up and wait runway 28L",
+            "Lufthansa 441 contact departure, good day"
         ]
         
         processor = ATCTranscriptProcessor(groq_api_key)

@@ -103,9 +103,10 @@ interface RadarMapProps {
   onAircraftSelect: (aircraft: Aircraft) => void;
   selectedAircraft?: Aircraft | null;
   onAircraftUpdate?: (count: number) => void;
+  selectedCallsign?: string | null;
 }
 
-export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraftUpdate }: RadarMapProps) {
+export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraftUpdate, selectedCallsign }: RadarMapProps) {
   const [aircraft, setAircraft] = useState<Aircraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -550,8 +551,12 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
 
   // Create custom aircraft icon with better design
   const createAircraftIcon = (aircraft: Aircraft, isSelected: boolean) => {
-    const iconColor = isSelected ? '#fbbf24' : '#22d3ee'; // yellow when selected, cyan otherwise
-    const iconSize = isSelected ? 24 : 20;
+    // Check if this aircraft is selected either directly or by callsign from LiveComms
+    const isCallsignSelected = selectedCallsign && aircraft.callsign.toLowerCase().includes(selectedCallsign.toLowerCase());
+    const isHighlighted = isSelected || isCallsignSelected;
+    
+    const iconColor = isHighlighted ? '#fbbf24' : '#22d3ee'; // yellow when selected, cyan otherwise
+    const iconSize = isHighlighted ? 24 : 20;
     
     return L.divIcon({
       className: 'custom-aircraft-icon',
@@ -573,15 +578,20 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
             <circle cx="12" cy="15" r="1" fill="#ff6b35" opacity="0.7"/>
             <circle cx="20" cy="15" r="1" fill="#ff6b35" opacity="0.7"/>
           </svg>
-          ${isSelected ? `
+          ${isHighlighted ? `
             <div class="absolute -inset-2 border-2 border-yellow-400 rounded-full animate-ping opacity-60"></div>
             <div class="absolute -inset-1 border border-yellow-400 rounded-full"></div>
           ` : ''}
+          ${isCallsignSelected && !isSelected ? `
+            <div class="absolute -inset-2 border-2 border-blue-400 rounded-full animate-pulse opacity-80"></div>
+            <div class="absolute -inset-1 border border-blue-400 rounded-full"></div>
+          ` : ''}
         </div>
         <div class="absolute top-6 left-1/2 transform -translate-x-1/2 text-xs font-mono font-bold whitespace-nowrap bg-gray-900 bg-opacity-90 px-1 rounded border" 
-             style="color: ${iconColor};">
+             style="color: ${iconColor}; ${isCallsignSelected ? 'border-color: #60a5fa;' : ''}">
           ${aircraft.callsign}
           <div class="text-white text-xs">${aircraft.altitude.toLocaleString()}'</div>
+          ${isCallsignSelected ? '<div class="text-blue-400 text-xs">📡 IN COMMS</div>' : ''}
         </div>
       `,
       iconSize: [iconSize, iconSize],

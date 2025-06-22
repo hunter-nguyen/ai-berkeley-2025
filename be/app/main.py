@@ -2,9 +2,15 @@
 Main FastAPI application for ATC Audio Agent - Full Version
 """
 import asyncio
+import json
+import os
+import shutil
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List, Dict, Any
+from datetime import datetime
+import uuid
 
 from .config import get_settings, validate_settings
 from .utils.logging import setup_logging, get_logger
@@ -19,7 +25,133 @@ transcription_service = None
 atc_agent = None
 background_task = None
 
+# JSON file path for messages
+MESSAGES_FILE = "../messages.json"
+MAX_MESSAGES = 100
+
 logger = get_logger(__name__)
+
+
+def clean_messages_file():
+    """Clean the messages JSON file on startup"""
+    try:
+        with open(MESSAGES_FILE, 'w') as f:
+            json.dump([], f)
+        
+        # Also clean frontend public copy
+        shutil.copy(MESSAGES_FILE, "../fe/public/messages.json")
+        
+        logger.info(f"✅ Cleaned messages file: {MESSAGES_FILE}")
+    except Exception as e:
+        logger.error(f"❌ Error cleaning messages file: {e}")
+
+
+def load_messages() -> List[Dict[str, Any]]:
+    """Load messages from JSON file"""
+    try:
+        if os.path.exists(MESSAGES_FILE):
+            with open(MESSAGES_FILE, 'r') as f:
+                return json.load(f)
+        return []
+    except Exception as e:
+        logger.error(f"❌ Error loading messages: {e}")
+        return []
+
+
+def save_messages(messages: List[Dict[str, Any]]):
+    """Save messages to JSON file"""
+    try:
+        with open(MESSAGES_FILE, 'w') as f:
+            json.dump(messages, f, indent=2)
+        
+        # Also copy to frontend public folder for web access
+        shutil.copy(MESSAGES_FILE, "../fe/public/messages.json")
+    except Exception as e:
+        logger.error(f"❌ Error saving messages: {e}")
+
+
+def is_meaningful_transcript(transcript: str) -> bool:
+    """Check if a transcript contains meaningful ATC communication"""
+    if not transcript or not transcript.strip():
+        return False
+    
+    # Remove common punctuation and whitespace
+    cleaned = transcript.strip().lower().replace('.', '').replace(',', '').replace('!', '').replace('?', '')
+    
+    # Filter out single characters, dots, and very short meaningless phrases
+    if len(cleaned) <= 1:
+        return False
+    
+    # Filter out common meaningless phrases
+    meaningless_phrases = {
+        'thank you', 'thanks', 'yes', 'no', 'okay', 'ok', 'roger', 'copy', 
+        'uh', 'um', 'ah', 'eh', 'and', 'the', 'a', 'an', 'is', 'are', 'was', 'were'
+    }
+    
+    if cleaned in meaningless_phrases:
+        return False
+    
+    # Must have at least 2 words to be meaningful
+    words = cleaned.split()
+    if len(words) < 2:
+        return False
+    
+    # Check if it contains aviation-related keywords
+    aviation_keywords = {
+        'runway', 'tower', 'ground', 'taxi', 'takeoff', 'landing', 'cleared', 'contact', 
+        'frequency', 'squawk', 'heading', 'altitude', 'descend', 'climb', 'turn', 'left', 'right',
+        'bravo', 'alpha', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'india',
+        'aircraft', 'flight', 'heavy', 'super', 'traffic', 'approach', 'departure'
+    }
+    
+    # If it contains aviation keywords or has callsign pattern, it's meaningful
+    has_aviation_keyword = any(keyword in cleaned for keyword in aviation_keywords)
+    has_callsign_pattern = any(word for word in words if len(word) >= 2 and (word.isalnum() or any(c.isdigit() for c in word)))
+    
+    return has_aviation_keyword or has_callsign_pattern or len(words) >= 4
+
+
+def add_message(transcript: str, atc_data: Dict[str, Any], chunk_number: int):
+    """Add a new message to the JSON file"""
+    
+    # Filter out meaningless transcripts
+    if not is_meaningful_transcript(transcript):
+        logger.debug(f"🚫 Filtered out meaningless transcript: '{transcript}'")
+        return None
+    
+    # Extract callsigns
+    callsigns = atc_data.get('callsigns', [])
+    primary_callsign = callsigns[0].get('callsign', 'KSFO Tower') if callsigns else 'KSFO Tower'
+    
+    message = {
+        "id": str(uuid.uuid4()),
+        "timestamp": datetime.now().isoformat(),
+        "callsign": primary_callsign,
+        "message": transcript,
+        "isUrgent": atc_data.get('emergencies', False) or 'mayday' in transcript.lower() or 'emergency' in transcript.lower(),
+        "type": "atc_analysis",
+        "rawTranscript": transcript,
+        "instructions": [inst.get('type', '') for inst in atc_data.get('instructions', [])],
+        "runways": atc_data.get('runways', []),
+        "chunk": chunk_number,
+        "atc_data": atc_data
+    }
+    
+    # Load existing messages
+    messages = load_messages()
+    
+    # Add to front of list (newest first)
+    messages.insert(0, message)
+    
+    # Keep only last MAX_MESSAGES
+    if len(messages) > MAX_MESSAGES:
+        messages = messages[:MAX_MESSAGES]
+    
+    # Save back to file
+    save_messages(messages)
+    
+    logger.info(f"💬 Added meaningful message to JSON file. Total: {len(messages)}")
+    return message
 
 
 @asynccontextmanager
@@ -32,6 +164,9 @@ async def lifespan(app: FastAPI):
     # Setup logging
     setup_logging(settings.log_level)
     logger.info("🎧 Starting ATC Audio Agent - Full Version...")
+    
+    # Clean messages file on startup
+    clean_messages_file()
     
     # Validate configuration
     is_valid, errors = validate_settings()
@@ -46,6 +181,32 @@ async def lifespan(app: FastAPI):
     transcription_service = TranscriptionService(settings.groq_api_key)
     atc_agent = ATCAgent(settings.groq_api_key)
     
+    # Add initial system message (allow system messages through)
+    system_message = {
+        "id": str(uuid.uuid4()),
+        "timestamp": datetime.now().isoformat(),
+        "callsign": "SYSTEM",
+        "message": "🎧 ATC Audio Agent started - listening to KSFO Tower",
+        "isUrgent": False,
+        "type": "atc_analysis",
+        "rawTranscript": "🎧 ATC Audio Agent started - listening to KSFO Tower",
+        "instructions": [],
+        "runways": [],
+        "chunk": 0,
+        "atc_data": {
+            "callsigns": [{"callsign": "SYSTEM"}],
+            "instructions": [],
+            "runways": [],
+            "emergencies": False
+        }
+    }
+    
+    # Save system message directly
+    messages = load_messages()
+    messages.insert(0, system_message)
+    save_messages(messages)
+    logger.info(f"💬 Added system message to JSON file. Total: {len(messages)}")
+    
     # Start background audio processing
     if settings.liveatc_url:
         logger.info("🎵 Starting live ATC audio processing...")
@@ -55,7 +216,8 @@ async def lifespan(app: FastAPI):
     
     logger.info("✅ ATC Audio Agent started successfully!")
     logger.info(f"🛩️  Listening to: {settings.liveatc_url}")
-    logger.info(f"🌐 WebSocket: ws://localhost:{settings.port}/api/v1/ws")
+    logger.info(f"🌐 Messages API: http://localhost:{settings.port}/api/v1/messages")
+    logger.info(f"📄 Messages JSON: {MESSAGES_FILE}")
     
     yield
     
@@ -92,33 +254,39 @@ async def start_audio_processing(settings):
                 # Process with ATC language agent
                 atc_result = await atc_agent.process_transcript(transcript, "LIVE_ATC")
                 
-                # Log extracted data
-                callsigns = atc_result.get('callsigns', [])
-                instructions = atc_result.get('instructions', [])
-                runways = atc_result.get('runways', [])
+                # Add to message store only if meaningful
+                message = add_message(transcript, atc_result, chunk_number)
                 
-                if callsigns:
-                    logger.info(f"🛩️  Callsigns: {[cs.get('callsign') for cs in callsigns]}")
-                if instructions:
-                    logger.info(f"📋 Instructions: {[inst.get('type') for inst in instructions]}")
-                if runways:
-                    logger.info(f"🛬 Runways: {runways}")
-                
-                # Broadcast to WebSocket clients
-                message = {
-                    "type": "atc_analysis",
-                    "chunk": chunk_number,
-                    "transcript": transcript,
-                    "atc_data": atc_result,
-                    "stats": {
-                        "audio": audio_processor.get_stats(),
-                        "transcription": transcription_service.get_stats(),
-                        "atc": atc_agent.get_stats()
+                if message:  # Only process if message was actually added
+                    # Log extracted data
+                    callsigns = atc_result.get('callsigns', [])
+                    instructions = atc_result.get('instructions', [])
+                    runways = atc_result.get('runways', [])
+                    
+                    if callsigns:
+                        logger.info(f"🛩️  Callsigns: {[cs.get('callsign') for cs in callsigns]}")
+                    if instructions:
+                        logger.info(f"📋 Instructions: {[inst.get('type') for inst in instructions]}")
+                    if runways:
+                        logger.info(f"🛬 Runways: {runways}")
+                    
+                    # Also broadcast to WebSocket clients (if any)
+                    websocket_message = {
+                        "type": "atc_analysis",
+                        "chunk": chunk_number,
+                        "transcript": transcript,
+                        "atc_data": atc_result,
+                        "stats": {
+                            "audio": audio_processor.get_stats(),
+                            "transcription": transcription_service.get_stats(),
+                            "atc": atc_agent.get_stats()
+                        }
                     }
-                }
-                
-                await connection_manager.broadcast(message)
-                logger.info(f"📡 Broadcasted to {len(connection_manager.active_connections)} WebSocket clients")
+                    
+                    await connection_manager.broadcast(websocket_message)
+                    logger.info(f"📡 Message stored and broadcasted to {len(connection_manager.active_connections)} WebSocket clients")
+                else:
+                    logger.debug("🚫 Transcript filtered out as meaningless")
             else:
                 logger.debug("❌ No meaningful transcription")
         
@@ -168,8 +336,55 @@ async def root():
             "Live ATC audio streaming",
             "Real-time transcription",
             "Aviation language processing",
+            "REST API for messages",
             "WebSocket broadcasting"
         ]
+    }
+
+
+@app.get("/api/v1/messages")
+async def get_messages(limit: int = 50, since: str = None):
+    """Get recent ATC messages"""
+    messages = load_messages()
+    
+    # Filter by timestamp if 'since' parameter provided
+    if since:
+        try:
+            since_dt = datetime.fromisoformat(since.replace('Z', '+00:00'))
+            filtered_messages = [
+                msg for msg in messages 
+                if datetime.fromisoformat(msg['timestamp'].replace('Z', '+00:00')) > since_dt
+            ]
+        except ValueError:
+            filtered_messages = messages
+    else:
+        filtered_messages = messages
+    
+    # Apply limit
+    limited_messages = filtered_messages[:limit]
+    
+    return {
+        "messages": limited_messages,
+        "total": len(messages),
+        "returned": len(limited_messages),
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@app.get("/api/v1/callsigns")
+async def get_active_callsigns():
+    """Get list of unique callsigns from recent messages"""
+    messages = load_messages()
+    
+    callsigns = set()
+    for msg in messages:
+        if msg.get('callsign') and msg['callsign'] != 'SYSTEM':
+            callsigns.add(msg['callsign'])
+    
+    return {
+        "callsigns": sorted(list(callsigns)),
+        "count": len(callsigns),
+        "timestamp": datetime.now().isoformat()
     }
 
 
@@ -183,7 +398,8 @@ async def health_check():
             "transcription_service": transcription_service is not None,
             "atc_agent": atc_agent is not None,
         },
-        "audio_processing": background_task is not None and not background_task.done()
+        "audio_processing": background_task is not None and not background_task.done(),
+        "messages_stored": len(load_messages())
     }
 
 
@@ -200,6 +416,10 @@ async def get_stats():
         "transcription": transcription_service.get_stats(),
         "atc": atc_agent.get_stats(),
         "websocket": connection_manager.get_stats(),
+        "messages": {
+            "stored": len(load_messages()),
+            "max_capacity": MAX_MESSAGES
+        }
     }
 
 
@@ -216,7 +436,22 @@ async def test_transcript(data: dict):
     # Process with ATC agent
     result = await atc_agent.process_transcript(transcript, "TEST")
     
+    # Add to message store
+    message = add_message(transcript, result, 9999)
+    
     return {
         "input": transcript,
-        "result": result
+        "result": result,
+        "message": message
+    }
+
+
+@app.get("/api/v1/messages/json")
+async def get_messages_json():
+    """Get messages directly from JSON file"""
+    messages = load_messages()
+    return {
+        "messages": messages,
+        "total": len(messages),
+        "timestamp": datetime.now().isoformat()
     } 

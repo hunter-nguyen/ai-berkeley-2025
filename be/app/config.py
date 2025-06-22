@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     
     # Server Settings
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8002
     websocket_port: int = 8765
     
     # Logging

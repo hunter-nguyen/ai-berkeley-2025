@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ATCStatusBarProps {
   aircraftCount?: number;
+  selectedCallsign?: string | null;
+  onClearSelection?: () => void;
 }
 
-export default function ATCStatusBar({ aircraftCount = 0 }: ATCStatusBarProps) {
+export default function ATCStatusBar({ aircraftCount = 0, selectedCallsign, onClearSelection }: ATCStatusBarProps) {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -55,6 +58,21 @@ export default function ATCStatusBar({ aircraftCount = 0 }: ATCStatusBarProps) {
               <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
               <span className="text-amber-400">WXALERT</span>
             </div>
+            {/* Selected Callsign Display */}
+            {selectedCallsign && (
+              <div className="flex items-center space-x-2 bg-blue-900 bg-opacity-50 px-3 py-1 rounded border border-blue-500">
+                <span className="text-blue-400 font-bold">SELECTED:</span>
+                <span className="text-white font-mono">{selectedCallsign}</span>
+                {onClearSelection && (
+                  <button
+                    onClick={onClearSelection}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
