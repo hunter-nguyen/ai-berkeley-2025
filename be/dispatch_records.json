@@ -158,5 +158,16 @@
     "call_status": "calling",
     "initiated_at": "2025-06-22T13:01:38.024Z",
     "call_id": "5a26f1dd-6d9c-4541-b8bc-5928193ba7eb"
+  },
+  {
+    "id": "dispatch_1750598424979_emrg_mic",
+    "alert_id": "emrg_mic_1750597269160_u0cvue",
+    "callsign": "SWA3894",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "call_recipient": "fire_rescue",
+    "call_status": "calling",
+    "initiated_at": "2025-06-22T13:20:24.979Z",
+    "call_id": "663415e2-8c8f-4506-9cf1-3c20006f8b62"
   }
 ]

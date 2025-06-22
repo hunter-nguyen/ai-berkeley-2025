@@ -14,7 +14,7 @@ interface EmergencyAlert {
   source_timestamp: string;
   callsign: string;
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  category: 'EMERGENCY' | 'ALERT' | 'WARNING';
+  category: 'EMERGENCY' | 'ALERT' | 'WARNING' | 'REPORT';
   emergency_type: string;
   description: string;
   original_message: string;
@@ -69,33 +69,36 @@ export async function POST(request: NextRequest) {
     const groqData = await processWithGroq(transcript);
     console.log('🤖 Groq processed data:', groqData);
 
-    // Only create emergency alert if it's detected as an emergency
-    if (!isEmergency) {
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Transcript processed - no emergency detected',
-        emergency_created: false,
-        groq_data: groqData,
-        aircraft_mentioned: groqData.callsigns.length > 0 ? groqData.callsigns[0].callsign : null
-      });
-    }
-
     // Extract flight information from Groq data or fallback to manual extraction
     const flightInfo = groqData.callsigns.length > 0 
       ? groqData.callsigns[0] 
       : extractFlightInfo(transcript);
     
     const emergencyType = groqData.emergencies || detectEmergencyType(transcript);
+    const category = determineCategory(emergencyType);
     
-    // Create emergency alert
+    // Check if we should create an alert (emergency, warning, or report)
+    const shouldCreate = isEmergency || shouldCreateAlert(transcript, emergencyType);
+    
+    if (!shouldCreate) {
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Transcript processed - no alert needed',
+        emergency_created: false,
+        groq_data: groqData,
+        aircraft_mentioned: groqData.callsigns.length > 0 ? groqData.callsigns[0].callsign : null
+      });
+    }
+
+    // Create alert (emergency, warning, or report)
     const emergency: EmergencyAlert = {
-      id: `emrg_mic_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      id: `${category.toLowerCase()}_mic_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
       timestamp: new Date().toISOString(),
       source_message_id: `mic_${Date.now()}`,
       source_timestamp: new Date().toISOString(),
       callsign: flightInfo.callsign,
       severity: determineSeverity(emergencyType),
-      category: 'EMERGENCY',
+      category: category,
       emergency_type: emergencyType,
       description: generateDescription(emergencyType, transcript),
       original_message: transcript,
@@ -132,16 +135,21 @@ export async function POST(request: NextRequest) {
     console.log('📋 Alert details:', {
       callsign: emergency.callsign,
       type: emergency.emergency_type,
-      severity: emergency.severity
+      severity: emergency.severity,
+      category: emergency.category
     });
 
     return NextResponse.json({
       success: true,
       emergency_created: true,
+      alert_created: true,
       emergency_id: emergency.id,
+      alert_id: emergency.id,
       callsign: emergency.callsign,
       emergency_type: emergency.emergency_type,
+      alert_type: emergency.emergency_type,
       severity: emergency.severity,
+      category: emergency.category,
       groq_data: groqData,
       aircraft_mentioned: flightInfo.callsign
     });
@@ -416,6 +424,7 @@ function extractFlightInfo(transcript: string) {
 function detectEmergencyType(transcript: string): string {
   const text = transcript.toLowerCase();
   
+  // Emergency types (highest priority)
   const emergencyTypes = {
     'mayday_call': ['mayday'],
     'engine_failure': ['engine failure', 'engine fire', 'lost engine', 'engine out'],
@@ -429,26 +438,83 @@ function detectEmergencyType(transcript: string): string {
     'general_emergency': ['emergency', 'pan pan', 'declaring emergency']
   };
   
+  // Warning types (medium priority)
+  const warningTypes = {
+    'weather_warning': ['severe weather', 'turbulence', 'windshear', 'microburst', 'thunderstorm'],
+    'equipment_warning': ['equipment malfunction', 'system failure', 'warning light', 'caution'],
+    'traffic_warning': ['traffic alert', 'tcas', 'collision avoidance', 'traffic'],
+    'altitude_warning': ['altitude deviation', 'wrong altitude', 'climb immediately'],
+    'navigation_warning': ['navigation error', 'off course', 'waypoint', 'gps'],
+    'communication_warning': ['radio failure', 'comm failure', 'lost communication']
+  };
+  
+  // Report types (informational)
+  const reportTypes = {
+    'pirep_turbulence': ['pirep', 'pilot report', 'turbulence report', 'smooth', 'light chop', 'moderate turbulence'],
+    'pirep_weather': ['icing', 'cloud tops', 'visibility', 'weather report'],
+    'pirep_winds': ['wind report', 'headwind', 'tailwind', 'crosswind'],
+    'incident_report': ['incident', 'unusual occurrence', 'deviation', 'violation'],
+    'maintenance_report': ['maintenance', 'mechanical issue', 'inspection', 'logbook'],
+    'operational_report': ['delay', 'gate change', 'passenger issue', 'ground stop']
+  };
+  
+  // Check emergencies first
   for (const [type, keywords] of Object.entries(emergencyTypes)) {
     if (keywords.some(keyword => text.includes(keyword))) {
       return type;
     }
   }
   
-  return 'general_emergency';
+  // Check warnings
+  for (const [type, keywords] of Object.entries(warningTypes)) {
+    if (keywords.some(keyword => text.includes(keyword))) {
+      return type;
+    }
+  }
+  
+  // Check reports
+  for (const [type, keywords] of Object.entries(reportTypes)) {
+    if (keywords.some(keyword => text.includes(keyword))) {
+      return type;
+    }
+  }
+  
+  return 'general_communication';
 }
 
 function determineSeverity(emergencyType: string): 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' {
   const criticalTypes = ['mayday_call', 'engine_failure', 'fire_emergency', 'medical_emergency'];
-  const highTypes = ['bird_strike', 'fuel_emergency', 'hydraulic_failure', 'security_threat'];
+  const highTypes = ['bird_strike', 'fuel_emergency', 'hydraulic_failure', 'security_threat', 'weather_warning', 'equipment_warning'];
+  const mediumTypes = ['traffic_warning', 'altitude_warning', 'navigation_warning', 'communication_warning', 'incident_report'];
   
   if (criticalTypes.includes(emergencyType)) return 'CRITICAL';
   if (highTypes.includes(emergencyType)) return 'HIGH';
-  return 'MEDIUM';
+  if (mediumTypes.includes(emergencyType)) return 'MEDIUM';
+  return 'LOW';
+}
+
+function determineCategory(emergencyType: string): 'EMERGENCY' | 'WARNING' | 'REPORT' | 'ALERT' {
+  const emergencyTypes = ['mayday_call', 'engine_failure', 'fire_emergency', 'medical_emergency', 'bird_strike', 'fuel_emergency', 'hydraulic_failure', 'pressurization_emergency', 'security_threat', 'general_emergency'];
+  const warningTypes = ['weather_warning', 'equipment_warning', 'traffic_warning', 'altitude_warning', 'navigation_warning', 'communication_warning'];
+  const reportTypes = ['pirep_turbulence', 'pirep_weather', 'pirep_winds', 'incident_report', 'maintenance_report', 'operational_report'];
+  
+  if (emergencyTypes.includes(emergencyType)) return 'EMERGENCY';
+  if (warningTypes.includes(emergencyType)) return 'WARNING';
+  if (reportTypes.includes(emergencyType)) return 'REPORT';
+  return 'ALERT';
+}
+
+function shouldCreateAlert(transcript: string, emergencyType: string): boolean {
+  // Don't create alerts for general communication
+  if (emergencyType === 'general_communication') return false;
+  
+  // Create alerts for all emergencies, warnings, and reports
+  return true;
 }
 
 function generateDescription(emergencyType: string, transcript: string): string {
   const descriptions: Record<string, string> = {
+    // Emergency descriptions
     'mayday_call': 'MAYDAY emergency call - life threatening situation',
     'engine_failure': 'Engine failure reported - aircraft requesting emergency landing',
     'bird_strike': 'Bird strike on departure - aircraft returning to field',
@@ -458,14 +524,31 @@ function generateDescription(emergencyType: string, transcript: string): string 
     'hydraulic_failure': 'Hydraulic system failure - landing gear/control issues possible',
     'pressurization_emergency': 'Cabin pressurization emergency - descending to safe altitude',
     'security_threat': 'Security threat reported - law enforcement required',
-    'general_emergency': 'General emergency declared - nature to be determined'
+    'general_emergency': 'General emergency declared - nature to be determined',
+    
+    // Warning descriptions
+    'weather_warning': 'Severe weather conditions reported - possible hazard to flight',
+    'equipment_warning': 'Equipment malfunction or system warning - monitoring required',
+    'traffic_warning': 'Traffic conflict or TCAS alert - separation issue',
+    'altitude_warning': 'Altitude deviation or clearance issue - immediate correction needed',
+    'navigation_warning': 'Navigation system issue or course deviation',
+    'communication_warning': 'Radio or communication system failure',
+    
+    // Report descriptions
+    'pirep_turbulence': 'Pilot report - turbulence conditions',
+    'pirep_weather': 'Pilot report - weather conditions (icing, visibility, clouds)',
+    'pirep_winds': 'Pilot report - wind conditions and advisories',
+    'incident_report': 'Incident or unusual occurrence reported',
+    'maintenance_report': 'Maintenance issue or mechanical problem reported',
+    'operational_report': 'Operational report - delays, gate changes, or passenger issues'
   };
   
-  return descriptions[emergencyType] || 'Emergency situation reported';
+  return descriptions[emergencyType] || 'Alert reported - details in transcript';
 }
 
 function getRecommendedActions(emergencyType: string): string[] {
   const actions: Record<string, string[]> = {
+    // Emergency actions
     'mayday_call': [
       'Deploy all emergency services immediately',
       'Clear airspace for priority approach',
@@ -495,13 +578,90 @@ function getRecommendedActions(emergencyType: string): string[] {
       'Prepare for immediate landing',
       'Alert emergency vehicles as precaution',
       'Monitor fuel status'
+    ],
+    
+    // Warning actions
+    'weather_warning': [
+      'Issue weather advisories to other aircraft',
+      'Monitor conditions closely',
+      'Consider alternate routing',
+      'Update ATIS/weather information'
+    ],
+    'equipment_warning': [
+      'Monitor aircraft status',
+      'Provide vectors as needed',
+      'Alert maintenance when aircraft lands',
+      'Consider priority handling if needed'
+    ],
+    'traffic_warning': [
+      'Verify aircraft separation',
+      'Issue traffic advisories',
+      'Provide vectors for separation',
+      'Monitor closely until resolved'
+    ],
+    'altitude_warning': [
+      'Issue immediate altitude correction',
+      'Verify pilot acknowledgment',
+      'Monitor compliance',
+      'Coordinate with other sectors if needed'
+    ],
+    'navigation_warning': [
+      'Provide vectors to correct course',
+      'Verify navigation equipment status',
+      'Offer alternate navigation aids',
+      'Monitor until back on course'
+    ],
+    'communication_warning': [
+      'Attempt contact on alternate frequencies',
+      'Coordinate with adjacent sectors',
+      'Monitor for restoration of communications',
+      'Use light signals if necessary'
+    ],
+    
+    // Report actions
+    'pirep_turbulence': [
+      'Disseminate turbulence report to other aircraft',
+      'Update weather briefings',
+      'Consider altitude changes for affected aircraft',
+      'Log report for meteorological services'
+    ],
+    'pirep_weather': [
+      'Distribute weather information to pilots',
+      'Update ATIS if significant',
+      'Coordinate with weather services',
+      'Document for future reference'
+    ],
+    'pirep_winds': [
+      'Update wind information for departures/arrivals',
+      'Adjust runway configuration if needed',
+      'Inform tower of wind conditions',
+      'Log for meteorological analysis'
+    ],
+    'incident_report': [
+      'Document incident details',
+      'Notify appropriate authorities',
+      'Coordinate investigation if required',
+      'Follow up on corrective actions'
+    ],
+    'maintenance_report': [
+      'Log maintenance issue',
+      'Coordinate with ground crew',
+      'Schedule inspection upon landing',
+      'Monitor flight progress'
+    ],
+    'operational_report': [
+      'Update operational status',
+      'Coordinate with ground operations',
+      'Communicate delays to affected flights',
+      'Monitor for resolution'
     ]
   };
   
   return actions[emergencyType] || [
     'Monitor situation closely',
     'Coordinate appropriate response',
-    'Maintain communication with aircraft'
+    'Maintain communication with aircraft',
+    'Document for follow-up'
   ];
 }
 

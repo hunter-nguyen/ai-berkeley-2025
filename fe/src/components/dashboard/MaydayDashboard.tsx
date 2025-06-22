@@ -127,38 +127,99 @@ export default function MaydayDashboard() {
         }
         
         if (result.emergency_created) {
-          // Show notification
+          // Show notification based on alert category
           const toast = document.createElement('div');
-          toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-lg font-mono text-sm z-[9999] shadow-lg';
+          
+          let bgColor = 'bg-red-600/95';
+          let borderColor = 'border-red-500/60';
+          let icon = '🚨';
+          let title = 'EMERGENCY DETECTED';
+          let message = 'Check alerts panel for dispatch options';
+          
+          if (result.category === 'WARNING') {
+            bgColor = 'bg-orange-600/95';
+            borderColor = 'border-orange-500/60';
+            icon = '⚠️';
+            title = 'WARNING ALERT';
+            message = 'Situation requires monitoring';
+          } else if (result.category === 'REPORT') {
+            bgColor = 'bg-blue-600/95';
+            borderColor = 'border-blue-500/60';
+            icon = '📋';
+            title = 'REPORT LOGGED';
+            message = 'Information recorded for awareness';
+          }
+          
+          toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 ${bgColor} backdrop-blur-sm text-white px-6 py-4 rounded-lg font-mono text-sm z-[9999] shadow-2xl border ${borderColor} max-w-sm`;
           toast.innerHTML = `
-            <div class="font-bold">🚨 EMERGENCY DETECTED</div>
-            <div class="text-xs mt-1">
-              ${result.callsign} - ${result.emergency_type.replace('_', ' ').toUpperCase()}<br/>
-              Check alerts panel for dispatch options
+            <div class="flex items-center space-x-3 mb-2">
+              <span class="text-lg">${icon}</span>
+              <div class="font-bold tracking-wide">${title}</div>
+            </div>
+            <div class="text-xs leading-relaxed opacity-90">
+              <div class="font-semibold">${result.callsign} - ${result.emergency_type.replace('_', ' ').toUpperCase()}</div>
+              <div class="mt-1">${message}</div>
             </div>
           `;
           document.body.appendChild(toast);
           
+          // Add entrance animation
+          toast.style.transform = 'translate(-50%, -20px)';
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            toast.style.transition = 'all 0.3s ease-out';
+            toast.style.transform = 'translate(-50%, 0)';
+            toast.style.opacity = '1';
+          }, 10);
+          
           setTimeout(() => {
             if (document.body.contains(toast)) {
-              document.body.removeChild(toast);
+              toast.style.transition = 'all 0.3s ease-in';
+              toast.style.transform = 'translate(-50%, -20px)';
+              toast.style.opacity = '0';
+              setTimeout(() => {
+                if (document.body.contains(toast)) {
+                  document.body.removeChild(toast);
+                }
+              }, 300);
             }
-          }, 5000);
+          }, result.category === 'EMERGENCY' ? 5000 : 3000);
         } else if (result.aircraft_mentioned && result.aircraft_mentioned !== 'UNKNOWN') {
           // Show aircraft selection notification for non-emergency mentions
           const toast = document.createElement('div');
-          toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg font-mono text-sm z-[9999] shadow-lg';
+          toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600/95 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-mono text-sm z-[9999] shadow-xl border border-blue-500/60';
           toast.innerHTML = `
-            <div class="font-bold">✈️ AIRCRAFT SELECTED</div>
-            <div class="text-xs mt-1">
-              ${result.aircraft_mentioned} - Selected from transcript
+            <div class="flex items-center space-x-3">
+              <span class="text-lg">✈️</span>
+              <div>
+                <div class="font-bold">AIRCRAFT SELECTED</div>
+                <div class="text-xs opacity-90 mt-1">
+                  ${result.aircraft_mentioned} - Selected from transcript
+                </div>
+              </div>
             </div>
           `;
           document.body.appendChild(toast);
           
+          // Add entrance animation
+          toast.style.transform = 'translate(-50%, -20px)';
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            toast.style.transition = 'all 0.3s ease-out';
+            toast.style.transform = 'translate(-50%, 0)';
+            toast.style.opacity = '1';
+          }, 10);
+          
           setTimeout(() => {
             if (document.body.contains(toast)) {
-              document.body.removeChild(toast);
+              toast.style.transition = 'all 0.3s ease-in';
+              toast.style.transform = 'translate(-50%, -20px)';
+              toast.style.opacity = '0';
+              setTimeout(() => {
+                if (document.body.contains(toast)) {
+                  document.body.removeChild(toast);
+                }
+              }, 300);
             }
           }, 3000);
         }
@@ -210,22 +271,22 @@ export default function MaydayDashboard() {
           />
         </div>
 
-        {/* Left Side - Demo Mode Toggle */}
+        {/* Left Side - Enhanced Filters Toggle */}
         <AnimatePresence>
           {!showFilters && (
             <motion.div
               initial={{ x: -50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -50, opacity: 0 }}
-              className="absolute left-3 top-3 z-20 space-y-2"
+              className="absolute left-4 top-4 z-20"
             >
-              {/* Filters Toggle */}
+              {/* Enhanced Filters Toggle */}
               <button
                 onClick={() => setShowFilters(true)}
-                className="bg-black/80 text-white p-2 rounded-lg hover:bg-black/90 transition-colors border border-gray-600"
-                title="Show filters & layers"
+                className="bg-gray-900/90 backdrop-blur-sm text-white p-3 rounded-lg hover:bg-gray-800/90 transition-all duration-200 border border-gray-600/60 shadow-lg group"
+                title="Show radar layers & filters"
               >
-                <AdjustmentsHorizontalIcon className="w-5 h-5" />
+                <AdjustmentsHorizontalIcon className="w-5 h-5 group-hover:text-blue-400 transition-colors" />
               </button>
             </motion.div>
           )}
@@ -238,48 +299,69 @@ export default function MaydayDashboard() {
               initial={{ x: -300, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
-              className="absolute left-0 top-0 bottom-0 w-64 bg-black/90 backdrop-blur-sm border-r border-gray-700 z-20 p-4"
+              className="absolute left-0 top-0 bottom-0 w-72 bg-gray-900/95 backdrop-blur-sm border-r border-gray-600/60 z-20 p-4 shadow-xl"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-mono text-sm font-bold">LAYERS & FILTERS</h3>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-white font-mono text-sm font-bold tracking-wide">RADAR LAYERS & FILTERS</h3>
                 <button
                   onClick={() => setShowFilters(false)}
-                  className="text-gray-400 hover:text-white"
+                  className="text-gray-400 hover:text-white p-1 rounded hover:bg-gray-700/50 transition-all duration-200"
                 >
-                  ✕
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
               
-              <div className="space-y-3 text-sm">
-                <div className="text-gray-300">
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" defaultChecked className="rounded" />
-                    <span>Aircraft Traffic</span>
-                  </label>
+              <div className="space-y-4">
+                <div className="border-b border-gray-700/50 pb-4">
+                  <h4 className="text-gray-300 font-mono text-xs font-semibold mb-3 uppercase tracking-wider">Traffic Display</h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-3 text-sm text-gray-300 hover:text-white cursor-pointer transition-colors">
+                      <input type="checkbox" defaultChecked className="rounded text-blue-500 focus:ring-blue-500 focus:ring-2" />
+                      <span>Aircraft Traffic</span>
+                    </label>
+                    <label className="flex items-center space-x-3 text-sm text-gray-300 hover:text-white cursor-pointer transition-colors">
+                      <input type="checkbox" defaultChecked className="rounded text-blue-500 focus:ring-blue-500 focus:ring-2" />
+                      <span>Flight Trails</span>
+                    </label>
+                  </div>
                 </div>
-                <div className="text-gray-300">
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" defaultChecked className="rounded" />
-                    <span>Alert Zones</span>
-                  </label>
+                
+                <div className="border-b border-gray-700/50 pb-4">
+                  <h4 className="text-gray-300 font-mono text-xs font-semibold mb-3 uppercase tracking-wider">Airspace</h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-3 text-sm text-gray-300 hover:text-white cursor-pointer transition-colors">
+                      <input type="checkbox" defaultChecked className="rounded text-green-500 focus:ring-green-500 focus:ring-2" />
+                      <span>Control Zones</span>
+                    </label>
+                    <label className="flex items-center space-x-3 text-sm text-gray-300 hover:text-white cursor-pointer transition-colors">
+                      <input type="checkbox" defaultChecked className="rounded text-green-500 focus:ring-green-500 focus:ring-2" />
+                      <span>Sector Boundaries</span>
+                    </label>
+                    <label className="flex items-center space-x-3 text-sm text-gray-300 hover:text-white cursor-pointer transition-colors">
+                      <input type="checkbox" className="rounded text-green-500 focus:ring-green-500 focus:ring-2" />
+                      <span>Waypoints</span>
+                    </label>
+                  </div>
                 </div>
-                <div className="text-gray-300">
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded" />
-                    <span>Weather Layers</span>
-                  </label>
-                </div>
-                <div className="text-gray-300">
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded" />
-                    <span>Airspace Sectors</span>
-                  </label>
-                </div>
-                <div className="text-gray-300">
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded" />
-                    <span>Waypoints</span>
-                  </label>
+                
+                <div className="border-b border-gray-700/50 pb-4">
+                  <h4 className="text-gray-300 font-mono text-xs font-semibold mb-3 uppercase tracking-wider">Weather & Safety</h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-3 text-sm text-gray-300 hover:text-white cursor-pointer transition-colors">
+                      <input type="checkbox" className="rounded text-yellow-500 focus:ring-yellow-500 focus:ring-2" />
+                      <span>Weather Layers</span>
+                    </label>
+                    <label className="flex items-center space-x-3 text-sm text-gray-300 hover:text-white cursor-pointer transition-colors">
+                      <input type="checkbox" defaultChecked className="rounded text-red-500 focus:ring-red-500 focus:ring-2" />
+                      <span>TFRs & NOTAMs</span>
+                    </label>
+                    <label className="flex items-center space-x-3 text-sm text-gray-300 hover:text-white cursor-pointer transition-colors">
+                      <input type="checkbox" defaultChecked className="rounded text-orange-500 focus:ring-orange-500 focus:ring-2" />
+                      <span>Alert Zones</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -318,20 +400,31 @@ export default function MaydayDashboard() {
             />
           </div>
 
-          {/* Floating Action Button - Only for Emergency Alerts */}
+          {/* Enhanced Floating Action Button - Only for Emergency Alerts */}
           <div className="absolute bottom-4 right-4 space-y-2">
             {!showEmergencyAlerts && criticalAlertsCount > 0 && (
               <motion.button
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                whileHover={{ scale: 1.1 }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowEmergencyAlerts(true)}
-                className="bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-colors relative"
+                className="relative bg-red-600/90 backdrop-blur-sm text-white p-4 rounded-full shadow-2xl hover:bg-red-500/90 transition-all duration-300 border border-red-500/50 group"
               >
-                <BellIcon className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                {/* Pulsing glow effect for critical alerts */}
+                <div className="absolute inset-0 rounded-full bg-red-500/30 animate-ping"></div>
+                <div className="absolute inset-0 rounded-full bg-red-500/20 animate-pulse"></div>
+                
+                <BellIcon className="w-6 h-6 relative z-10 group-hover:animate-bounce" />
+                
+                {/* Enhanced badge */}
+                <motion.span 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="absolute -top-2 -right-2 bg-white text-red-600 text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-red-600"
+                >
                   {criticalAlertsCount}
-                </span>
+                </motion.span>
               </motion.button>
             )}
           </div>

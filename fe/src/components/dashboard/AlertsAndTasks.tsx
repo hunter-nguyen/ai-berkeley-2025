@@ -11,7 +11,8 @@ import {
   CheckIcon,
   MapPinIcon,
   EyeSlashIcon,
-  EyeIcon
+  EyeIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface EmergencyAlert {
@@ -21,7 +22,7 @@ interface EmergencyAlert {
   source_timestamp: string;
   callsign: string;
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  category: 'EMERGENCY' | 'ALERT' | 'WARNING';
+  category: 'EMERGENCY' | 'WARNING' | 'REPORT' | 'ALERT';
   emergency_type: string;
   description: string;
   original_message: string;
@@ -202,13 +203,31 @@ export default function AlertsAndTasks({ isCollapsed, onToggle }: AlertsAndTasks
     );
   };
 
-  const getAlertColor = (severity: string) => {
+  const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'CRITICAL': return 'text-red-400 border-red-500';
-      case 'HIGH': return 'text-orange-400 border-orange-500';
-      case 'MEDIUM': return 'text-yellow-400 border-yellow-500';
-      case 'LOW': return 'text-blue-400 border-blue-500';
-      default: return 'text-gray-400 border-gray-500';
+      case 'CRITICAL': return 'text-red-400 bg-red-500/10 border-red-500/50';
+      case 'HIGH': return 'text-orange-400 bg-orange-500/10 border-orange-500/50';
+      case 'MEDIUM': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/50';
+      case 'LOW': return 'text-blue-400 bg-blue-500/10 border-blue-500/50';
+      default: return 'text-gray-400 bg-gray-500/10 border-gray-500/50';
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'EMERGENCY': return '🚨';
+      case 'WARNING': return '⚠️';
+      case 'REPORT': return '📋';
+      default: return '📢';
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'EMERGENCY': return 'text-red-400 bg-red-500/15 border-red-500/40';
+      case 'WARNING': return 'text-orange-400 bg-orange-500/15 border-orange-500/40';
+      case 'REPORT': return 'text-blue-400 bg-blue-500/15 border-blue-500/40';
+      default: return 'text-gray-400 bg-gray-500/15 border-gray-500/40';
     }
   };
 
@@ -231,10 +250,14 @@ export default function AlertsAndTasks({ isCollapsed, onToggle }: AlertsAndTasks
     return (
       <motion.div
         animate={{ height: isCollapsed ? 50 : '100%' }}
-        className="bg-gray-900 border border-gray-500 rounded-lg shadow-lg overflow-hidden h-full flex flex-col"
+        className="bg-gray-900/95 backdrop-blur-sm border border-gray-600/60 rounded-lg shadow-xl overflow-hidden h-full flex flex-col"
       >
-        <div className="flex items-center justify-center p-4">
-          <div className="text-gray-400 font-mono text-xs">Loading emergencies...</div>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <div className="text-gray-300 font-mono text-sm font-semibold">Loading Emergency System</div>
+            <div className="text-gray-500 font-mono text-xs mt-1">Initializing real-time alerts...</div>
+          </div>
         </div>
       </motion.div>
     );
@@ -244,34 +267,47 @@ export default function AlertsAndTasks({ isCollapsed, onToggle }: AlertsAndTasks
     <motion.div
       animate={{ height: isCollapsed ? 50 : '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className={`bg-gray-900 border rounded-lg shadow-lg overflow-hidden h-full flex flex-col ${
-        criticalAlerts.length > 0 ? 'border-red-500' : 'border-gray-500'
+      className={`bg-gray-900/95 backdrop-blur-sm border rounded-lg shadow-xl overflow-hidden h-full flex flex-col ${
+        criticalAlerts.length > 0 ? 'border-red-500/60 shadow-red-500/20' : 'border-gray-600/60'
       }`}
     >
-      {/* Compact Header */}
+      {/* Enhanced Header */}
       <div 
-        className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-800 transition-colors flex-shrink-0"
+        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-800/50 transition-all duration-200 flex-shrink-0 border-b border-gray-700/50"
         onClick={onToggle}
       >
-        <div className="flex items-center space-x-2">
-          <ExclamationTriangleIcon className={`w-4 h-4 ${criticalAlerts.length > 0 ? 'text-red-400' : 'text-gray-400'}`} />
-          <h3 className={`font-semibold font-mono text-xs ${criticalAlerts.length > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-            {criticalAlerts.length > 0 ? 'EMERGENCY' : 'ALERTS'}
-          </h3>
-          {criticalAlerts.length > 0 && (
-            <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
-              {criticalAlerts.length}
-            </span>
-          )}
+        <div className="flex items-center space-x-3">
+          <div className={`p-1.5 rounded-md ${criticalAlerts.length > 0 ? 'bg-red-500/20 text-red-400' : 'bg-gray-700/50 text-gray-400'}`}>
+            <ExclamationTriangleIcon className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className={`font-bold font-mono text-sm tracking-wide ${criticalAlerts.length > 0 ? 'text-red-400' : 'text-gray-300'}`}>
+              {criticalAlerts.length > 0 ? 'EMERGENCY ALERTS' : 'SYSTEM ALERTS'}
+            </h3>
+            <div className="text-xs text-gray-500 font-mono">
+              {alerts.length} total • {criticalAlerts.length} critical
+            </div>
+          </div>
         </div>
-        <div className="flex items-center space-x-1">
-          {error && (
-            <span className="text-red-400 text-xs">!</span>
+        <div className="flex items-center space-x-2">
+          {criticalAlerts.length > 0 && (
+            <motion.span 
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="bg-red-600 text-white text-xs px-2.5 py-1 rounded-full font-bold shadow-lg"
+            >
+              {criticalAlerts.length}
+            </motion.span>
           )}
-          {isCollapsed ? 
-            <ChevronDownIcon className="w-3 h-3 text-gray-400" /> : 
-            <ChevronUpIcon className="w-3 h-3 text-gray-400" />
-          }
+          {error && (
+            <span className="text-red-400 text-xs bg-red-500/20 px-2 py-1 rounded">!</span>
+          )}
+          <motion.div
+            animate={{ rotate: isCollapsed ? 0 : 180 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+          </motion.div>
         </div>
       </div>
 
@@ -291,112 +327,158 @@ export default function AlertsAndTasks({ isCollapsed, onToggle }: AlertsAndTasks
               </div>
             )}
 
-            {/* Controls */}
-            <div className="p-2 border-b border-gray-700 flex justify-between items-center">
-              <div className="text-gray-400 text-xs font-mono">
-                {alerts.length} total | {criticalAlerts.length} critical
+            {/* Enhanced Controls */}
+            <div className="px-3 py-2 bg-gray-800/30 border-b border-gray-700/50 flex justify-between items-center">
+              <div className="flex items-center space-x-4">
+                <div className="text-gray-400 text-xs font-mono">
+                  <span className="text-white font-semibold">{alerts.length}</span> total
+                </div>
+                <div className="w-px h-4 bg-gray-600"></div>
+                <div className="text-gray-400 text-xs font-mono">
+                  <span className={`font-semibold ${criticalAlerts.length > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                    {criticalAlerts.length}
+                  </span> critical
+                </div>
               </div>
               <button
                 onClick={() => setShowAllAlerts(!showAllAlerts)}
-                className="text-gray-400 hover:text-white text-xs font-mono flex items-center space-x-1"
+                className="text-gray-400 hover:text-white text-xs font-mono flex items-center space-x-1.5 px-2 py-1 rounded hover:bg-gray-700/50 transition-all duration-200"
               >
                 {showAllAlerts ? <EyeSlashIcon className="w-3 h-3" /> : <EyeIcon className="w-3 h-3" />}
                 <span>{showAllAlerts ? 'Critical Only' : 'Show All'}</span>
               </button>
             </div>
 
-            {/* Alerts List */}
+            {/* Enhanced Alerts List */}
             <div className="flex-1 overflow-y-auto">
               {visibleAlerts.length === 0 ? (
-                <div className="p-4 text-center">
-                  <CheckIcon className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <div className="text-green-400 text-xs font-mono">All Clear</div>
-                  <div className="text-gray-500 text-xs">No active emergencies</div>
+                <div className="p-6 text-center">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <CheckIcon className="w-6 h-6 text-green-400" />
+                  </div>
+                  <div className="text-green-400 text-sm font-mono font-semibold mb-1">All Systems Clear</div>
+                  <div className="text-gray-500 text-xs">No active alerts requiring attention</div>
                 </div>
               ) : (
-                <div className="space-y-1 p-1">
+                <div className="space-y-2 p-3">
                   {visibleAlerts.map((alert) => (
                     <motion.div
                       key={alert.id}
                       initial={{ x: 300, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      className={`p-2 rounded border-l-4 ${getAlertColor(alert.severity)} ${
-                        alert.dispatched ? 'bg-gray-800/50' : 'bg-gray-800'
-                      } hover:bg-gray-700 transition-colors`}
+                      className={`relative p-3 rounded-lg border-l-4 ${getSeverityColor(alert.severity)} ${
+                        alert.dispatched ? 'bg-gray-800/30' : 'bg-gray-800/60'
+                      } hover:bg-gray-700/60 transition-all duration-200 backdrop-blur-sm`}
                     >
                       {/* Alert Header */}
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
-                          <span className="text-white font-mono text-xs font-bold">
+                          <span className="text-white font-mono text-sm font-bold tracking-wide">
                             {alert.callsign}
                           </span>
-                          <span className={`text-xs px-1.5 py-0.5 rounded ${getAlertColor(alert.severity)} bg-opacity-20`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-mono font-semibold ${getSeverityColor(alert.severity)}`}>
                             {alert.severity}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-2">
                           <span className="text-gray-400 text-xs font-mono">
                             {formatTime(alert.source_timestamp)}
                           </span>
                           <button
                             onClick={() => togglePin(alert.id)}
-                            className={`w-3 h-3 ${alert.pinned ? 'text-yellow-400' : 'text-gray-500'} hover:text-yellow-400`}
+                            className={`p-1 rounded transition-colors ${alert.pinned ? 'text-yellow-400 bg-yellow-400/20' : 'text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/10'}`}
                           >
                             📌
                           </button>
                         </div>
                       </div>
 
-                      {/* Alert Content */}
-                      <div className="text-gray-300 text-xs mb-2">
-                        <div className="font-semibold mb-1">{alert.description}</div>
-                        <div className="text-gray-400 italic">"{alert.original_message}"</div>
+                      {/* Enhanced Alert Content */}
+                      <div className="mb-3">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <div className="text-gray-200 text-sm font-medium leading-snug mb-1">
+                              {alert.description}
+                            </div>
+                            <div className="text-gray-400 text-xs italic bg-gray-900/40 p-2 rounded border-l-2 border-gray-600">
+                              "{alert.original_message}"
+                            </div>
+                          </div>
+                          <span className={`ml-3 text-xs px-2 py-1 rounded-full font-mono font-semibold border ${getCategoryColor(alert.category)}`}>
+                            {alert.category}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Confidence & Type */}
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-400 text-xs">
-                          {alert.emergency_type.replace('_', ' ').toUpperCase()}
-                        </span>
-                        <div className="flex items-center space-x-1">
-                          <div className="w-12 bg-gray-700 rounded-full h-1">
+                      {/* Enhanced Confidence & Type */}
+                      <div className="flex items-center justify-between mb-3 text-xs">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-400 font-mono">
+                            {getCategoryIcon(alert.category)} {alert.emergency_type.replace('_', ' ').toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-500 font-mono">Confidence:</span>
+                          <div className="w-16 bg-gray-700/50 rounded-full h-1.5 overflow-hidden">
                             <div
-                              className="bg-blue-500 h-1 rounded-full"
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                alert.confidence > 0.8 ? 'bg-green-400' : 
+                                alert.confidence > 0.6 ? 'bg-yellow-400' : 'bg-orange-400'
+                              }`}
                               style={{ width: `${alert.confidence * 100}%` }}
                             ></div>
                           </div>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-gray-400 font-mono font-semibold">
                             {Math.round(alert.confidence * 100)}%
                           </span>
                         </div>
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center space-x-1">
+                      {/* Enhanced Actions */}
+                      <div className="flex items-center gap-2">
                         {!alert.acknowledged && (
                           <button
                             onClick={() => handleAcknowledge(alert.id)}
-                            className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded font-mono"
+                            className="px-3 py-1.5 bg-blue-600/80 hover:bg-blue-600 text-white text-xs rounded font-mono font-semibold transition-all duration-200 flex items-center space-x-1"
                           >
-                            ACK
+                            <CheckIcon className="w-3 h-3" />
+                            <span>ACK</span>
                           </button>
                         )}
                         
-                        {!alert.dispatched && alert.severity === 'CRITICAL' && (
+                        {alert.category === 'EMERGENCY' && !alert.dispatched && (
                           <button
                             onClick={() => handleDispatch(alert.id)}
                             disabled={dispatchingAlert === alert.id}
-                            className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded font-mono flex items-center space-x-1 disabled:opacity-50"
+                            className="flex-1 px-3 py-1.5 bg-red-600/90 hover:bg-red-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded font-mono font-bold transition-all duration-200 flex items-center justify-center space-x-1.5 shadow-md"
                           >
-                            <PhoneIcon className="w-3 h-3" />
-                            <span>{dispatchingAlert === alert.id ? 'DISPATCHING...' : 'DISPATCH'}</span>
+                            {dispatchingAlert === alert.id ? (
+                              <>
+                                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span>DISPATCHING...</span>
+                              </>
+                            ) : (
+                              <>
+                                <PhoneIcon className="w-3 h-3" />
+                                <span>DISPATCH</span>
+                              </>
+                            )}
                           </button>
                         )}
 
                         {alert.dispatched && (
-                          <span className="px-2 py-1 bg-green-600 text-white text-xs rounded font-mono">
-                            ✅ DISPATCHED
-                          </span>
+                          <div className="flex-1 px-3 py-1.5 bg-green-600/80 text-white text-xs rounded font-mono font-semibold flex items-center justify-center space-x-1.5">
+                            <CheckIcon className="w-3 h-3" />
+                            <span>DISPATCHED</span>
+                          </div>
+                        )}
+                        
+                        {/* Category-specific status for non-emergency alerts */}
+                        {alert.category !== 'EMERGENCY' && !alert.dispatched && (
+                          <div className={`flex-1 px-3 py-1.5 text-xs rounded font-mono text-center border ${getCategoryColor(alert.category)}`}>
+                            {alert.category === 'WARNING' ? '⚠️ MONITORING' : 
+                             alert.category === 'REPORT' ? '📋 LOGGED' : '📢 NOTED'}
+                          </div>
                         )}
                       </div>
                     </motion.div>

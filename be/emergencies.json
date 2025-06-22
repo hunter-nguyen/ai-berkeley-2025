@@ -1,5 +1,47 @@
 [
   {
+    "id": "warning_mic_1750598865817_zrln1q",
+    "timestamp": "2025-06-22T13:27:45.817Z",
+    "source_message_id": "mic_1750598865817",
+    "source_timestamp": "2025-06-22T13:27:45.817Z",
+    "callsign": "UNKNOWN",
+    "severity": "HIGH",
+    "category": "WARNING",
+    "emergency_type": "weather_warning",
+    "description": "Severe weather conditions reported - possible hazard to flight",
+    "original_message": "Alex report a pirate there was pirate p i r e p there's some turbulence in the area",
+    "raw_transcript": "Alex report a pirate there was pirate p i r e p there's some turbulence in the area",
+    "recommended_actions": [
+      "Issue weather advisories to other aircraft",
+      "Monitor conditions closely",
+      "Consider alternate routing",
+      "Update ATIS/weather information"
+    ],
+    "confidence": 0.95,
+    "status": "ACKNOWLEDGED",
+    "acknowledged": true,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [
+        {
+          "type": "report",
+          "callsign": null,
+          "instruction": "report a pirate",
+          "runway": null,
+          "details": "pirate p i r e p, turbulence in the area"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "report of pirate and turbulence in the area"
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T13:28:00.157Z"
+  },
+  {
     "id": "emrg_mic_1750597292807_g99brz",
     "timestamp": "2025-06-22T13:01:32.807Z",
     "source_message_id": "mic_1750597292807",
@@ -68,9 +110,9 @@
       "Prepare for emergency landing"
     ],
     "confidence": 0.95,
-    "status": "ACTIVE",
+    "status": "DISPATCHED",
     "acknowledged": false,
-    "escalated": false,
+    "escalated": true,
     "atc_data": {
       "callsigns": [
         {
@@ -96,7 +138,8 @@
       "summary": "MICROPHONE TRANSCRIPT - mayday_call detected for SWA3894"
     },
     "created_by": "microphone_demo_system",
-    "updated_at": "2025-06-22T13:01:09.161Z"
+    "updated_at": "2025-06-22T13:20:25.267Z",
+    "dispatched": true
   },
   {
     "id": "emrg_mic_1750597005060_2xpvrd",
@@ -117,8 +160,8 @@
       "Prepare for emergency landing"
     ],
     "confidence": 0.95,
-    "status": "ACTIVE",
-    "acknowledged": false,
+    "status": "ACKNOWLEDGED",
+    "acknowledged": true,
     "escalated": false,
     "atc_data": {
       "callsigns": [
@@ -143,7 +186,7 @@
       "summary": "MICROPHONE TRANSCRIPT - mayday_call detected for UNKNOWN"
     },
     "created_by": "microphone_demo_system",
-    "updated_at": "2025-06-22T12:56:45.060Z"
+    "updated_at": "2025-06-22T13:38:06.194Z"
   },
   {
     "id": "emrg_mic_1750596722752_bntl70",
