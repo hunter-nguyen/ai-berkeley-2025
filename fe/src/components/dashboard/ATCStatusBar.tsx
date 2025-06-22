@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { loadAirportData, formatWindDisplay, formatTemperature, formatClouds, type AirportData } from '@/utils/airportData';
 
 interface ATCStatusBarProps {
   aircraftCount?: number;
@@ -12,6 +13,7 @@ interface ATCStatusBarProps {
 export default function ATCStatusBar({ aircraftCount = 0, selectedCallsign, onClearSelection }: ATCStatusBarProps) {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [airportData, setAirportData] = useState<AirportData | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -21,7 +23,18 @@ export default function ATCStatusBar({ aircraftCount = 0, selectedCallsign, onCl
       setCurrentTime(new Date());
     }, 1000);
     
-    return () => clearInterval(timer);
+    // Load airport data
+    loadAirportData().then(setAirportData);
+    
+    // Refresh airport data every 5 minutes
+    const airportTimer = setInterval(() => {
+      loadAirportData().then(setAirportData);
+    }, 5 * 60 * 1000);
+    
+    return () => {
+      clearInterval(timer);
+      clearInterval(airportTimer);
+    };
   }, []);
 
   const formatTime = (date: Date) => {
@@ -93,12 +106,32 @@ export default function ATCStatusBar({ aircraftCount = 0, selectedCallsign, onCl
             </div>
           </div>
           <div className="text-center">
+            <div className="text-xs text-gray-400">TEMP</div>
+            <div className="text-sm font-bold text-orange-400">
+              {airportData ? formatTemperature(airportData.airport_data.temp) : '--°C'}
+            </div>
+          </div>
+          <div className="text-center">
             <div className="text-xs text-gray-400">VIS</div>
-            <div className="text-sm font-bold text-white">10SM</div>
+            <div className="text-sm font-bold text-white">
+              {airportData ? airportData.airport_data.visib : '10SM'}
+            </div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-400">WIND</div>
-            <div className="text-sm font-bold text-white">280/15G22</div>
+            <div className="text-sm font-bold text-white">
+              {airportData ? formatWindDisplay(
+                airportData.airport_data.wdir, 
+                airportData.airport_data.wspd, 
+                airportData.airport_data.wgst
+              ) : '280/15'}
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-gray-400">SKY</div>
+            <div className="text-sm font-bold text-cyan-400">
+              {airportData ? formatClouds(airportData.airport_data.clouds) : 'CLR'}
+            </div>
           </div>
         </div>
 

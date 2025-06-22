@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, Polygon } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { flightRadar24 } from '@/utils/api/flightradar24';
+import { flightRadar24, AIRCRAFT_CONFIG } from '@/utils/api/flightradar24';
 import { aviationSafety, type TFR, type NOTAM, type SIGMET } from '@/utils/api/aviationSafety';
 
 // Add custom CSS for popup styling
@@ -1014,8 +1014,8 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
           </Marker>
         ))}
 
-        {/* Aircraft Markers - Limited to 10 for performance */}
-        {aircraft.slice(0, 10).map((plane) => (
+        {/* Aircraft Markers - Configurable limit for performance */}
+        {aircraft.slice(0, AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY).map((plane) => (
           <Marker
             key={plane.id}
             position={[plane.lat, plane.lng]}

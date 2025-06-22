@@ -27,6 +27,15 @@ interface Aircraft {
 
 const API_KEY = process.env.NEXT_PUBLIC_FLIGHTRADAR24_API_KEY;
 
+// ✈️ AIRCRAFT DISPLAY CONFIGURATION
+// Adjust these values to control how many aircraft are shown
+export const AIRCRAFT_CONFIG = {
+  MAX_AIRCRAFT_DISPLAY: 20,  // Maximum aircraft to show on map (change this!)
+  API_FETCH_LIMIT: 25,       // How many to fetch from API (should be higher than display limit)
+  MIN_ALTITUDE: 1000,        // Minimum altitude to show (feet)
+  MAX_FALLBACK_AIRCRAFT: 7   // Number of demo aircraft when no API key
+};
+
 // San Francisco Bay Area bounds for filtering aircraft
 const SFO_BOUNDS = {
   north: 37.9,
@@ -84,6 +93,7 @@ export class FlightRadar24Service {
     console.log('   - API Key present:', !!API_KEY);
     console.log('   - Cache age:', now - this.lastFetch, 'ms');
     console.log('   - Cache size:', this.cache.length);
+    console.log('   - Max aircraft display:', AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY);
     console.log('   - Page visible:', this.isPageVisible());
     console.log('   - Error count:', this.errorCount);
     
@@ -109,9 +119,9 @@ export class FlightRadar24Service {
     }
 
     try {
-      // Official FlightRadar24 API endpoint - optimized for fewer calls
+      // Official FlightRadar24 API endpoint - use configurable limit
       const bounds = `${SFO_BOUNDS.north},${SFO_BOUNDS.south},${SFO_BOUNDS.west},${SFO_BOUNDS.east}`;
-      const endpoint = `https://fr24api.flightradar24.com/api/live/flight-positions/light?bounds=${bounds}&limit=15`;
+      const endpoint = `https://fr24api.flightradar24.com/api/live/flight-positions/light?bounds=${bounds}&limit=${AIRCRAFT_CONFIG.API_FETCH_LIMIT}`;
       
       console.log(`🛩️ Fetching live aircraft data from official FR24 API...`);
       console.log(`📍 Endpoint: ${endpoint}`);
@@ -142,8 +152,8 @@ export class FlightRadar24Service {
         console.log(`🔄 Processing ${data.data.length} aircraft from API`);
         
         for (const flight of data.data) {
-          // Only include airborne aircraft (altitude > 1000ft) to avoid ground traffic
-          if (flight.lat && flight.lon && flight.alt > 1000) {
+          // Only include airborne aircraft (configurable altitude) to avoid ground traffic
+          if (flight.lat && flight.lon && flight.alt > AIRCRAFT_CONFIG.MIN_ALTITUDE) {
             const aircraftId = flight.fr24_id || flight.hex;
             const currentPosition = {
               lat: parseFloat(flight.lat),
@@ -174,14 +184,14 @@ export class FlightRadar24Service {
         console.warn('⚠️ Unexpected API response format:', data);
       }
 
-      // Limit to 10 aircraft for performance and clarity
-      this.cache = aircraft.slice(0, 10);
+      // Limit to configured maximum for performance and clarity
+      this.cache = aircraft.slice(0, AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY);
       this.lastFetch = now;
       
       // Reset error count on successful call
       this.errorCount = 0;
       
-      console.log(`✅ Successfully processed ${this.cache.length} aircraft from official FR24 API`);
+      console.log(`✅ Successfully processed ${this.cache.length}/${aircraft.length} aircraft from official FR24 API`);
       return this.cache;
 
     } catch (error) {
@@ -282,6 +292,7 @@ export class FlightRadar24Service {
     return {
       cacheAge: now - this.lastFetch,
       cacheSize: this.cache.length,
+      maxDisplay: AIRCRAFT_CONFIG.MAX_AIRCRAFT_DISPLAY,
       errorCount: this.errorCount,
       isVisible: this.isPageVisible(),
       nextRefreshIn: Math.max(0, this.CACHE_DURATION - (now - this.lastFetch))
@@ -290,7 +301,8 @@ export class FlightRadar24Service {
 
   private getFallbackAircraft(): Aircraft[] {
     // Enhanced mock data that looks realistic for SFO area
-    return [
+    // Limit fallback aircraft to configured amount
+    const fallbackAircraft = [
       {
         id: 'UAL123',
         callsign: 'UAL123',
@@ -354,7 +366,36 @@ export class FlightRadar24Service {
         heading: 240,
         speed: 485,
       },
+      {
+        id: 'LUV123',
+        callsign: 'LUV123',
+        lat: 37.8049,
+        lng: -122.3894,
+        altitude: 32000,
+        heading: 60,
+        speed: 495,
+      },
+      {
+        id: 'FFT456',
+        callsign: 'FFT456',
+        lat: 37.7349,
+        lng: -122.4494,
+        altitude: 38000,
+        heading: 300,
+        speed: 515,
+      },
+      {
+        id: 'UAL789',
+        callsign: 'UAL789',
+        lat: 37.7949,
+        lng: -122.4194,
+        altitude: 36000,
+        heading: 150,
+        speed: 485,
+      }
     ];
+    
+    return fallbackAircraft.slice(0, AIRCRAFT_CONFIG.MAX_FALLBACK_AIRCRAFT);
   }
 
   private normalizeHeading(heading: number): number {

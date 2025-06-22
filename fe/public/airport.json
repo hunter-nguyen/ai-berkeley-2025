@@ -1,0 +1,53 @@
+[
+  {
+    "id": "dd80e0c0-dd38-4ebc-a59d-2c706467ffa6",
+    "timestamp": "2025-06-21T23:08:53.964456",
+    "callsign": "AIRPORT-KSFO",
+    "message": "Temp: 12.8\u00b0C, Wind: 280\u00b0 at 15KT, Vis: 10+SM, Clouds: CLR",
+    "isUrgent": false,
+    "type": "airport_update",
+    "rawTranscript": "KSFO 220556Z 28015KT 10SM CLR 13/08 A3000 RMK AO2 SLP158 T01280083 10189 20128 53006",
+    "airport_data": {
+      "metar_id": 781140635,
+      "icaoId": "KSFO",
+      "receiptTime": "2025-06-22 06:02:17",
+      "obsTime": 1750571760,
+      "reportTime": "2025-06-22 06:00:00",
+      "temp": 12.8,
+      "dewp": 8.3,
+      "wdir": 280,
+      "wspd": 15,
+      "wgst": null,
+      "visib": "10+",
+      "altim": 1016,
+      "slp": 1015.8,
+      "qcField": 4,
+      "wxString": null,
+      "presTend": 0.6,
+      "maxT": 18.9,
+      "minT": 12.8,
+      "maxT24": null,
+      "minT24": null,
+      "precip": null,
+      "pcp3hr": null,
+      "pcp6hr": null,
+      "pcp24hr": null,
+      "snow": null,
+      "vertVis": null,
+      "metarType": "METAR",
+      "rawOb": "KSFO 220556Z 28015KT 10SM CLR 13/08 A3000 RMK AO2 SLP158 T01280083 10189 20128 53006",
+      "mostRecent": 1,
+      "lat": 37.6196,
+      "lon": -122.366,
+      "elev": 2,
+      "prior": 1,
+      "name": "San Francisco Intl, CA, US",
+      "clouds": [
+        {
+          "cover": "CLR",
+          "base": null
+        }
+      ]
+    }
+  }
+]
