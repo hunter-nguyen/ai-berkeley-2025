@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     # API Keys
     groq_api_key: str
     
+    # Agent Settings
+    transcriber_agent_address: str = "http://127.0.0.1:8001/transcribe"
+    
     # Audio Settings
     liveatc_url: str = "https://d.liveatc.net/ksfo_twr"
     chunk_duration: int = 5
@@ -53,5 +56,8 @@ def validate_settings() -> tuple[bool, list[str]]:
     
     if not settings.liveatc_url:
         errors.append("LIVEATC_URL is required")
+    
+    if not settings.transcriber_agent_address:
+        errors.append("TRANSCRIBER_AGENT_ADDRESS is required")
     
     return len(errors) == 0, errors 

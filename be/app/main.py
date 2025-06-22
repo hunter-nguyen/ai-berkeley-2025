@@ -178,7 +178,7 @@ async def lifespan(app: FastAPI):
     # Initialize services
     logger.info("Initializing services...")
     audio_processor = AudioProcessor(sample_rate=settings.sample_rate)
-    transcription_service = TranscriptionService(settings.groq_api_key)
+    transcription_service = TranscriptionService(settings.transcriber_agent_address)
     atc_agent = ATCAgent(settings.groq_api_key)
     
     # Add initial system message (allow system messages through)

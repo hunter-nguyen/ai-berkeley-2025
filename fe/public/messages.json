@@ -1,515 +1,56 @@
 [
   {
-    "id": "ffa58c4e-1364-4f72-b80f-affb70b5b042",
-    "timestamp": "2025-06-21T21:18:07.975218",
-    "callsign": "KSFO Tower",
-    "message": "Quebec, Cross Runley, tweet left, send the ground funny. Cross Runley, thanks for being here.",
+    "id": "62be1668-0454-4f29-97a0-1eb8869fef8c",
+    "timestamp": "2025-06-21T22:27:44.534355",
+    "callsign": "L2",
+    "message": "L2 to 500 climbing, 1E.",
     "isUrgent": false,
     "type": "atc_analysis",
-    "rawTranscript": "Quebec, Cross Runley, tweet left, send the ground funny. Cross Runley, thanks for being here.",
+    "rawTranscript": "L2 to 500 climbing, 1E.",
     "instructions": [
-      "taxi",
-      "frequency_change"
+      "climbing"
     ],
-    "runways": [
-      "runley"
-    ],
-    "chunk": 13,
-    "atc_data": {
-      "callsigns": [],
-      "instructions": [
-        {
-          "type": "taxi",
-          "callsign": "quebec",
-          "instruction": "cross runley",
-          "runway": "runley",
-          "details": ""
-        },
-        {
-          "type": "frequency_change",
-          "callsign": "quebec",
-          "instruction": "send the ground",
-          "runway": "",
-          "details": "funny"
-        }
-      ],
-      "runways": [
-        "runley"
-      ],
-      "frequencies": [
-        "ground"
-      ],
-      "weather_info": "",
-      "emergencies": "",
-      "summary": "Taxi instruction and frequency change for Quebec",
-      "processing_stats": {
-        "callsign_count": 0,
-        "instruction_count": 2,
-        "runway_count": 1,
-        "confidence": "low"
-      },
-      "original_transcript": "Quebec, Cross Runley, tweet left, send the ground funny. Cross Runley, thanks for being here.",
-      "cleaned_transcript": "quebec, cross runley, tweet left, send the ground funny. cross runley, thanks for being here.",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:18:07.974669",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "f4d2000e-98eb-4f58-9163-bbc5f6072a86",
-    "timestamp": "2025-06-21T21:18:00.614716",
-    "callsign": null,
-    "message": "One left line of way, next line of flight journey. It's 1757, heavy on",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "One left line of way, next line of flight journey. It's 1757, heavy on",
-    "instructions": [
-      "line_up_wait"
-    ],
-    "runways": [],
-    "chunk": 12,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": null,
-          "airline": null,
-          "flight_number": null,
-          "aircraft_type": "heavy"
-        }
-      ],
-      "instructions": [
-        {
-          "type": "line_up_wait",
-          "callsign": null,
-          "instruction": "line up and wait",
-          "runway": null,
-          "details": "1 left line of way, next line of flight journey"
-        }
-      ],
-      "runways": [],
-      "frequencies": [
-        "LIVE_ATC"
-      ],
-      "weather_info": null,
-      "emergencies": null,
-      "summary": "Line up and wait instruction",
-      "processing_stats": {
-        "callsign_count": 1,
-        "instruction_count": 1,
-        "runway_count": 0,
-        "confidence": "high"
-      },
-      "original_transcript": "One left line of way, next line of flight journey. It's 1757, heavy on",
-      "cleaned_transcript": "1 left line of way, next line of flight journey. it's 1757, heavy on",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:18:00.613895",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "1801873c-ed4e-4094-a105-cea28ced3e01",
-    "timestamp": "2025-06-21T21:17:54.378885",
-    "callsign": "UAL249",
-    "message": "Hello. I'm at a 24-0-9, stands for the tower on the way 1-0-8.",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "Hello. I'm at a 24-0-9, stands for the tower on the way 1-0-8.",
-    "instructions": [
-      "taxi"
-    ],
-    "runways": [],
-    "chunk": 11,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "UAL249",
-          "airline": "United",
-          "flight_number": "249",
-          "aircraft_type": ""
-        }
-      ],
-      "instructions": [
-        {
-          "type": "taxi",
-          "callsign": "UAL249",
-          "instruction": "taxi to stands",
-          "runway": "",
-          "details": ""
-        }
-      ],
-      "runways": [],
-      "frequencies": [],
-      "weather_info": "",
-      "emergencies": "",
-      "summary": "UAL249 taxiing to stands",
-      "processing_stats": {
-        "callsign_count": 1,
-        "instruction_count": 1,
-        "runway_count": 0,
-        "confidence": "high"
-      },
-      "original_transcript": "Hello. I'm at a 24-0-9, stands for the tower on the way 1-0-8.",
-      "cleaned_transcript": "hello. i'm at a 24-0-9, stands for the tower on the way 1-0-8.",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:17:54.377674",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "fb41a6d1-4207-4955-b24d-53fd3108a058",
-    "timestamp": "2025-06-21T21:17:45.230766",
-    "callsign": "5218",
-    "message": "5218, I have two stick, runway one left, trip takeoff. One left, trip takeoff.",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "5218, I have two stick, runway one left, trip takeoff. One left, trip takeoff.",
-    "instructions": [
-      "takeoff_clearance"
-    ],
-    "runways": [
-      "1 left"
-    ],
-    "chunk": 10,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "5218",
-          "airline": null,
-          "flight_number": "5218",
-          "aircraft_type": null
-        }
-      ],
-      "instructions": [
-        {
-          "type": "takeoff_clearance",
-          "callsign": "5218",
-          "instruction": "trip takeoff runway 1 left",
-          "runway": "1 left",
-          "details": null
-        }
-      ],
-      "runways": [
-        "1 left"
-      ],
-      "frequencies": [],
-      "weather_info": null,
-      "emergencies": null,
-      "summary": "Takeoff clearance for 5218 on runway 1 left",
-      "processing_stats": {
-        "callsign_count": 1,
-        "instruction_count": 1,
-        "runway_count": 1,
-        "confidence": "high"
-      },
-      "original_transcript": "5218, I have two stick, runway one left, trip takeoff. One left, trip takeoff.",
-      "cleaned_transcript": "5218, i have 2 stick, runway 1 left, trip takeoff. 1 left, trip takeoff.",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:17:45.230483",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "b633df98-34d2-4c7a-a2ba-b4bbf706dab9",
-    "timestamp": "2025-06-21T21:17:39.202846",
-    "callsign": "United 1722",
-    "message": "Tower, good evening, United 1722, visual, 28 left.",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "Tower, good evening, United 1722, visual, 28 left.",
-    "instructions": [
-      "landing_clearance"
-    ],
-    "runways": [
-      "28L"
-    ],
-    "chunk": 9,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "United 1722",
-          "airline": "United",
-          "flight_number": "1722",
-          "aircraft_type": ""
-        },
-        {
-          "callsign": "UAL1722",
-          "source": "regex_extraction"
-        }
-      ],
-      "instructions": [
-        {
-          "type": "landing_clearance",
-          "callsign": "United 1722",
-          "instruction": "visual approach",
-          "runway": "28L",
-          "details": ""
-        }
-      ],
-      "runways": [
-        "28L"
-      ],
-      "frequencies": [],
-      "weather_info": "",
-      "emergencies": "",
-      "summary": "United 1722 reports visual approach for runway 28L",
-      "processing_stats": {
-        "callsign_count": 2,
-        "instruction_count": 1,
-        "runway_count": 1,
-        "confidence": "high"
-      },
-      "original_transcript": "Tower, good evening, United 1722, visual, 28 left.",
-      "cleaned_transcript": "tower, good evening, united 1722, visual, 28 left.",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:17:39.202528",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "ccd7256c-dbe3-47b6-9b6e-118393180665",
-    "timestamp": "2025-06-21T21:17:28.048900",
-    "callsign": "278",
-    "message": "278 runway 19 line up away",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "278 runway 19 line up away",
-    "instructions": [
-      "line_up_wait"
-    ],
-    "runways": [
-      "19"
-    ],
-    "chunk": 7,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "278",
-          "airline": null,
-          "flight_number": "278",
-          "aircraft_type": null
-        }
-      ],
-      "instructions": [
-        {
-          "type": "line_up_wait",
-          "callsign": "278",
-          "instruction": "line up away",
-          "runway": "19",
-          "details": null
-        }
-      ],
-      "runways": [
-        "19"
-      ],
-      "frequencies": [],
-      "weather_info": null,
-      "emergencies": null,
-      "summary": "Line up on runway 19",
-      "processing_stats": {
-        "callsign_count": 1,
-        "instruction_count": 1,
-        "runway_count": 1,
-        "confidence": "high"
-      },
-      "original_transcript": "278 runway 19 line up away",
-      "cleaned_transcript": "278 runway 19 line up away",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:17:28.048605",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "3f61953b-9732-4424-80f9-94be7e92a2b2",
-    "timestamp": "2025-06-21T21:17:21.891241",
-    "callsign": "5444",
-    "message": "5444 on a tight air runway one right here. Take off. Okay, I want to take off it. Okay.",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "5444 on a tight air runway one right here. Take off. Okay, I want to take off it. Okay.",
-    "instructions": [
-      "takeoff_clearance"
-    ],
-    "runways": [
-      "1 right"
-    ],
-    "chunk": 6,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "5444",
-          "airline": null,
-          "flight_number": "44",
-          "aircraft_type": null
-        }
-      ],
-      "instructions": [
-        {
-          "type": "takeoff_clearance",
-          "callsign": "5444",
-          "instruction": "takeoff runway 1 right",
-          "runway": "1 right",
-          "details": null
-        }
-      ],
-      "runways": [
-        "1 right"
-      ],
-      "frequencies": [],
-      "weather_info": null,
-      "emergencies": null,
-      "summary": "5444 requesting takeoff on runway 1 right",
-      "processing_stats": {
-        "callsign_count": 1,
-        "instruction_count": 1,
-        "runway_count": 1,
-        "confidence": "high"
-      },
-      "original_transcript": "5444 on a tight air runway one right here. Take off. Okay, I want to take off it. Okay.",
-      "cleaned_transcript": "5444 on a tight air runway 1 right here. takeoff. okay, i want to takeoff it. okay.",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:17:21.890668",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "0b5ba381-f2ec-47c2-9549-0cbb32e7b82d",
-    "timestamp": "2025-06-21T21:17:01.110848",
-    "callsign": "Delta 517",
-    "message": "Delta 517, Cross Street, left ground point A, Delta 517.",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "Delta 517, Cross Street, left ground point A, Delta 517.",
-    "instructions": [
-      "taxi"
-    ],
-    "runways": [],
-    "chunk": 3,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "Delta 517",
-          "airline": "Delta",
-          "flight_number": "517",
-          "aircraft_type": null
-        },
-        {
-          "callsign": "DAL517",
-          "source": "regex_extraction"
-        }
-      ],
-      "instructions": [
-        {
-          "type": "taxi",
-          "callsign": "Delta 517",
-          "instruction": "cross street, left ground point a",
-          "runway": null,
-          "details": null
-        }
-      ],
-      "runways": [],
-      "frequencies": [],
-      "weather_info": null,
-      "emergencies": null,
-      "summary": "Taxi instruction to Delta 517",
-      "processing_stats": {
-        "callsign_count": 2,
-        "instruction_count": 1,
-        "runway_count": 0,
-        "confidence": "high"
-      },
-      "original_transcript": "Delta 517, Cross Street, left ground point A, Delta 517.",
-      "cleaned_transcript": "delta 517, cross street, left ground point a, delta 517.",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:17:01.109053",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "23cd2237-bb03-4802-8c52-1d2c9f1b9b4d",
-    "timestamp": "2025-06-21T21:16:53.993469",
-    "callsign": "4713",
-    "message": "That's 4713 ground point, see ya.",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "That's 4713 ground point, see ya.",
-    "instructions": [
-      "taxi"
-    ],
-    "runways": [],
-    "chunk": 2,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "4713",
-          "airline": null,
-          "flight_number": "713",
-          "aircraft_type": null
-        }
-      ],
-      "instructions": [
-        {
-          "type": "taxi",
-          "callsign": "4713",
-          "instruction": "ground point",
-          "runway": null,
-          "details": null
-        }
-      ],
-      "runways": [],
-      "frequencies": [
-        "ground"
-      ],
-      "weather_info": null,
-      "emergencies": null,
-      "summary": "4713 instructed to proceed to ground point",
-      "processing_stats": {
-        "callsign_count": 1,
-        "instruction_count": 1,
-        "runway_count": 0,
-        "confidence": "high"
-      },
-      "original_transcript": "That's 4713 ground point, see ya.",
-      "cleaned_transcript": "that's 4713 ground point, see ya.",
-      "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:16:53.993198",
-      "processing_agent": "ATC_Agent_v2"
-    }
-  },
-  {
-    "id": "94c58216-072f-468b-9805-acd801c72714",
-    "timestamp": "2025-06-21T21:16:48.237237",
-    "callsign": "KSFO Tower",
-    "message": "... Wait, what's this?",
-    "isUrgent": false,
-    "type": "atc_analysis",
-    "rawTranscript": "... Wait, what's this?",
-    "instructions": [],
     "runways": [],
     "chunk": 1,
     "atc_data": {
-      "callsigns": [],
-      "instructions": [],
+      "callsigns": [
+        {
+          "callsign": "L2",
+          "airline": null,
+          "flight_number": "2",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "climbing",
+          "callsign": "L2",
+          "instruction": "climb to 500",
+          "runway": null,
+          "details": null
+        }
+      ],
       "runways": [],
       "frequencies": [],
-      "weather_info": "",
-      "emergencies": "",
-      "summary": "No relevant information extracted from the transcript.",
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Climb to 500 feet",
       "processing_stats": {
-        "callsign_count": 0,
-        "instruction_count": 0,
+        "callsign_count": 1,
+        "instruction_count": 1,
         "runway_count": 0,
-        "confidence": "low"
+        "confidence": "high"
       },
-      "original_transcript": "... Wait, what's this?",
-      "cleaned_transcript": "... wait, what's this?",
+      "original_transcript": "L2 to 500 climbing, 1E.",
+      "cleaned_transcript": "l2 to 500 climbing, 1e.",
       "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T21:16:48.236792",
+      "timestamp": "2025-06-21T22:27:44.534140",
       "processing_agent": "ATC_Agent_v2"
     }
   },
   {
-    "id": "5d99b409-dea0-46c2-bdee-88566af30ac7",
-    "timestamp": "2025-06-21T21:16:37.844638",
+    "id": "62822e32-3223-4079-a9af-b58d793966a4",
+    "timestamp": "2025-06-21T22:27:36.859017",
     "callsign": "SYSTEM",
     "message": "\ud83c\udfa7 ATC Audio Agent started - listening to KSFO Tower",
     "isUrgent": false,
