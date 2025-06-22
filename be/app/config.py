@@ -11,9 +11,16 @@ class Settings(BaseSettings):
     
     # API Keys
     groq_api_key: str
+    vapi_api_key: Optional[str] = None
     
     # Agent Settings
     transcriber_agent_address: str = "http://127.0.0.1:8001/transcribe"
+    
+    # VAPI Settings
+    vapi_base_url: str = "https://api.vapi.ai"
+    vapi_assistant_id: Optional[str] = None
+    vapi_phone_number_id: Optional[str] = None
+    emergency_phone_number: Optional[str] = None
     
     # Audio Settings
     liveatc_url: str = "https://d.liveatc.net/ksfo_twr"
@@ -59,5 +66,12 @@ def validate_settings() -> tuple[bool, list[str]]:
     
     if not settings.transcriber_agent_address:
         errors.append("TRANSCRIBER_AGENT_ADDRESS is required")
+    
+    # VAPI settings (optional but warn if incomplete)
+    if settings.vapi_api_key and not settings.vapi_assistant_id:
+        errors.append("VAPI_ASSISTANT_ID required when VAPI_API_KEY is provided")
+    
+    if settings.vapi_api_key and not settings.emergency_phone_number:
+        errors.append("EMERGENCY_PHONE_NUMBER required when VAPI_API_KEY is provided")
     
     return len(errors) == 0, errors 

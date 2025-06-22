@@ -18,11 +18,13 @@ from .api.websocket import router as websocket_router, get_connection_manager
 from .core.audio import AudioProcessor
 from .core.transcription import TranscriptionService
 from .agents.atc_agent import ATCAgent
+from .agents.vapi_voice_agent import VAPIVoiceAgent
 
 # Global services
 audio_processor = None
 transcription_service = None
 atc_agent = None
+vapi_agent = None
 background_task = None
 
 # JSON file path for messages
@@ -157,7 +159,7 @@ def add_message(transcript: str, atc_data: Dict[str, Any], chunk_number: int):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan management"""
-    global audio_processor, transcription_service, atc_agent, background_task
+    global audio_processor, transcription_service, atc_agent, vapi_agent, background_task
     
     settings = get_settings()
     
@@ -180,6 +182,16 @@ async def lifespan(app: FastAPI):
     audio_processor = AudioProcessor(sample_rate=settings.sample_rate)
     transcription_service = TranscriptionService(settings.transcriber_agent_address)
     atc_agent = ATCAgent(settings.groq_api_key)
+    
+    # Initialize VAPI agent if configured
+    if settings.vapi_api_key:
+        vapi_agent = VAPIVoiceAgent(
+            api_key=settings.vapi_api_key,
+            base_url=settings.vapi_base_url
+        )
+        logger.info("✅ VAPI Voice Agent initialized")
+    else:
+        logger.warning("⚠️ VAPI not configured - emergency calling disabled")
     
     # Add initial system message (allow system messages through)
     system_message = {
@@ -388,6 +400,99 @@ async def get_active_callsigns():
     }
 
 
+@app.post("/api/v1/emergency/call")
+async def emergency_call(data: dict):
+    """Make an emergency VAPI call"""
+    if not vapi_agent:
+        raise HTTPException(status_code=503, detail="VAPI not configured")
+    
+    settings = get_settings()
+    if not settings.vapi_assistant_id or not settings.emergency_phone_number:
+        raise HTTPException(status_code=503, detail="VAPI assistant or phone number not configured")
+    
+    # Extract call parameters
+    emergency_data = data.get("emergency_data", {})
+    assistant_id = data.get("assistant_id", settings.vapi_assistant_id)
+    phone_number = data.get("phone_number", settings.emergency_phone_number)
+    call_name = data.get("call_name")
+    
+    if not emergency_data:
+        raise HTTPException(status_code=400, detail="emergency_data required")
+    
+    try:
+        result = await vapi_agent.make_emergency_call(
+            assistant_id=assistant_id,
+            phone_number=phone_number,
+            emergency_data=emergency_data,
+            call_name=call_name,
+            phone_number_id=settings.vapi_phone_number_id
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Emergency call failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/emergency/airport")
+async def airport_emergency_call(data: dict):
+    """Make an airport emergency VAPI call"""
+    if not vapi_agent:
+        raise HTTPException(status_code=503, detail="VAPI not configured")
+    
+    settings = get_settings()
+    if not settings.vapi_assistant_id or not settings.emergency_phone_number:
+        raise HTTPException(status_code=503, detail="VAPI assistant or phone number not configured")
+    
+    # Required fields
+    required_fields = ["airport_code", "emergency_type", "details"]
+    for field in required_fields:
+        if field not in data:
+            raise HTTPException(status_code=400, detail=f"{field} is required")
+    
+    try:
+        result = await vapi_agent.make_airport_emergency_call(
+            assistant_id=data.get("assistant_id", settings.vapi_assistant_id),
+            phone_number=data.get("phone_number", settings.emergency_phone_number),
+            airport_code=data["airport_code"],
+            emergency_type=data["emergency_type"],
+            details=data["details"],
+            urgency_level=data.get("urgency_level", "high"),
+            phone_number_id=settings.vapi_phone_number_id
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Airport emergency call failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/vapi/assistants")
+async def list_vapi_assistants():
+    """List available VAPI assistants"""
+    if not vapi_agent:
+        raise HTTPException(status_code=503, detail="VAPI not configured")
+    
+    try:
+        result = await vapi_agent.list_assistants()
+        return result
+    except Exception as e:
+        logger.error(f"Failed to list assistants: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/vapi/call/{call_id}/status")
+async def get_vapi_call_status(call_id: str):
+    """Get status of a VAPI call"""
+    if not vapi_agent:
+        raise HTTPException(status_code=503, detail="VAPI not configured")
+    
+    try:
+        result = await vapi_agent.get_call_status(call_id)
+        return result
+    except Exception as e:
+        logger.error(f"Failed to get call status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/v1/health")
 async def health_check():
     """Health check endpoint"""
@@ -411,7 +516,7 @@ async def get_stats():
     
     connection_manager = get_connection_manager()
     
-    return {
+    stats = {
         "audio": audio_processor.get_stats(),
         "transcription": transcription_service.get_stats(),
         "atc": atc_agent.get_stats(),
@@ -421,6 +526,12 @@ async def get_stats():
             "max_capacity": MAX_MESSAGES
         }
     }
+    
+    # Add VAPI stats if available
+    if vapi_agent:
+        stats["vapi"] = vapi_agent.get_stats()
+    
+    return stats
 
 
 @app.post("/api/v1/test/transcript")
@@ -454,4 +565,88 @@ async def get_messages_json():
         "messages": messages,
         "total": len(messages),
         "timestamp": datetime.now().isoformat()
-    } 
+    }
+
+
+@app.post("/api/v1/emergency/process-data")
+async def process_emergency_data_for_vapi(data: dict):
+    """
+    VAPI function endpoint - Process emergency data for voice communication
+    """
+    try:
+        action = data.get("action", "format_emergency")
+        emergency_type = data.get("emergency_type", "unknown")
+        detail_type = data.get("detail_type", "all")
+        format_style = data.get("format_style", "brief")
+        
+        # Get emergency data from global context or load recent emergency
+        messages = load_messages()
+        recent_emergency = None
+        
+        # Find most recent emergency message
+        for msg in messages:
+            if msg.get("isUrgent") or msg.get("type") == "emergency":
+                recent_emergency = msg
+                break
+        
+        if not recent_emergency and emergency_type != "unknown":
+            # Create mock emergency data for function testing
+            recent_emergency = {
+                "airport_code": "KSFO",
+                "emergency_type": emergency_type,
+                "location": "Terminal Area",
+                "urgency_level": "high",
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        result = {}
+        
+        if action == "format_emergency":
+            if recent_emergency:
+                airport = recent_emergency.get("airport_code", "Unknown Airport")
+                location = recent_emergency.get("location", "Unknown Location")
+                urgency = recent_emergency.get("urgency_level", "medium")
+                
+                if format_style == "urgent":
+                    result["formatted_text"] = f"URGENT: {emergency_type} emergency at {airport}, {location}. This is a {urgency} priority situation requiring immediate response."
+                elif format_style == "detailed":
+                    details = recent_emergency.get("atc_data", {}).get("details", {})
+                    result["formatted_text"] = f"Emergency report for {airport}: {emergency_type} at {location}. Urgency level: {urgency}. Additional details: {details}"
+                else:  # brief
+                    result["formatted_text"] = f"{emergency_type} emergency at {airport}, {location}. Priority: {urgency}."
+            else:
+                result["formatted_text"] = f"No active emergency data available for {emergency_type} emergency."
+        
+        elif action == "get_details":
+            if recent_emergency and detail_type in recent_emergency:
+                result["detail_value"] = recent_emergency[detail_type]
+                result["detail_text"] = f"The {detail_type} is: {recent_emergency[detail_type]}"
+            else:
+                result["detail_text"] = f"No {detail_type} information available."
+        
+        elif action == "check_status":
+            # Check if there are any active emergencies
+            emergency_count = sum(1 for msg in messages[:10] if msg.get("isUrgent"))
+            result["status"] = "active" if emergency_count > 0 else "clear"
+            result["status_text"] = f"Currently {emergency_count} active emergency situations."
+        
+        elif action == "escalate":
+            result["escalation_text"] = f"Escalating {emergency_type} emergency. Notifying additional emergency services."
+            result["escalated"] = True
+        
+        return {
+            "success": True,
+            "action": action,
+            "emergency_type": emergency_type,
+            "result": result,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error processing VAPI emergency data: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "fallback_text": "Emergency data processing unavailable. Please proceed with manual communication.",
+            "timestamp": datetime.now().isoformat()
+        } 
