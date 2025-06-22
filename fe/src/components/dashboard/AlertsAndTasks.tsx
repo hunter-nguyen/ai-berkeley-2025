@@ -28,7 +28,7 @@ interface EmergencyAlert {
   raw_transcript: string;
   recommended_actions: string[];
   confidence: number;
-  status: 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED';
+  status: 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED' | 'DISPATCHED';
   acknowledged: boolean;
   escalated: boolean;
   atc_data: any;
@@ -101,36 +101,74 @@ export default function AlertsAndTasks({ isCollapsed, onToggle }: AlertsAndTasks
     setDispatchingAlert(alertId);
 
     try {
-      // Update via API
-      const response = await fetch('/api/emergencies', {
+      // Call the new dispatch API
+      const response = await fetch('/api/dispatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emergencyId: alertId, action: 'escalate' })
+        body: JSON.stringify({
+          alertId: alert.id,
+          callsign: alert.callsign,
+          emergencyType: alert.emergency_type,
+          description: alert.description,
+          originalMessage: alert.original_message
+        })
       });
 
       if (response.ok) {
+        const dispatchResult = await response.json();
+        
+        // Update local state
         setAlerts(prev => 
           prev.map(a => 
-            a.id === alertId ? { ...a, dispatched: true, escalated: true } : a
+            a.id === alertId ? { 
+              ...a, 
+              dispatched: true, 
+              escalated: true,
+              status: 'DISPATCHED' as const
+            } : a
           )
         );
 
-        // Show toast notification
+        // Show detailed toast notification
         const toast = document.createElement('div');
-        toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg font-mono text-sm z-[9999] shadow-lg';
-        toast.textContent = `✅ Emergency Services Dispatched for ${alert.callsign}`;
+        toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg font-mono text-sm z-[9999] shadow-lg max-w-md';
+        toast.innerHTML = `
+          <div class="font-bold">✅ EMERGENCY DISPATCH INITIATED</div>
+          <div class="text-xs mt-1">
+            Flight: ${alert.callsign}<br/>
+            Recipient: ${dispatchResult.recipient}<br/>
+            Call ID: ${dispatchResult.call_id || 'Simulated'}<br/>
+            Status: ${dispatchResult.call_status}
+          </div>
+        `;
         document.body.appendChild(toast);
         
         setTimeout(() => {
           if (document.body.contains(toast)) {
             document.body.removeChild(toast);
           }
-        }, 3000);
+        }, 5000);
 
-        console.log(`🚨 EMERGENCY DISPATCH INITIATED for ${alert.callsign}`);
+        console.log(`🚨 VAPI DISPATCH INITIATED for ${alert.callsign}:`, dispatchResult);
+        console.log(`📞 Script: ${dispatchResult.script}`);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Dispatch failed');
       }
     } catch (err) {
       console.error('Failed to dispatch emergency:', err);
+      
+      // Show error toast
+      const errorToast = document.createElement('div');
+      errorToast.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg font-mono text-sm z-[9999] shadow-lg';
+      errorToast.textContent = `❌ Dispatch Failed: ${err instanceof Error ? err.message : 'Unknown error'}`;
+      document.body.appendChild(errorToast);
+      
+      setTimeout(() => {
+        if (document.body.contains(errorToast)) {
+          document.body.removeChild(errorToast);
+        }
+      }, 3000);
     } finally {
       setDispatchingAlert(null);
     }

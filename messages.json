@@ -1,85 +1,73 @@
 [
   {
-    "id": "d1cf07b9-4ea8-4c28-9951-011e7f040aed",
-    "timestamp": "2025-06-22T04:37:45.905035",
-    "callsign": "AAL445",
-    "message": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
-    "isUrgent": true,
-    "type": "test_emergency",
-    "rawTranscript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
-    "instructions": [],
-    "runways": [],
-    "chunk": 1,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "AAL445"
-        }
-      ],
-      "instructions": [],
-      "runways": [],
-      "emergencies": true,
-      "summary": "Emergency communication from AAL445",
-      "confidence": "high",
-      "original_transcript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
-      "frequency": "121.5",
-      "timestamp": "2025-06-22T04:37:45.905045"
-    }
-  },
-  {
-    "id": "081b10c5-f802-4aaa-a69d-c30ae2c57462",
-    "timestamp": "2025-06-22T04:37:40.416113",
-    "callsign": "AAL445",
-    "message": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
-    "isUrgent": true,
-    "type": "test_emergency",
-    "rawTranscript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
-    "instructions": [],
-    "runways": [],
-    "chunk": 1,
-    "atc_data": {
-      "callsigns": [
-        {
-          "callsign": "AAL445"
-        }
-      ],
-      "instructions": [],
-      "runways": [],
-      "emergencies": true,
-      "summary": "Emergency communication from AAL445",
-      "confidence": "high",
-      "original_transcript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
-      "frequency": "121.5",
-      "timestamp": "2025-06-22T04:37:40.416136"
-    }
-  },
-  {
-    "id": "62be1668-0454-4f29-97a0-1eb8869fef8c",
-    "timestamp": "2025-06-21T22:27:44.534355",
-    "callsign": "L2",
-    "message": "L2 to 500 climbing, 1E.",
+    "id": "1edbb300-5668-4f12-9aa3-a3ebdcaed106",
+    "timestamp": "2025-06-22T05:30:12.288624",
+    "callsign": "KSFO Tower",
+    "message": "push spot to 5,000.",
     "isUrgent": false,
     "type": "atc_analysis",
-    "rawTranscript": "L2 to 500 climbing, 1E.",
+    "rawTranscript": "push spot to 5,000.",
     "instructions": [
-      "climbing"
+      "taxi"
     ],
     "runways": [],
-    "chunk": 1,
+    "chunk": 60,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [
+        {
+          "type": "taxi",
+          "callsign": null,
+          "instruction": "push spot to 5,000",
+          "runway": null,
+          "details": "push spot to 5,000"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Taxi instruction to push spot to 5,000",
+      "processing_stats": {
+        "callsign_count": 0,
+        "instruction_count": 1,
+        "runway_count": 0,
+        "confidence": "low"
+      },
+      "original_transcript": "push spot to 5,000.",
+      "cleaned_transcript": "push spot to 5,000.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:30:12.288324",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "dc832d42-c8ea-4ed2-9a18-f47e93babdec",
+    "timestamp": "2025-06-22T05:30:06.613461",
+    "callsign": "south 1905",
+    "message": "South 1905, San Francisco, roger.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "South 1905, San Francisco, roger.",
+    "instructions": [
+      "acknowledgement"
+    ],
+    "runways": [],
+    "chunk": 59,
     "atc_data": {
       "callsigns": [
         {
-          "callsign": "L2",
+          "callsign": "south 1905",
           "airline": null,
-          "flight_number": "2",
+          "flight_number": "1905",
           "aircraft_type": null
         }
       ],
       "instructions": [
         {
-          "type": "climbing",
-          "callsign": "L2",
-          "instruction": "climb to 500",
+          "type": "acknowledgement",
+          "callsign": "south 1905",
+          "instruction": "roger",
           "runway": null,
           "details": null
         }
@@ -88,23 +76,551 @@
       "frequencies": [],
       "weather_info": null,
       "emergencies": null,
-      "summary": "Climb to 500 feet",
+      "summary": "Acknowledgement from south 1905",
       "processing_stats": {
         "callsign_count": 1,
         "instruction_count": 1,
         "runway_count": 0,
         "confidence": "high"
       },
-      "original_transcript": "L2 to 500 climbing, 1E.",
-      "cleaned_transcript": "l2 to 500 climbing, 1e.",
+      "original_transcript": "South 1905, San Francisco, roger.",
+      "cleaned_transcript": "south 1905, san francisco, roger.",
       "frequency": "LIVE_ATC",
-      "timestamp": "2025-06-21T22:27:44.534140",
+      "timestamp": "2025-06-22T05:30:06.612471",
       "processing_agent": "ATC_Agent_v2"
     }
   },
   {
-    "id": "62822e32-3223-4079-a9af-b58d793966a4",
-    "timestamp": "2025-06-21T22:27:36.859017",
+    "id": "18fa6f6e-d066-41e3-b274-aa43973b216c",
+    "timestamp": "2025-06-22T05:29:38.382281",
+    "callsign": "Alpha1",
+    "message": "Alpha, alpha one to one, right, right to 30, 80, 90.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Alpha, alpha one to one, right, right to 30, 80, 90.",
+    "instructions": [
+      "taxi",
+      "taxi",
+      "taxi",
+      "taxi"
+    ],
+    "runways": [
+      "1",
+      "30",
+      "80",
+      "90"
+    ],
+    "chunk": 54,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "Alpha1",
+          "airline": null,
+          "flight_number": "1",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "taxi",
+          "callsign": "Alpha1",
+          "instruction": "taxi to runway 1",
+          "runway": "1",
+          "details": "right turn"
+        },
+        {
+          "type": "taxi",
+          "callsign": "Alpha1",
+          "instruction": "taxi to runway 30",
+          "runway": "30",
+          "details": "right turn"
+        },
+        {
+          "type": "taxi",
+          "callsign": "Alpha1",
+          "instruction": "taxi to runway 80",
+          "runway": "80",
+          "details": null
+        },
+        {
+          "type": "taxi",
+          "callsign": "Alpha1",
+          "instruction": "taxi to runway 90",
+          "runway": "90",
+          "details": null
+        }
+      ],
+      "runways": [
+        "1",
+        "30",
+        "80",
+        "90"
+      ],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Taxi instructions to Alpha1",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 4,
+        "runway_count": 4,
+        "confidence": "high"
+      },
+      "original_transcript": "Alpha, alpha one to one, right, right to 30, 80, 90.",
+      "cleaned_transcript": "alpha, alpha 1 to 1, right, right to 30, 80, 90.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:29:38.380215",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "0192f765-3ce6-4e0c-b726-d558495dbfe0",
+    "timestamp": "2025-06-22T05:29:32.109344",
+    "callsign": "American 3082",
+    "message": "American 3082, early one right, taxi off Alpha 1.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "American 3082, early one right, taxi off Alpha 1.",
+    "instructions": [
+      "taxi"
+    ],
+    "runways": [],
+    "chunk": 53,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "American 3082",
+          "airline": "American",
+          "flight_number": "3082",
+          "aircraft_type": ""
+        },
+        {
+          "callsign": "AAL3082",
+          "source": "regex_extraction"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "taxi",
+          "callsign": "American 3082",
+          "instruction": "early 1 right, taxi off alpha 1",
+          "runway": "",
+          "details": "early 1 right, alpha 1"
+        }
+      ],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": "",
+      "emergencies": "",
+      "summary": "Taxi instruction to American 3082",
+      "processing_stats": {
+        "callsign_count": 2,
+        "instruction_count": 1,
+        "runway_count": 0,
+        "confidence": "high"
+      },
+      "original_transcript": "American 3082, early one right, taxi off Alpha 1.",
+      "cleaned_transcript": "american 3082, early 1 right, taxi off alpha 1.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:29:32.108700",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "aed91851-0997-4a4f-be37-0db1c69e32d8",
+    "timestamp": "2025-06-22T05:29:15.059106",
+    "callsign": "KSFO Tower",
+    "message": "Good morning, America.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Good morning, America.",
+    "instructions": [],
+    "runways": [],
+    "chunk": 50,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": "",
+      "emergencies": "",
+      "summary": "No relevant information extracted from the transcript.",
+      "processing_stats": {
+        "callsign_count": 0,
+        "instruction_count": 0,
+        "runway_count": 0,
+        "confidence": "low"
+      },
+      "original_transcript": "Good morning, America.",
+      "cleaned_transcript": "good morning, america.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:29:15.058592",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "253bcbe6-ed37-403f-a96d-4f7c616bd5bf",
+    "timestamp": "2025-06-22T05:28:47.511673",
+    "callsign": "south 943",
+    "message": "South 943, connect departure. Departure, we'll see you at South 943.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "South 943, connect departure. Departure, we'll see you at South 943.",
+    "instructions": [
+      "frequency_change"
+    ],
+    "runways": [],
+    "chunk": 45,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "south 943",
+          "airline": null,
+          "flight_number": "943",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "frequency_change",
+          "callsign": "south 943",
+          "instruction": "connect departure",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "departure"
+      ],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "south 943 is instructed to connect with departure",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 1,
+        "runway_count": 0,
+        "confidence": "high"
+      },
+      "original_transcript": "South 943, connect departure. Departure, we'll see you at South 943.",
+      "cleaned_transcript": "south 943, connect departure. departure, we'll see you at south 943.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:28:47.507765",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "64a130a0-400f-49ce-a723-6905a1a1930c",
+    "timestamp": "2025-06-22T05:27:40.818603",
+    "callsign": "2420",
+    "message": "2420, Ernie, one right taxi off off one.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "2420, Ernie, one right taxi off off one.",
+    "instructions": [
+      "taxi"
+    ],
+    "runways": [
+      "1"
+    ],
+    "chunk": 36,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "2420",
+          "airline": null,
+          "flight_number": "2420",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "taxi",
+          "callsign": "2420",
+          "instruction": "taxi off 1 right",
+          "runway": "1",
+          "details": "off"
+        }
+      ],
+      "runways": [
+        "1"
+      ],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Taxi instruction to aircraft 2420",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 1,
+        "runway_count": 1,
+        "confidence": "high"
+      },
+      "original_transcript": "2420, Ernie, one right taxi off off one.",
+      "cleaned_transcript": "2420, ernie, 1 right taxi off off 1.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:27:40.818427",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "10f41e66-9181-4d23-9030-3df7e685246b",
+    "timestamp": "2025-06-22T05:25:34.745301",
+    "callsign": "KSFO Tower",
+    "message": "you want to...",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "you want to...",
+    "instructions": [],
+    "runways": [],
+    "chunk": 21,
+    "atc_data": {
+      "callsigns": [],
+      "instructions": [],
+      "runways": [],
+      "frequencies": [],
+      "weather_info": "",
+      "emergencies": "",
+      "summary": "No actionable information in the transcript.",
+      "processing_stats": {
+        "callsign_count": 0,
+        "instruction_count": 0,
+        "runway_count": 0,
+        "confidence": "low"
+      },
+      "original_transcript": "you want to...",
+      "cleaned_transcript": "you want to...",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:25:34.745039",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "1dbd1d2d-5b37-42ad-b946-87cd3593aa9f",
+    "timestamp": "2025-06-22T05:25:29.310197",
+    "callsign": "SCOTT9643",
+    "message": "3-1-2-5-0-6-4-8-1-left, clear for takeoff. 1-left, clear for takeoff, Scott, flight 9-43-6.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "3-1-2-5-0-6-4-8-1-left, clear for takeoff. 1-left, clear for takeoff, Scott, flight 9-43-6.",
+    "instructions": [
+      "takeoff_clearance",
+      "takeoff_clearance"
+    ],
+    "runways": [
+      "1-left"
+    ],
+    "chunk": 20,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "SCOTT9643",
+          "airline": "SCOTT",
+          "flight_number": "9643",
+          "aircraft_type": ""
+        },
+        {
+          "callsign": "312506481",
+          "airline": "",
+          "flight_number": "",
+          "aircraft_type": ""
+        }
+      ],
+      "instructions": [
+        {
+          "type": "takeoff_clearance",
+          "callsign": "312506481",
+          "instruction": "clear for takeoff",
+          "runway": "1-left",
+          "details": ""
+        },
+        {
+          "type": "takeoff_clearance",
+          "callsign": "SCOTT9643",
+          "instruction": "clear for takeoff",
+          "runway": "1-left",
+          "details": ""
+        }
+      ],
+      "runways": [
+        "1-left"
+      ],
+      "frequencies": [
+        "LIVE_ATC"
+      ],
+      "weather_info": "",
+      "emergencies": "",
+      "summary": "Two aircraft cleared for takeoff on runway 1-left",
+      "processing_stats": {
+        "callsign_count": 2,
+        "instruction_count": 2,
+        "runway_count": 1,
+        "confidence": "high"
+      },
+      "original_transcript": "3-1-2-5-0-6-4-8-1-left, clear for takeoff. 1-left, clear for takeoff, Scott, flight 9-43-6.",
+      "cleaned_transcript": "3-1-2-5-0-6-4-8-1-left, clear for takeoff. 1-left, clear for takeoff, scott, flight 9-43-6.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:25:29.309957",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "fd0c930e-ba0a-47c3-8c98-88d408148e56",
+    "timestamp": "2025-06-22T05:25:04.368860",
+    "callsign": "1687",
+    "message": "Yes 1687 contact departure, see ya. Oh departure, that's 1687, good day.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Yes 1687 contact departure, see ya. Oh departure, that's 1687, good day.",
+    "instructions": [
+      "frequency_change"
+    ],
+    "runways": [],
+    "chunk": 16,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "1687",
+          "airline": null,
+          "flight_number": "1687",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "frequency_change",
+          "callsign": "1687",
+          "instruction": "contact departure",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "departure"
+      ],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Aircraft 1687 contacts departure frequency",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 1,
+        "runway_count": 0,
+        "confidence": "high"
+      },
+      "original_transcript": "Yes 1687 contact departure, see ya. Oh departure, that's 1687, good day.",
+      "cleaned_transcript": "yes 1687 contact departure, see ya. oh departure, that's 1687, good day.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:25:04.365981",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "9820109c-9ce9-45b2-9b95-f55085e606f1",
+    "timestamp": "2025-06-22T05:23:03.607905",
+    "callsign": "1687",
+    "message": "Runway one last step takeoff in act 1687",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Runway one last step takeoff in act 1687",
+    "instructions": [
+      "takeoff_clearance"
+    ],
+    "runways": [
+      "1"
+    ],
+    "chunk": 2,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "1687",
+          "airline": null,
+          "flight_number": "687",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "takeoff_clearance",
+          "callsign": "1687",
+          "instruction": "runway 1 last step takeoff",
+          "runway": "1",
+          "details": "last step"
+        }
+      ],
+      "runways": [
+        "1"
+      ],
+      "frequencies": [],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Takeoff clearance for 1687 on runway 1",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 1,
+        "runway_count": 1,
+        "confidence": "high"
+      },
+      "original_transcript": "Runway one last step takeoff in act 1687",
+      "cleaned_transcript": "runway 1 last step takeoff in act 1687",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:23:03.587896",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "1c6d64cc-1734-4567-9cba-8489b54f6217",
+    "timestamp": "2025-06-22T05:22:43.500293",
+    "callsign": "1687",
+    "message": "Yes, 1687, one more first takeoff.",
+    "isUrgent": false,
+    "type": "atc_analysis",
+    "rawTranscript": "Yes, 1687, one more first takeoff.",
+    "instructions": [
+      "takeoff_clearance"
+    ],
+    "runways": [],
+    "chunk": 1,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "1687",
+          "airline": null,
+          "flight_number": "1687",
+          "aircraft_type": null
+        }
+      ],
+      "instructions": [
+        {
+          "type": "takeoff_clearance",
+          "callsign": "1687",
+          "instruction": "first takeoff",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "LIVE_ATC"
+      ],
+      "weather_info": null,
+      "emergencies": null,
+      "summary": "Takeoff clearance for 1687",
+      "processing_stats": {
+        "callsign_count": 1,
+        "instruction_count": 1,
+        "runway_count": 0,
+        "confidence": "high"
+      },
+      "original_transcript": "Yes, 1687, one more first takeoff.",
+      "cleaned_transcript": "yes, 1687, 1 more first takeoff.",
+      "frequency": "LIVE_ATC",
+      "timestamp": "2025-06-22T05:22:43.500055",
+      "processing_agent": "ATC_Agent_v2"
+    }
+  },
+  {
+    "id": "9ee3cdd8-d431-4f11-9287-ab65d72d77e7",
+    "timestamp": "2025-06-22T05:22:17.144621",
     "callsign": "SYSTEM",
     "message": "\ud83c\udfa7 ATC Audio Agent started - listening to KSFO Tower",
     "isUrgent": false,

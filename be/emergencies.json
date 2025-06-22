@@ -1,5 +1,528 @@
 [
   {
+    "id": "emrg_mic_1750597292807_g99brz",
+    "timestamp": "2025-06-22T13:01:32.807Z",
+    "source_message_id": "mic_1750597292807",
+    "source_timestamp": "2025-06-22T13:01:32.807Z",
+    "callsign": "SWA519",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday this is s w a 519 we are going down we are not making it mayday mayday mayday",
+    "raw_transcript": "mayday mayday mayday this is s w a 519 we are going down we are not making it mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "SWA519",
+          "airline": "SWA",
+          "flight_number": "519",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "SWA519",
+          "instruction": "emergency assistance requested"
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "MICROPHONE TRANSCRIPT - mayday_call detected for SWA519"
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T13:01:38.223Z",
+    "dispatched": true
+  },
+  {
+    "id": "emrg_mic_1750597269160_u0cvue",
+    "timestamp": "2025-06-22T13:01:09.160Z",
+    "source_message_id": "mic_1750597269160",
+    "source_timestamp": "2025-06-22T13:01:09.160Z",
+    "callsign": "SWA3894",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": " mayday mayday mayday this is s w a 3894 we're going down mayday mayday mayday",
+    "raw_transcript": " mayday mayday mayday this is s w a 3894 we're going down mayday mayday mayday",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "ACTIVE",
+    "acknowledged": false,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "SWA3894",
+          "airline": "SWA",
+          "flight_number": "3894",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "SWA3894",
+          "instruction": "emergency assistance requested"
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "MICROPHONE TRANSCRIPT - mayday_call detected for SWA3894"
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T13:01:09.161Z"
+  },
+  {
+    "id": "emrg_mic_1750597005060_2xpvrd",
+    "timestamp": "2025-06-22T12:56:45.060Z",
+    "source_message_id": "mic_1750597005060",
+    "source_timestamp": "2025-06-22T12:56:45.060Z",
+    "callsign": "UNKNOWN",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "this is d a l 772 mayday mayday mayday we are going down to the Pacific Ocean",
+    "raw_transcript": "this is d a l 772 mayday mayday mayday we are going down to the Pacific Ocean",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "ACTIVE",
+    "acknowledged": false,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UNKNOWN",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UNKNOWN",
+          "instruction": "emergency assistance requested"
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "MICROPHONE TRANSCRIPT - mayday_call detected for UNKNOWN"
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T12:56:45.060Z"
+  },
+  {
+    "id": "emrg_mic_1750596722752_bntl70",
+    "timestamp": "2025-06-22T12:52:02.752Z",
+    "source_message_id": "mic_1750596722752",
+    "source_timestamp": "2025-06-22T12:52:02.752Z",
+    "callsign": "UNKNOWN",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday ever Pete this is an emergency I repeat we are not going to make it I repeat",
+    "raw_transcript": "mayday mayday mayday ever Pete this is an emergency I repeat we are not going to make it I repeat",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "ACKNOWLEDGED",
+    "acknowledged": true,
+    "escalated": false,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UNKNOWN",
+          "airline": "",
+          "flight_number": "",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UNKNOWN",
+          "instruction": "emergency assistance requested",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "MICROPHONE DEMO - mayday_call detected for UNKNOWN"
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T12:52:07.557Z"
+  },
+  {
+    "id": "emrg_mic_1750596604611_ahod0w",
+    "timestamp": "2025-06-22T12:50:04.611Z",
+    "source_message_id": "mic_1750596604611",
+    "source_timestamp": "2025-06-22T12:50:04.611Z",
+    "callsign": "UNKNOWN",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": "mayday mayday mayday this is Cessna 1 2 3 4 we are going down in the Pacific Ocean we are going down I repeat we're not going to make it",
+    "raw_transcript": "mayday mayday mayday this is Cessna 1 2 3 4 we are going down in the Pacific Ocean we are going down I repeat we're not going to make it",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UNKNOWN",
+          "airline": "",
+          "flight_number": "",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UNKNOWN",
+          "instruction": "emergency assistance requested",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "MICROPHONE DEMO - mayday_call detected for UNKNOWN"
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T12:50:28.721Z",
+    "dispatched": true
+  },
+  {
+    "id": "emrg_mic_1750596282814_0fdioj",
+    "timestamp": "2025-06-22T12:44:42.814Z",
+    "source_message_id": "mic_1750596282814",
+    "source_timestamp": "2025-06-22T12:44:42.814Z",
+    "callsign": "UNKNOWN",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "mayday_call",
+    "description": "MAYDAY emergency call - life threatening situation",
+    "original_message": " mayday mayday mayday this is flight number 5547-5000 we're going down to the Atlantic Ocean I repeat we are going down in the Atlantic Ocean",
+    "raw_transcript": " mayday mayday mayday this is flight number 5547-5000 we're going down to the Atlantic Ocean I repeat we are going down in the Atlantic Ocean",
+    "recommended_actions": [
+      "Deploy all emergency services immediately",
+      "Clear airspace for priority approach",
+      "Alert fire rescue, medical, and airport operations",
+      "Prepare for emergency landing"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UNKNOWN",
+          "airline": "",
+          "flight_number": "",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "mayday_call",
+          "callsign": "UNKNOWN",
+          "instruction": "emergency assistance requested",
+          "runway": null,
+          "details": null
+        }
+      ],
+      "runways": [],
+      "frequencies": [
+        "emergency"
+      ],
+      "weather_info": null,
+      "emergencies": "mayday_call",
+      "summary": "MICROPHONE DEMO - mayday_call detected for UNKNOWN"
+    },
+    "created_by": "microphone_demo_system",
+    "updated_at": "2025-06-22T12:44:54.551Z",
+    "dispatched": true
+  },
+  {
+    "id": "emrg_fixed_vapi_test_004",
+    "timestamp": "2025-06-22T05:35:00.000000",
+    "source_message_id": "msg_fixed_vapi_test",
+    "source_timestamp": "2025-06-22T05:35:00.000000",
+    "callsign": "DL789",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "medical_emergency",
+    "description": "Medical emergency aboard - passenger cardiac arrest",
+    "original_message": "Delta 789, medical emergency, passenger cardiac arrest, requesting immediate priority landing at SFO",
+    "raw_transcript": "Delta 789, medical emergency, passenger cardiac arrest, requesting immediate priority landing at SFO",
+    "recommended_actions": [
+      "Clear runway immediately for priority landing",
+      "Alert medical emergency teams",
+      "Prepare ambulance and paramedics at gate",
+      "Coordinate with emergency medical services"
+    ],
+    "confidence": 0.97,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "DL789",
+          "airline": "Delta Air Lines",
+          "flight_number": "789",
+          "aircraft_type": "heavy"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "medical_emergency",
+          "callsign": "DL789",
+          "instruction": "immediate priority landing",
+          "runway": "28L",
+          "details": "passenger cardiac arrest"
+        }
+      ],
+      "runways": [
+        "28L"
+      ],
+      "frequencies": [
+        "emergency",
+        "medical",
+        "approach"
+      ],
+      "weather_info": "winds calm, visibility unlimited",
+      "emergencies": "medical emergency",
+      "summary": "MEDICAL EMERGENCY - Passenger cardiac arrest, priority landing required"
+    },
+    "created_by": "fixed_vapi_test_system",
+    "updated_at": "2025-06-22T12:27:38.053Z",
+    "dispatched": true
+  },
+  {
+    "id": "emrg_real_vapi_test_003",
+    "timestamp": "2025-06-22T05:30:00.000000",
+    "source_message_id": "msg_real_vapi_test",
+    "source_timestamp": "2025-06-22T05:30:00.000000",
+    "callsign": "SWA1345",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "fuel_emergency",
+    "description": "Fuel emergency - minimum fuel remaining, requesting immediate landing",
+    "original_message": "Southwest 1345, declaring minimum fuel emergency, requesting immediate vectors to SFO, 143 souls on board",
+    "raw_transcript": "Southwest 1345, declaring minimum fuel emergency, requesting immediate vectors to SFO, 143 souls on board",
+    "recommended_actions": [
+      "Clear airspace immediately",
+      "Prepare runway for priority landing",
+      "Alert fire rescue and emergency vehicles",
+      "Coordinate with approach control"
+    ],
+    "confidence": 0.95,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "SWA1345",
+          "airline": "Southwest Airlines",
+          "flight_number": "1345",
+          "aircraft_type": "medium"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "fuel_emergency",
+          "callsign": "SWA1345",
+          "instruction": "immediate vectors to SFO",
+          "runway": "28R",
+          "details": "minimum fuel, 143 souls on board"
+        }
+      ],
+      "runways": [
+        "28R"
+      ],
+      "frequencies": [
+        "emergency",
+        "approach"
+      ],
+      "weather_info": "winds 280 at 10 knots, clear skies",
+      "emergencies": "fuel emergency",
+      "summary": "FUEL EMERGENCY - Minimum fuel, 143 souls requesting immediate landing"
+    },
+    "created_by": "real_vapi_test_system",
+    "updated_at": "2025-06-22T12:23:55.845Z",
+    "dispatched": true
+  },
+  {
+    "id": "emrg_vapi_live_test_002",
+    "timestamp": "2025-06-22T05:25:00.000000",
+    "source_message_id": "msg_vapi_test",
+    "source_timestamp": "2025-06-22T05:25:00.000000",
+    "callsign": "UAL1234",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "engine_failure",
+    "description": "Engine failure during climb - requesting immediate emergency landing",
+    "original_message": "United 1234 declaring emergency, engine failure, requesting vectors back to SFO, 298 souls on board",
+    "raw_transcript": "United 1234 declaring emergency, engine failure, requesting vectors back to SFO, 298 souls on board",
+    "recommended_actions": [
+      "Deploy all emergency vehicles immediately",
+      "Clear runway for emergency approach",
+      "Alert fire rescue, medical, and airport ops",
+      "Coordinate emergency landing approach"
+    ],
+    "confidence": 0.99,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "UAL1234",
+          "airline": "United Airlines",
+          "flight_number": "1234",
+          "aircraft_type": "heavy"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "emergency_landing",
+          "callsign": "UAL1234",
+          "instruction": "emergency vectors back to SFO",
+          "runway": "28L",
+          "details": "engine failure, 298 souls on board"
+        }
+      ],
+      "runways": [
+        "28L"
+      ],
+      "frequencies": [
+        "emergency",
+        "approach",
+        "tower"
+      ],
+      "weather_info": "winds 280 at 8 knots, visibility 10 miles",
+      "emergencies": "engine failure",
+      "summary": "CRITICAL - Engine failure emergency, 298 souls requesting immediate landing"
+    },
+    "created_by": "vapi_test_system",
+    "updated_at": "2025-06-22T12:21:26.977Z",
+    "dispatched": true
+  },
+  {
+    "id": "emrg_test_live_001",
+    "timestamp": "2025-06-22T05:20:00.000000",
+    "source_message_id": "msg_live_test",
+    "source_timestamp": "2025-06-22T05:20:00.000000",
+    "callsign": "AAL445",
+    "severity": "CRITICAL",
+    "category": "EMERGENCY",
+    "emergency_type": "bird_strike",
+    "description": "Bird strike on departure - aircraft returning to field",
+    "original_message": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
+    "raw_transcript": "American 445, EMERGENCY, bird strike on departure, returning to field, 180 souls on board",
+    "recommended_actions": [
+      "Dispatch emergency vehicles immediately",
+      "Clear runway 28R for emergency landing",
+      "Alert fire rescue and medical teams",
+      "Coordinate with pilot for landing approach"
+    ],
+    "confidence": 0.98,
+    "status": "DISPATCHED",
+    "acknowledged": false,
+    "escalated": true,
+    "atc_data": {
+      "callsigns": [
+        {
+          "callsign": "AAL445",
+          "airline": "American Airlines",
+          "flight_number": "445",
+          "aircraft_type": "heavy"
+        }
+      ],
+      "instructions": [
+        {
+          "type": "emergency_return",
+          "callsign": "AAL445",
+          "instruction": "emergency return to field",
+          "runway": "28R",
+          "details": "bird strike, 180 souls on board"
+        }
+      ],
+      "runways": [
+        "28R"
+      ],
+      "frequencies": [
+        "emergency",
+        "tower"
+      ],
+      "weather_info": "winds 280 at 12 knots",
+      "emergencies": "bird strike",
+      "summary": "EMERGENCY - Bird strike on departure, returning with 180 souls"
+    },
+    "created_by": "live_test_system",
+    "updated_at": "2025-06-22T12:19:17.103Z",
+    "dispatched": true
+  },
+  {
     "id": "emrg_1750592637_msg_001",
     "timestamp": "2025-06-22T04:43:57.739975",
     "source_message_id": "msg_001",

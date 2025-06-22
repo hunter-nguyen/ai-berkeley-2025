@@ -1,0 +1,17 @@
+{
+  "emergency_services": {
+    "fire_rescue": "+16505346538",
+    "medical": "+16505346538",
+    "airport_ops": "+16505346538",
+    "faa_tower": "+16505346538",
+    "test_number": "+16505346538"
+  },
+  "default_recipient": "airport_ops",
+  "vapi_settings": {
+    "assistant_id": "emergency_dispatch_assistant",
+    "voice": "jennifer",
+    "timeout_seconds": 60,
+    "max_retries": 2
+  },
+  "environment": "development"
+} 

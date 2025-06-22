@@ -133,6 +133,10 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
   const [showNOTAMs, setShowNOTAMs] = useState(true);
   const [showSIGMETs, setShowSIGMETs] = useState(true);
 
+  // Emergency aircraft tracking
+  const [emergencyAircraft, setEmergencyAircraft] = useState<Set<string>>(new Set());
+  const mapRef = useRef<any>(null);
+
   // Aviation safety data
   const [tfrs, setTFRs] = useState<TFR[]>([]);
   const [notams, setNOTAMs] = useState<NOTAM[]>([]);
@@ -459,6 +463,81 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
     setMounted(true);
   }, []);
 
+  // Handle aircraft selection from transcript
+  useEffect(() => {
+    const handleAircraftSelection = (event: CustomEvent) => {
+      const { callsign, isEmergency } = event.detail;
+      console.log('🎯 RadarMap: Received aircraft selection event:', callsign, 'Emergency:', isEmergency);
+      
+      // Find aircraft by callsign (case insensitive, partial match)
+      const foundAircraft = aircraft.find(plane => 
+        plane.callsign.toLowerCase().includes(callsign.toLowerCase()) ||
+        callsign.toLowerCase().includes(plane.callsign.toLowerCase())
+      );
+      
+      if (foundAircraft) {
+        console.log('✅ Found aircraft:', foundAircraft.callsign);
+        
+        // Select the aircraft
+        onAircraftSelect(foundAircraft);
+        
+        // Zoom to aircraft location
+        if (mapRef.current) {
+          mapRef.current.setView([foundAircraft.lat, foundAircraft.lng], 14, {
+            animate: true,
+            duration: 1.5
+          });
+        }
+        
+        // Mark as emergency if needed
+        if (isEmergency) {
+          setEmergencyAircraft(prev => new Set([...prev, foundAircraft.callsign]));
+        }
+      } else {
+        console.log('❌ Aircraft not found:', callsign);
+        // Show notification that aircraft not found
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white px-4 py-2 rounded-lg font-mono text-sm z-[9999] shadow-lg';
+        toast.innerHTML = `
+          <div class="font-bold">✈️ AIRCRAFT NOT FOUND</div>
+          <div class="text-xs mt-1">${callsign} - Not currently on radar</div>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          if (document.body.contains(toast)) {
+            document.body.removeChild(toast);
+          }
+        }, 4000);
+      }
+    };
+
+    const handleEmergencyAircraft = (event: CustomEvent) => {
+      const { callsign, isEmergency } = event.detail;
+      console.log('🚨 RadarMap: Emergency aircraft event:', callsign, isEmergency);
+      
+      if (isEmergency) {
+        setEmergencyAircraft(prev => new Set([...prev, callsign]));
+      } else {
+        setEmergencyAircraft(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(callsign);
+          return newSet;
+        });
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('select-aircraft', handleAircraftSelection as EventListener);
+    window.addEventListener('emergency-aircraft', handleEmergencyAircraft as EventListener);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('select-aircraft', handleAircraftSelection as EventListener);
+      window.removeEventListener('emergency-aircraft', handleEmergencyAircraft as EventListener);
+    };
+  }, [aircraft, onAircraftSelect]);
+
   // Fetch real aircraft data from FlightRadar24
   const fetchAircraftData = async () => {
     try {
@@ -595,9 +674,17 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
     // Check if this aircraft is selected either directly or by callsign from LiveComms
     const isCallsignSelected = selectedCallsign && aircraft.callsign.toLowerCase().includes(selectedCallsign.toLowerCase());
     const isHighlighted = isSelected || isCallsignSelected;
+    const isEmergency = emergencyAircraft.has(aircraft.callsign);
     
-    const iconColor = isHighlighted ? '#fbbf24' : '#22d3ee'; // yellow when selected, cyan otherwise
-    const iconSize = isHighlighted ? 24 : 20;
+    // Emergency aircraft are red, selected aircraft are yellow, normal aircraft are cyan
+    let iconColor = '#22d3ee'; // cyan (normal)
+    if (isEmergency) {
+      iconColor = '#ef4444'; // red (emergency)
+    } else if (isHighlighted) {
+      iconColor = '#fbbf24'; // yellow (selected)
+    }
+    
+    const iconSize = (isHighlighted || isEmergency) ? 28 : 20;
     
     return L.divIcon({
       className: 'custom-aircraft-icon',
@@ -618,21 +705,31 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
             <!-- Engine highlights -->
             <circle cx="12" cy="15" r="1" fill="#ff6b35" opacity="0.7"/>
             <circle cx="20" cy="15" r="1" fill="#ff6b35" opacity="0.7"/>
+            ${isEmergency ? `
+              <!-- Emergency strobe lights -->
+              <circle cx="16" cy="8" r="3" fill="#ef4444" opacity="0.6" class="animate-ping"/>
+              <circle cx="16" cy="22" r="2" fill="#ef4444" opacity="0.8" class="animate-pulse"/>
+            ` : ''}
           </svg>
-          ${isHighlighted ? `
+          ${isEmergency ? `
+            <div class="absolute -inset-3 border-2 border-red-500 rounded-full animate-ping opacity-80"></div>
+            <div class="absolute -inset-2 border-2 border-red-400 rounded-full animate-pulse opacity-60"></div>
+            <div class="absolute -inset-1 border border-red-300 rounded-full"></div>
+          ` : isHighlighted ? `
             <div class="absolute -inset-2 border-2 border-yellow-400 rounded-full animate-ping opacity-60"></div>
             <div class="absolute -inset-1 border border-yellow-400 rounded-full"></div>
           ` : ''}
-          ${isCallsignSelected && !isSelected ? `
+          ${isCallsignSelected && !isSelected && !isEmergency ? `
             <div class="absolute -inset-2 border-2 border-blue-400 rounded-full animate-pulse opacity-80"></div>
             <div class="absolute -inset-1 border border-blue-400 rounded-full"></div>
           ` : ''}
         </div>
-        <div class="absolute top-6 left-1/2 transform -translate-x-1/2 text-xs font-mono font-bold whitespace-nowrap bg-gray-900 bg-opacity-90 px-1 rounded border" 
-             style="color: ${iconColor}; ${isCallsignSelected ? 'border-color: #60a5fa;' : ''}">
+        <div class="absolute top-7 left-1/2 transform -translate-x-1/2 text-xs font-mono font-bold whitespace-nowrap bg-gray-900 bg-opacity-90 px-2 py-1 rounded border" 
+             style="color: ${iconColor}; ${isEmergency ? 'border-color: #ef4444; box-shadow: 0 0 10px #ef444440;' : isCallsignSelected ? 'border-color: #60a5fa;' : ''}">
           ${aircraft.callsign}
           <div class="text-white text-xs">${aircraft.altitude.toLocaleString()}'</div>
-          ${isCallsignSelected ? '<div class="text-blue-400 text-xs">📡 IN COMMS</div>' : ''}
+          ${isEmergency ? '<div class="text-red-400 text-xs font-bold animate-pulse">🚨 EMERGENCY</div>' : ''}
+          ${isCallsignSelected && !isEmergency ? '<div class="text-blue-400 text-xs">📡 IN COMMS</div>' : ''}
         </div>
       `,
       iconSize: [iconSize, iconSize],
@@ -759,6 +856,7 @@ export default function RadarMap({ onAircraftSelect, selectedAircraft, onAircraf
         zoom={11}
         className="w-full h-full z-0"
         style={{ height: '100%', width: '100%' }}
+        ref={mapRef}
       >
         {/* Map Events Handler for deselecting aircraft */}
         <MapEvents onMapClick={onMapClick} />

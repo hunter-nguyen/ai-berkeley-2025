@@ -1,8 +1,9 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { ChevronUpIcon, ChevronDownIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronUpIcon, ChevronDownIcon, FunnelIcon, XMarkIcon, RadioIcon, MicrophoneIcon, SpeakerWaveIcon } from '@heroicons/react/24/outline';
+import MicrophoneDemo from './MicrophoneDemo';
 
 interface CommMessage {
   id: string;
@@ -20,18 +21,28 @@ interface CommMessage {
 interface LiveCommsProps {
   isCollapsed: boolean;
   onToggle: () => void;
-  selectedCallsign?: string | null;
-  onCallsignSelect?: (callsign: string) => void;
-  onMessagesUpdate?: (messages: CommMessage[]) => void;
+  selectedCallsign: string | null;
+  onCallsignSelect: (callsign: string) => void;
+  onMessagesUpdate: (messages: CommMessage[]) => void;
+  onMicrophoneTranscript?: (transcript: string, isEmergency: boolean) => void;
 }
 
-export default function LiveComms({ isCollapsed, onToggle, selectedCallsign, onCallsignSelect, onMessagesUpdate }: LiveCommsProps) {
+export default function LiveComms({ 
+  isCollapsed, 
+  onToggle, 
+  selectedCallsign, 
+  onCallsignSelect, 
+  onMessagesUpdate,
+  onMicrophoneTranscript 
+}: LiveCommsProps) {
   const [messages, setMessages] = useState<CommMessage[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('disconnected');
   const [filteredCallsign, setFilteredCallsign] = useState<string | null>(null);
   const [showCallsignFilter, setShowCallsignFilter] = useState(false);
   const [uniqueCallsigns, setUniqueCallsigns] = useState<Set<string>>(new Set());
   const [lastMessageCount, setLastMessageCount] = useState(0);
+  const [filter, setFilter] = useState<'all' | 'urgent' | 'normal'>('all');
+  const [activeTab, setActiveTab] = useState<'live' | 'microphone'>('live');
 
   // Function to filter meaningful messages on client side too
   const isClientMeaningful = (message: string, callsign: string): boolean => {
@@ -144,237 +155,183 @@ export default function LiveComms({ isCollapsed, onToggle, selectedCallsign, onC
     }
   };
 
-  // Filter messages by callsign - ADD NULL CHECKS
-  const filteredMessages = filteredCallsign 
-    ? messages.filter(msg => {
-        const callsign = msg.callsign || '';
-        const message = msg.message || '';
-        const filter = filteredCallsign || '';
-        
-        return callsign.toLowerCase().includes(filter.toLowerCase()) ||
-               message.toLowerCase().includes(filter.toLowerCase());
-      })
-    : messages;
-
-  const handleCallsignClick = (callsign: string) => {
-    if (!callsign) return; // Safety check for null/undefined callsign
-    
-    if (filteredCallsign === callsign) {
-      setFilteredCallsign(null);
-    } else {
-      setFilteredCallsign(callsign);
-      if (onCallsignSelect) {
-        onCallsignSelect(callsign);
-      }
-    }
-  };
-
   const clearFilter = () => {
     setFilteredCallsign(null);
   };
 
+  const formatTime = (timestamp: string): string => {
+    return timestamp; // Already formatted in the useEffect
+  };
+
+  // Apply both callsign and type filters
+  const getFilteredMessages = () => {
+    let filtered = filteredCallsign 
+      ? messages.filter(msg => {
+          const callsign = msg.callsign || '';
+          const message = msg.message || '';
+          const filterText = filteredCallsign || '';
+          
+          return callsign.toLowerCase().includes(filterText.toLowerCase()) ||
+                 message.toLowerCase().includes(filterText.toLowerCase());
+        })
+      : messages;
+
+    // Apply type filter
+    if (filter === 'urgent') {
+      filtered = filtered.filter(msg => msg.isUrgent);
+    } else if (filter === 'normal') {
+      filtered = filtered.filter(msg => !msg.isUrgent);
+    }
+
+    return filtered;
+  };
+
+  const finalFilteredMessages = getFilteredMessages();
+
   return (
     <motion.div
-      animate={{ height: isCollapsed ? 50 : '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="bg-gray-900 border border-green-500 rounded-lg shadow-lg overflow-hidden h-full flex flex-col"
+      initial={{ opacity: 0, x: 300 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="bg-black/90 backdrop-blur-sm border border-gray-600 rounded-lg h-full flex flex-col"
     >
-      {/* Header */}
-      <div 
-        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-800 transition-colors flex-shrink-0"
-        onClick={onToggle}
-      >
-        <div className="flex items-center space-x-3">
-          <div className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'animate-pulse' : ''} ${getStatusColor()}`} />
-          <h3 className="font-semibold text-green-400 font-mono text-sm">{getStatusText()}</h3>
-          {filteredCallsign && (
-            <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded font-mono">
-              {filteredCallsign}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-xs text-gray-400 font-mono">
-            {filteredMessages.length}/{messages.length} msgs
-          </span>
-          {!isCollapsed && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowCallsignFilter(!showCallsignFilter);
-              }}
-              className="p-1 hover:bg-gray-700 rounded transition-colors"
-            >
-              <FunnelIcon className="w-4 h-4 text-gray-400" />
-            </button>
-          )}
-          {isCollapsed ? (
-            <ChevronUpIcon className="w-4 h-4 text-gray-400" />
-          ) : (
-            <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      {!isCollapsed && (
-        <div className="px-3 pb-3 flex-1 flex flex-col min-h-0">
-          
-          {/* Callsign Filter */}
-          <AnimatePresence>
-            {showCallsignFilter && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mb-3 p-2 bg-gray-800 rounded border border-gray-600"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-400 font-mono">Filter by Callsign:</span>
-                  {filteredCallsign && (
-                    <button
-                      onClick={clearFilter}
-                      className="flex items-center space-x-1 text-xs text-red-400 hover:text-red-300"
-                    >
-                      <XMarkIcon className="w-3 h-3" />
-                      <span>Clear</span>
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                  {Array.from(uniqueCallsigns).sort().map((callsign) => (
-                    <button
-                      key={callsign}
-                      onClick={() => handleCallsignClick(callsign)}
-                      className={`text-xs px-2 py-1 rounded font-mono transition-colors ${
-                        filteredCallsign === callsign
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                    >
-                      {callsign}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Messages Feed */}
-          <div className="flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-gray-600 mb-3">
-            {filteredMessages.length === 0 && connectionStatus === 'connected' && !filteredCallsign && (
-              <div className="text-center text-gray-400 text-xs py-4">
-                🎧 Listening for ATC communications...
-              </div>
-            )}
-            
-            {filteredMessages.length === 0 && filteredCallsign && (
-              <div className="text-center text-gray-400 text-xs py-4">
-                No messages found for {filteredCallsign}
-              </div>
-            )}
-            
-            {filteredMessages.length === 0 && connectionStatus === 'disconnected' && (
-              <div className="text-center text-red-400 text-xs py-4">
-                ❌ Communications unavailable<br/>
-                No messages found
-              </div>
-            )}
-
-            {filteredMessages.map((message, index) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.02 }}
-                className={`p-3 rounded-lg text-xs border ${
-                  message.isUrgent 
-                    ? 'bg-red-900 bg-opacity-50 border-red-500 shadow-lg shadow-red-500/20' 
-                    : message.type === 'atc_analysis'
-                    ? 'bg-blue-900 bg-opacity-30 border-blue-400'
-                    : 'bg-gray-800 border-gray-600'
+      {/* Header with Tabs */}
+      <div className="flex items-center justify-between p-3 border-b border-gray-700">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <div className="flex bg-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('live')}
+                className={`px-3 py-1 rounded text-xs font-mono transition-colors ${
+                  activeTab === 'live'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-400 hover:text-white'
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <button
-                    onClick={() => handleCallsignClick(message.callsign)}
-                    className={`font-mono font-bold text-sm transition-colors hover:text-blue-300 ${
-                      message.isUrgent ? 'text-red-400' : 'text-cyan-400'
-                    }`}
-                  >
-                    {message.callsign}
-                  </button>
-                  <div className="flex items-center space-x-2">
-                    {message.chunk && (
-                      <span className="text-xs text-gray-500 font-mono">
-                        #{message.chunk}
-                      </span>
-                    )}
-                    <span className="text-gray-400 font-mono text-xs">
-                      {message.timestamp}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className={`text-sm leading-relaxed mb-2 ${
-                  message.isUrgent ? 'text-red-300 font-semibold' : 'text-gray-200'
-                }`}>
-                  "{message.message}"
-                </div>
-
-                {/* Show extracted ATC data */}
-                {message.instructions && message.instructions.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {message.instructions
-                      .filter(instruction => instruction != null && instruction !== '') // Filter out null/empty instructions
-                      .map((instruction, idx) => (
-                        <span 
-                          key={idx}
-                          className="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded font-mono"
-                        >
-                          {String(instruction).replace(/_/g, ' ').toUpperCase()}
-                        </span>
-                      ))}
-                  </div>
-                )}
-
-                {message.runways && message.runways.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {message.runways
-                      .filter(runway => runway != null && runway !== '') // Filter out null/empty runways
-                      .map((runway, idx) => (
-                        <span 
-                          key={idx}
-                          className="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded font-mono"
-                        >
-                          RWY {String(runway).toUpperCase()}
-                        </span>
-                      ))}
-                  </div>
-                )}
-
-                {message.isUrgent && (
-                  <div className="mt-2">
-                    <span className="inline-block bg-red-600 text-white text-xs px-2 py-1 rounded font-bold animate-pulse">
-                      🚨 URGENT
-                    </span>
-                  </div>
-                )}
-              </motion.div>
-            ))}
+                <RadioIcon className="w-4 h-4 inline mr-1" />
+                LIVE ATC
+              </button>
+              <button
+                onClick={() => setActiveTab('microphone')}
+                className={`px-3 py-1 rounded text-xs font-mono transition-colors ${
+                  activeTab === 'microphone'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <MicrophoneIcon className="w-4 h-4 inline mr-1" />
+                MIC
+              </button>
+            </div>
           </div>
-          
-          {/* Status Info */}
-          <div className="flex-shrink-0 text-xs text-gray-400 font-mono text-center py-2 border-t border-gray-700">
-            {connectionStatus === 'connected' ? (
-              <div className="space-y-1">
-                <div>🎧 KSFO Tower Live Communications</div>
+        </div>
+        
+        <button
+          onClick={onToggle}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
+          {isCollapsed ? (
+            <ChevronUpIcon className="w-4 h-4" />
+          ) : (
+            <ChevronDownIcon className="w-4 h-4" />
+          )}
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        {!isCollapsed && (
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex-1 overflow-hidden"
+          >
+            {activeTab === 'live' && (
+              <div className="h-full flex flex-col">
+                {/* Filter Controls */}
+                <div className="p-3 border-b border-gray-700">
+                  <div className="flex space-x-2">
+                    {(['all', 'urgent', 'normal'] as const).map((filterType) => (
+                      <button
+                        key={filterType}
+                        onClick={() => setFilter(filterType)}
+                        className={`px-3 py-1 rounded text-xs font-mono transition-colors ${
+                          filter === filterType
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        {filterType.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Messages List */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                  <AnimatePresence>
+                    {finalFilteredMessages.map((message) => (
+                      <motion.div
+                        key={message.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
+                          message.isUrgent
+                            ? 'bg-red-900/30 border-red-500 hover:bg-red-900/50'
+                            : selectedCallsign === message.callsign
+                            ? 'bg-blue-900/30 border-blue-500 hover:bg-blue-900/50'
+                            : 'bg-gray-800/50 border-gray-600 hover:bg-gray-800/70'
+                        }`}
+                        onClick={() => onCallsignSelect(message.callsign)}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-white font-mono text-sm font-bold">
+                            {message.callsign}
+                          </span>
+                          <span className="text-gray-400 text-xs font-mono">
+                            {formatTime(message.timestamp)}
+                          </span>
+                        </div>
+                        
+                        <div className="text-gray-300 text-xs font-mono leading-relaxed">
+                          {message.message}
+                        </div>
+                        
+                        {message.isUrgent && (
+                          <div className="mt-2 flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            <span className="text-red-400 text-xs font-mono font-bold">URGENT</span>
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  
+                  {finalFilteredMessages.length === 0 && (
+                    <div className="text-center text-gray-500 text-sm font-mono py-8">
+                      {filter === 'all' ? 'No communications yet...' : `No ${filter} messages`}
+                    </div>
+                  )}
+                </div>
               </div>
-            ) : connectionStatus === 'connecting' ? (
-              '🔄 Loading...'
-            ) : (
-              '❌ No communications available'
             )}
+
+            {activeTab === 'microphone' && onMicrophoneTranscript && (
+              <div className="h-full p-3">
+                <MicrophoneDemo onTranscript={onMicrophoneTranscript} />
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Collapsed State */}
+      {isCollapsed && (
+        <div className="p-4 text-center">
+          <div className="text-gray-400 text-xs font-mono">
+            {activeTab === 'live' ? 'LIVE ATC' : 'MICROPHONE'} COLLAPSED
           </div>
         </div>
       )}

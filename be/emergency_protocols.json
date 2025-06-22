@@ -1,0 +1,57 @@
+{
+  "bird_strike": {
+    "priority": "high",
+    "recipients": ["airport_ops", "fire_rescue"],
+    "script": "Emergency alert for flight {callsign}. Bird strike reported on departure. Aircraft returning to field with {souls} souls on board. Requesting immediate runway preparation and emergency vehicles standing by."
+  },
+  "engine_failure": {
+    "priority": "critical",
+    "recipients": ["fire_rescue", "medical", "airport_ops"],
+    "script": "Critical emergency for flight {callsign}. Engine failure reported. Aircraft attempting emergency landing. Request full emergency response including fire rescue and medical teams. Prepare for emergency landing procedures."
+  },
+  "medical_emergency": {
+    "priority": "critical",
+    "recipients": ["medical", "airport_ops"],
+    "script": "Medical emergency aboard flight {callsign}. Immediate medical response required upon landing. Prepare ambulance and medical personnel at gate. Priority landing requested."
+  },
+  "fuel_emergency": {
+    "priority": "high",
+    "recipients": ["airport_ops", "fire_rescue"],
+    "script": "Fuel emergency declared by flight {callsign}. Aircraft requesting priority handling and direct approach. Emergency vehicles should be on standby. Minimum fuel remaining."
+  },
+  "hydraulic_failure": {
+    "priority": "critical",
+    "recipients": ["fire_rescue", "airport_ops"],
+    "script": "Hydraulic system failure reported by flight {callsign}. Aircraft may have landing gear or control issues. Request emergency vehicles and foam trucks standing by."
+  },
+  "electrical_failure": {
+    "priority": "high",
+    "recipients": ["airport_ops", "fire_rescue"],
+    "script": "Electrical emergency reported by flight {callsign}. Aircraft may lose communications. Request priority vectors and emergency lighting preparation."
+  },
+  "pressurization_emergency": {
+    "priority": "critical",
+    "recipients": ["medical", "airport_ops"],
+    "script": "Cabin pressurization emergency for flight {callsign}. Aircraft descending to safe altitude. Medical personnel should prepare for possible oxygen-related issues."
+  },
+  "fire_emergency": {
+    "priority": "critical",
+    "recipients": ["fire_rescue", "medical", "airport_ops"],
+    "script": "FIRE EMERGENCY reported by flight {callsign}. Immediate emergency response required. All fire suppression equipment and medical teams to staging area. Priority emergency landing."
+  },
+  "security_threat": {
+    "priority": "critical",
+    "recipients": ["airport_ops", "faa_tower"],
+    "script": "Security threat reported aboard flight {callsign}. Law enforcement and security teams required. Coordinate with TSA and airport security for isolated gate assignment."
+  },
+  "general_emergency": {
+    "priority": "high",
+    "recipients": ["airport_ops"],
+    "script": "General emergency declared by flight {callsign}. Nature of emergency: {description}. Requesting appropriate emergency response coordination and priority handling."
+  },
+  "mayday_call": {
+    "priority": "critical",
+    "recipients": ["fire_rescue", "medical", "airport_ops"],
+    "script": "MAYDAY MAYDAY MAYDAY. Emergency distress call from flight {callsign}. All emergency services respond immediately. Life-threatening situation reported. Full emergency response required."
+  }
+} 

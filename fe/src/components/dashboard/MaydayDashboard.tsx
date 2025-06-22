@@ -100,6 +100,94 @@ export default function MaydayDashboard() {
     setMessages(updatedMessages);
   }, []);
 
+  const handleMicrophoneTranscript = useCallback(async (transcript: string, isEmergency: boolean) => {
+    try {
+      console.log('🎤 Processing microphone transcript:', transcript);
+      
+      // Send transcript to processing API
+      const response = await fetch('/api/process-transcript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript,
+          isEmergency
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('📋 Transcript processed:', result);
+        
+        // Handle aircraft selection from transcript
+        if (result.aircraft_mentioned && result.aircraft_mentioned !== 'UNKNOWN') {
+          console.log('✈️ Aircraft mentioned in transcript:', result.aircraft_mentioned);
+          
+          // Trigger aircraft selection and highlighting
+          handleAircraftFromTranscript(result.aircraft_mentioned, isEmergency);
+        }
+        
+        if (result.emergency_created) {
+          // Show notification
+          const toast = document.createElement('div');
+          toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-lg font-mono text-sm z-[9999] shadow-lg';
+          toast.innerHTML = `
+            <div class="font-bold">🚨 EMERGENCY DETECTED</div>
+            <div class="text-xs mt-1">
+              ${result.callsign} - ${result.emergency_type.replace('_', ' ').toUpperCase()}<br/>
+              Check alerts panel for dispatch options
+            </div>
+          `;
+          document.body.appendChild(toast);
+          
+          setTimeout(() => {
+            if (document.body.contains(toast)) {
+              document.body.removeChild(toast);
+            }
+          }, 5000);
+        } else if (result.aircraft_mentioned && result.aircraft_mentioned !== 'UNKNOWN') {
+          // Show aircraft selection notification for non-emergency mentions
+          const toast = document.createElement('div');
+          toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg font-mono text-sm z-[9999] shadow-lg';
+          toast.innerHTML = `
+            <div class="font-bold">✈️ AIRCRAFT SELECTED</div>
+            <div class="text-xs mt-1">
+              ${result.aircraft_mentioned} - Selected from transcript
+            </div>
+          `;
+          document.body.appendChild(toast);
+          
+          setTimeout(() => {
+            if (document.body.contains(toast)) {
+              document.body.removeChild(toast);
+            }
+          }, 3000);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error processing microphone transcript:', error);
+    }
+  }, []);
+
+  const handleAircraftFromTranscript = useCallback((callsign: string, isEmergency: boolean) => {
+    console.log('🎯 Looking for aircraft:', callsign, 'Emergency:', isEmergency);
+    
+    // Set the callsign for aircraft matching
+    setSelectedCallsign(callsign);
+    
+    // Store emergency status for radar highlighting
+    if (isEmergency) {
+      // Add to emergency aircraft list (we'll create this)
+      window.dispatchEvent(new CustomEvent('emergency-aircraft', {
+        detail: { callsign, isEmergency: true }
+      }));
+    }
+    
+    // The RadarMap will handle the actual aircraft selection and zoom
+    window.dispatchEvent(new CustomEvent('select-aircraft', {
+      detail: { callsign, isEmergency }
+    }));
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-900 overflow-hidden">
       {/* ATC Status Bar */}
@@ -122,15 +210,16 @@ export default function MaydayDashboard() {
           />
         </div>
 
-        {/* Left Side - Filters Toggle */}
+        {/* Left Side - Demo Mode Toggle */}
         <AnimatePresence>
           {!showFilters && (
             <motion.div
               initial={{ x: -50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -50, opacity: 0 }}
-              className="absolute left-3 top-3 z-20"
+              className="absolute left-3 top-3 z-20 space-y-2"
             >
+              {/* Filters Toggle */}
               <button
                 onClick={() => setShowFilters(true)}
                 className="bg-black/80 text-white p-2 rounded-lg hover:bg-black/90 transition-colors border border-gray-600"
@@ -217,7 +306,7 @@ export default function MaydayDashboard() {
             )}
           </AnimatePresence>
 
-          {/* LiveComms - Always Visible */}
+          {/* LiveComms with Microphone Tab - Always Visible */}
           <div className={showEmergencyAlerts ? "h-1/2" : "h-2/3"}>
             <LiveComms 
               isCollapsed={false}
@@ -225,6 +314,7 @@ export default function MaydayDashboard() {
               selectedCallsign={selectedCallsign}
               onCallsignSelect={handleCallsignSelect}
               onMessagesUpdate={handleMessagesUpdate}
+              onMicrophoneTranscript={handleMicrophoneTranscript}
             />
           </div>
 

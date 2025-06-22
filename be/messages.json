@@ -212,5 +212,19 @@
       "emergencies": null,
       "summary": "Line up and wait on runway 28R"
     }
+  },
+  {
+    "id": "96c27162-f2fb-42a0-8760-fdcd450eb56f",
+    "timestamp": "2025-06-22T05:10:29.063432",
+    "callsign": "United 297",
+    "message": "United 297 heavy runway 28R cleared to land",
+    "isUrgent": false,
+    "type": "incoming",
+    "rawTranscript": "United 297 heavy runway 28R cleared to land",
+    "instructions": [],
+    "runways": [],
+    "chunk": 1,
+    "frequency": "KSFO_TWR",
+    "source": "Audio_Fetch_Agent"
   }
 ]
